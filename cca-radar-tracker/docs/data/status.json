@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "monitoring_started_utc": null,
+  "last_checked_utc": null,
+  "latest_frame_utc": null,
+  "latest_analysis": null,
+  "open_event": null,
+  "last_qualifying_event": null,
+  "events": [],
+  "health": {
+    "ok": true,
+    "message": "Waiting for first radar check"
+  }
+}

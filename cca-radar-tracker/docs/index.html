@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Global Canyon Pool-Fill Radar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="heading">
+      <div>
+        <p class="eyebrow">AUTOMATED RADAR CHECK</p>
+        <h1>Global Canyon Pool Conditions</h1>
+      </div>
+      <span id="health-dot" class="health-dot" title="Tracker health"></span>
+    </header>
+
+    <section id="status-card" class="status-card loading">
+      <div id="status-icon" class="status-icon">···</div>
+      <div>
+        <p id="status-label" class="status-label">Loading radar status</p>
+        <p id="status-detail" class="status-detail">Waiting for the latest automated check.</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Latest watershed radar measurements">
+      <article>
+        <span>Maximum</span>
+        <strong id="maximum-dbz">—</strong>
+        <small>dBZ</small>
+      </article>
+      <article>
+        <span>Area ≥50</span>
+        <strong id="coverage-50">—</strong>
+        <small>trigger: 50%</small>
+      </article>
+      <article>
+        <span>Area ≥55</span>
+        <strong id="coverage-55">—</strong>
+        <small>trigger: 25%</small>
+      </article>
+      <article>
+        <span>Area ≥60</span>
+        <strong id="coverage-60">—</strong>
+        <small>trigger: 10%</small>
+      </article>
+    </section>
+
+    <section class="radar-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LATEST FRAME</p>
+          <h2 id="frame-time">No frame analyzed yet</h2>
+        </div>
+        <div class="legend" aria-label="Reflectivity legend">
+          <span><i class="c40"></i>40–49</span>
+          <span><i class="c50"></i>50–54</span>
+          <span><i class="c55"></i>55–59</span>
+          <span><i class="c60"></i>60+</span>
+        </div>
+      </div>
+      <canvas id="radar-canvas" width="720" height="360" aria-label="Radar grid with watershed boundary"></canvas>
+    </section>
+
+    <section class="event-panel">
+      <p class="eyebrow">LAST QUALIFYING STORM</p>
+      <div id="event-content" class="event-content">
+        <strong>None recorded</strong>
+        <span>Monitoring has not recorded a storm meeting the pool-fill rule.</span>
+      </div>
+    </section>
+
+    <section class="rules-panel">
+      <p class="eyebrow">POOL-FILL RULE</p>
+      <p>A frame qualifies when <b>any one</b> of these conditions is met:</p>
+      <ul>
+        <li><b>50+ dBZ</b> over at least <b>50%</b> of the watershed</li>
+        <li><b>55+ dBZ</b> over at least <b>25%</b> of the watershed</li>
+        <li><b>60+ dBZ</b> over at least <b>10%</b> of the watershed</li>
+      </ul>
+    </section>
+
+    <footer>
+      <span id="last-check">Waiting for first check</span>
+      <span>Radar: Iowa Environmental Mesonet N0Q composite</span>
+      <span class="disclaimer">Radar-based pool-fill indicator; not visual confirmation or flash-flood guidance.</span>
+    </footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>

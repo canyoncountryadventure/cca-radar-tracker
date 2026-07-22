@@ -1,0 +1,19 @@
+{
+  "title": "Global Canyon Pool-Fill Radar",
+  "timezone": "America/Denver",
+  "recent_window_days": 14,
+  "schedule_lookback_minutes": 55,
+  "max_frames_per_run": 12,
+  "request_timeout_seconds": 30,
+  "request_retries": 3,
+  "grid_padding_cells": 2,
+  "mask_supersample": 200,
+  "thresholds": [
+    {"dbz": 50, "minimum_coverage_percent": 50},
+    {"dbz": 55, "minimum_coverage_percent": 25},
+    {"dbz": 60, "minimum_coverage_percent": 10}
+  ],
+  "iem_historical_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi",
+  "iem_current_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi",
+  "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png"
+}
