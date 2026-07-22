@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+    inputs:
+      send_test_email:
+        description: Send a test email even when there is no storm
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -23,10 +29,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -45,14 +51,28 @@ jobs:
         working-directory: cca-radar-tracker
         run: python tracker.py
 
+      - name: Send email when a new storm qualifies
+        working-directory: cca-radar-tracker
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          SMTP_USERNAME: canyoncountryadventure@gmail.com
+          ALERT_TO: canyoncountryadventure@gmail.com
+          SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
+        run: |
+          if [[ "$SEND_TEST_EMAIL" == "true" ]]; then
+            python send_alert.py --test
+          else
+            python send_alert.py
+          fi
+
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload website
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: cca-radar-tracker/docs
 
       - name: Publish website
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
