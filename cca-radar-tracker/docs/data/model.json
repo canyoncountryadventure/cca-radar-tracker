@@ -4,16 +4,16 @@
     "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
     "rainfall_formula": "Z = 300 \u00d7 R^1.4; dBZ capped at 55 for rainfall volume",
     "runoff_formula": "NRCS direct runoff: S = 1000/CN \u2212 10; Ia = 0.20S; Q = (P \u2212 Ia)\u00b2/(P + 0.80S) when P > Ia",
-    "runoff_coefficient_explanation": "The former fixed 5% coefficient has been removed. Each canyon now uses a composite curve number from USDA SSURGO hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet antecedent-condition results expose uncertainty in infiltration and initial loss.",
+    "runoff_coefficient_explanation": "Event classification uses composite NRCS curve numbers from SSURGO hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet antecedent-condition estimates expose uncertainty in initial loss.",
     "peak_flow_formula": "Screening peak CFS = 2 \u00d7 runoff volume \u00f7 triangular hydrograph base time; base time = rain duration + 2 \u00d7 NRCS watershed lag",
-    "peak_flow_explanation": "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. Lag uses USGS 3DEP terrain, supplied pour point, and basin extent. The displayed range reflects dry/normal/wet antecedent conditions.",
-    "target_formula": "Fill target = 18,000 ft\u00b3 \u00d7 (watershed area \u00f7 1.36 mi\u00b2)^0.4",
-    "target_explanation": "Only ZeroG's 18,000 ft\u00b3 anchor equals 5 cfs sustained for one hour. Other canyon targets are scaled by drainage area; each dashboard also converts its target back to an equivalent one-hour cfs for readability.",
-    "spatial_formula": "Required high-dBZ area = ZeroG reference area \u00d7 (watershed area \u00f7 1.36 mi\u00b2)^0.4",
-    "spatial_explanation": "The heavy-rain footprint gate requires an adequate area of intense rain. It prevents a large watershed receiving widespread light rain, or one isolated noisy pixel, from being called full on volume alone.",
-    "fill_ratio_explanation": "Estimated fill ratio = delivered runoff \u00f7 canyon fill target. A value of 1.0 means the modeled delivered volume equals the provisional target; it is not a measured percentage of pool depth.",
-    "atlas_explanation": "Atlas context compares the watershed-average radar accumulation over the event duration with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is an Atlas-equivalent recurrence context, not a formal watershed areal return interval.",
-    "scaling_basis": "The 0.4 drainage-area exponent is a provisional regional transfer based on the supplied USGS StreamStats comparisons; it is not a claim that every canyon behaves identically.",
+    "peak_flow_explanation": "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. Lag uses USGS 3DEP terrain, supplied pour point, and basin extent.",
+    "target_formula": "Fill target = 52,442 ft\u00b3 \u00d7 (technical-section length \u00f7 0.75 mi) \u00d7 (1 + canyon pothole modifier)",
+    "target_explanation": "Zero G is anchored to the 1-meter depression inventory of 114 depressions totaling 1,485.0 m\u00b3. Other targets are normalized by technical-section length and adjusted using user-assigned canyon morphology modifiers.",
+    "spatial_formula": "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, or 60+ dBZ over 10%",
+    "spatial_explanation": "The same watershed-percentage gate applies to every canyon. It prevents light basin-wide rain or one isolated radar pixel from being labeled full.",
+    "fill_ratio_explanation": "Estimated fill ratio = normal-antecedent-condition direct runoff \u00f7 canyon storage target. A value of 1.0 means modeled runoff equals the provisional empty-storage target; it is not a measured pool-depth percentage.",
+    "atlas_explanation": "Atlas context compares watershed-average radar accumulation with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet.",
+    "scaling_basis": "Technical-section length replaces watershed-area scaling. Pothole modifiers represent storage density and typical pool size relative to Zero G.",
     "sources": [
       {
         "label": "IEM N0Q composite documentation",
@@ -48,7 +48,7 @@
         "url": "https://www.usgs.gov/3d-elevation-program"
       },
       {
-        "label": "NRCS National Engineering Handbook, runoff curve-number method",
+        "label": "NRCS runoff curve-number method",
         "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf"
       }
     ],
@@ -59,9 +59,9 @@
       "full_flush": "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames"
     },
     "limitations": [
-      "ZeroG is field-informed; other canyon targets are provisional until pool observations calibrate them.",
+      "Only Zero G has a mapped depression-volume anchor. Other targets remain provisional until field observations or canyon-specific terrain analysis calibrate technical length and pool-storage modifiers.",
       "Radar reflectivity is an indirect rainfall estimate and values above 55 dBZ can be hail-contaminated.",
-      "Curve numbers and NRCS routing are screening estimates; antecedent moisture, exposed bedrock, fractures, channel transmission losses, and pool geometry still require field calibration.",
+      "Curve numbers and routing are screening estimates; antecedent moisture, bedrock fractures, channel transmission loss, and existing pool water can materially change actual conditions.",
       "NOAA Atlas 14 values are point-frequency context, not direct proof of runoff or pool condition."
     ]
   },
@@ -73,21 +73,27 @@
         -110.49403,
         38.77378
       ],
-      "scale_factor": 0.9997,
-      "fill_target_ft3": 17995,
-      "flush_target_ft3": 35989,
+      "scale_factor": 1.0,
+      "technical_length_miles": 0.75,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 1.0,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 52442,
+      "storage_basis": "Zero G 1-meter depression inventory: 114 depressions totaling 1,485.0 m3 (52,442 ft3)",
+      "flush_target_ft3": 104884,
       "runoff_coefficient": 0.05,
-      "calibration": "field-informed + federal basin data",
+      "calibration": "measured Zero G depression storage + federal basin data",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.68,
-          "minimum_coverage_percent": 50.02
+          "minimum_area_sq_mi": 0.679,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
           "minimum_area_sq_mi": 0.34,
-          "minimum_coverage_percent": 25.01
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
@@ -207,26 +213,32 @@
         -110.335404,
         37.816692
       ],
-      "scale_factor": 8.209,
-      "fill_target_ft3": 147762,
-      "flush_target_ft3": 295524,
+      "scale_factor": 5.0,
+      "technical_length_miles": 2.5,
+      "pothole_modifier": 0.5,
+      "length_ratio_to_zerog": 3.3333,
+      "storage_rate_multiplier": 1.5,
+      "fill_target_ft3": 262210,
+      "storage_basis": "User technical-section length and continuous-water/pool morphology adjustment",
+      "flush_target_ft3": 524420,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 5.582,
-          "minimum_coverage_percent": 2.13
+          "minimum_area_sq_mi": 131.291,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 2.791,
-          "minimum_coverage_percent": 1.06
+          "minimum_area_sq_mi": 65.645,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 1.116,
-          "minimum_coverage_percent": 0.43
+          "minimum_area_sq_mi": 26.258,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -350,26 +362,32 @@
         -110.531419,
         38.027276
       ],
-      "scale_factor": 0.9243,
-      "fill_target_ft3": 16637,
-      "flush_target_ft3": 33274,
+      "scale_factor": 0.1333,
+      "technical_length_miles": 1.0,
+      "pothole_modifier": -0.9,
+      "length_ratio_to_zerog": 1.3333,
+      "storage_rate_multiplier": 0.1,
+      "fill_target_ft3": 6992,
+      "storage_basis": "User technical-section length and very-low persistent pool-storage adjustment",
+      "flush_target_ft3": 13984,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.629,
-          "minimum_coverage_percent": 56.27
+          "minimum_area_sq_mi": 0.558,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.314,
-          "minimum_coverage_percent": 28.13
+          "minimum_area_sq_mi": 0.279,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.126,
-          "minimum_coverage_percent": 11.25
+          "minimum_area_sq_mi": 0.112,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -482,26 +500,32 @@
         -110.547134,
         37.861771
       ],
-      "scale_factor": 0.6576,
-      "fill_target_ft3": 11838,
-      "flush_target_ft3": 23675,
+      "scale_factor": 0.3333,
+      "technical_length_miles": 0.25,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 0.3333,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 17481,
+      "storage_basis": "User technical-section length and Zero G-equivalent storage rate",
+      "flush_target_ft3": 34962,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.447,
-          "minimum_coverage_percent": 93.75
+          "minimum_area_sq_mi": 0.238,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.224,
-          "minimum_coverage_percent": 46.88
+          "minimum_area_sq_mi": 0.119,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.089,
-          "minimum_coverage_percent": 18.75
+          "minimum_area_sq_mi": 0.048,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -613,26 +637,32 @@
         -110.513666,
         37.972316
       ],
-      "scale_factor": 1.0366,
-      "fill_target_ft3": 18659,
-      "flush_target_ft3": 37319,
+      "scale_factor": 0.65,
+      "technical_length_miles": 0.65,
+      "pothole_modifier": -0.25,
+      "length_ratio_to_zerog": 0.8667,
+      "storage_rate_multiplier": 0.75,
+      "fill_target_ft3": 34087,
+      "storage_basis": "User technical-section length and lower pothole-storage adjustment",
+      "flush_target_ft3": 68174,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.705,
-          "minimum_coverage_percent": 47.37
+          "minimum_area_sq_mi": 0.744,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.352,
-          "minimum_coverage_percent": 23.69
+          "minimum_area_sq_mi": 0.372,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.141,
-          "minimum_coverage_percent": 9.47
+          "minimum_area_sq_mi": 0.149,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -750,26 +780,32 @@
         -110.509375,
         38.035298
       ],
-      "scale_factor": 0.5743,
-      "fill_target_ft3": 10338,
-      "flush_target_ft3": 20677,
+      "scale_factor": 0.544,
+      "technical_length_miles": 0.34,
+      "pothole_modifier": 0.2,
+      "length_ratio_to_zerog": 0.4533,
+      "storage_rate_multiplier": 1.2,
+      "fill_target_ft3": 28528,
+      "storage_basis": "User technical-section length and higher pothole-storage adjustment",
+      "flush_target_ft3": 57056,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.34,
-          "minimum_coverage_percent": 100.0
+          "minimum_area_sq_mi": 0.17,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.195,
-          "minimum_coverage_percent": 57.43
+          "minimum_area_sq_mi": 0.085,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.078,
-          "minimum_coverage_percent": 22.97
+          "minimum_area_sq_mi": 0.034,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -882,26 +918,32 @@
         -110.535394,
         38.317136
       ],
-      "scale_factor": 1.0114,
-      "fill_target_ft3": 18205,
-      "flush_target_ft3": 36409,
+      "scale_factor": 0.65,
+      "technical_length_miles": 0.65,
+      "pothole_modifier": -0.25,
+      "length_ratio_to_zerog": 0.8667,
+      "storage_rate_multiplier": 0.75,
+      "fill_target_ft3": 34087,
+      "storage_basis": "User technical-section length and lower pothole-storage adjustment",
+      "flush_target_ft3": 68174,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.688,
-          "minimum_coverage_percent": 49.16
+          "minimum_area_sq_mi": 0.7,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.344,
-          "minimum_coverage_percent": 24.58
+          "minimum_area_sq_mi": 0.35,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.138,
-          "minimum_coverage_percent": 9.83
+          "minimum_area_sq_mi": 0.14,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1016,26 +1058,32 @@
         -110.523726,
         38.106828
       ],
-      "scale_factor": 0.5909,
-      "fill_target_ft3": 10636,
-      "flush_target_ft3": 21272,
+      "scale_factor": 0.4,
+      "technical_length_miles": 0.6,
+      "pothole_modifier": -0.5,
+      "length_ratio_to_zerog": 0.8,
+      "storage_rate_multiplier": 0.5,
+      "fill_target_ft3": 20977,
+      "storage_basis": "User technical-section length and lower pothole-storage adjustment",
+      "flush_target_ft3": 41954,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.365,
-          "minimum_coverage_percent": 100.0
+          "minimum_area_sq_mi": 0.182,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.201,
-          "minimum_coverage_percent": 55.04
+          "minimum_area_sq_mi": 0.091,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.08,
-          "minimum_coverage_percent": 22.02
+          "minimum_area_sq_mi": 0.036,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1145,26 +1193,32 @@
         -110.403392,
         38.274452
       ],
-      "scale_factor": 2.1188,
-      "fill_target_ft3": 38138,
-      "flush_target_ft3": 76276,
+      "scale_factor": 1.04,
+      "technical_length_miles": 0.65,
+      "pothole_modifier": 0.2,
+      "length_ratio_to_zerog": 0.8667,
+      "storage_rate_multiplier": 1.2,
+      "fill_target_ft3": 54540,
+      "storage_basis": "User technical-section length and higher pothole-storage adjustment",
+      "flush_target_ft3": 109080,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 1.441,
-          "minimum_coverage_percent": 16.21
+          "minimum_area_sq_mi": 4.444,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.72,
-          "minimum_coverage_percent": 8.11
+          "minimum_area_sq_mi": 2.222,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.288,
-          "minimum_coverage_percent": 3.24
+          "minimum_area_sq_mi": 0.889,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1280,26 +1334,32 @@
         -110.871886,
         37.559544
       ],
-      "scale_factor": 1.0471,
-      "fill_target_ft3": 18849,
-      "flush_target_ft3": 37697,
+      "scale_factor": 1.7333,
+      "technical_length_miles": 0.65,
+      "pothole_modifier": 1.0,
+      "length_ratio_to_zerog": 0.8667,
+      "storage_rate_multiplier": 2.0,
+      "fill_target_ft3": 90899,
+      "storage_basis": "User technical-section length and large-keeper-pothole adjustment",
+      "flush_target_ft3": 181798,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.712,
-          "minimum_coverage_percent": 46.66
+          "minimum_area_sq_mi": 0.763,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.356,
-          "minimum_coverage_percent": 23.33
+          "minimum_area_sq_mi": 0.382,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.142,
-          "minimum_coverage_percent": 9.33
+          "minimum_area_sq_mi": 0.153,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1415,26 +1475,32 @@
         -109.400076,
         38.478813
       ],
-      "scale_factor": 1.1152,
-      "fill_target_ft3": 20073,
-      "flush_target_ft3": 40146,
+      "scale_factor": 0.34,
+      "technical_length_miles": 0.85,
+      "pothole_modifier": -0.7,
+      "length_ratio_to_zerog": 1.1333,
+      "storage_rate_multiplier": 0.3,
+      "fill_target_ft3": 17830,
+      "storage_basis": "User technical-section length; result closely matches prior 1-meter depression estimate",
+      "flush_target_ft3": 35660,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.758,
-          "minimum_coverage_percent": 42.46
+          "minimum_area_sq_mi": 0.893,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.379,
-          "minimum_coverage_percent": 21.23
+          "minimum_area_sq_mi": 0.447,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.152,
-          "minimum_coverage_percent": 8.49
+          "minimum_area_sq_mi": 0.179,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1550,26 +1616,32 @@
         -109.572542,
         38.53439
       ],
-      "scale_factor": 0.7671,
-      "fill_target_ft3": 13808,
-      "flush_target_ft3": 27617,
+      "scale_factor": 0.0333,
+      "technical_length_miles": 0.1,
+      "pothole_modifier": -0.75,
+      "length_ratio_to_zerog": 0.1333,
+      "storage_rate_multiplier": 0.25,
+      "fill_target_ft3": 1748,
+      "storage_basis": "User technical-section length and low-storage adjustment",
+      "flush_target_ft3": 3496,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.522,
-          "minimum_coverage_percent": 74.42
+          "minimum_area_sq_mi": 0.35,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.261,
-          "minimum_coverage_percent": 37.21
+          "minimum_area_sq_mi": 0.175,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.104,
-          "minimum_coverage_percent": 14.88
+          "minimum_area_sq_mi": 0.07,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1681,26 +1753,32 @@
         -110.938669,
         38.539111
       ],
-      "scale_factor": 1.9289,
-      "fill_target_ft3": 34721,
-      "flush_target_ft3": 69442,
+      "scale_factor": 2.9167,
+      "technical_length_miles": 1.25,
+      "pothole_modifier": 0.75,
+      "length_ratio_to_zerog": 1.6667,
+      "storage_rate_multiplier": 1.75,
+      "fill_target_ft3": 152956,
+      "storage_basis": "User technical-section length and pothole-dense adjustment",
+      "flush_target_ft3": 305912,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 1.312,
-          "minimum_coverage_percent": 18.66
+          "minimum_area_sq_mi": 3.514,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.656,
-          "minimum_coverage_percent": 9.33
+          "minimum_area_sq_mi": 1.757,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.262,
-          "minimum_coverage_percent": 3.73
+          "minimum_area_sq_mi": 0.703,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1814,26 +1892,32 @@
         -110.964621,
         38.500279
       ],
-      "scale_factor": 1.5225,
-      "fill_target_ft3": 27405,
-      "flush_target_ft3": 54811,
+      "scale_factor": 5.0,
+      "technical_length_miles": 2.5,
+      "pothole_modifier": 0.5,
+      "length_ratio_to_zerog": 3.3333,
+      "storage_rate_multiplier": 1.5,
+      "fill_target_ft3": 262210,
+      "storage_basis": "User technical-section length and higher pool-storage adjustment",
+      "flush_target_ft3": 524420,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 1.035,
-          "minimum_coverage_percent": 26.61
+          "minimum_area_sq_mi": 1.945,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.518,
-          "minimum_coverage_percent": 13.31
+          "minimum_area_sq_mi": 0.973,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.207,
-          "minimum_coverage_percent": 5.32
+          "minimum_area_sq_mi": 0.389,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -1946,26 +2030,32 @@
         -110.519118,
         38.787135
       ],
-      "scale_factor": 5.0349,
-      "fill_target_ft3": 90628,
-      "flush_target_ft3": 181256,
+      "scale_factor": 1.6667,
+      "technical_length_miles": 1.0,
+      "pothole_modifier": 0.25,
+      "length_ratio_to_zerog": 1.3333,
+      "storage_rate_multiplier": 1.25,
+      "fill_target_ft3": 87403,
+      "storage_basis": "User technical-section length and higher pool-storage adjustment",
+      "flush_target_ft3": 174806,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 3.424,
-          "minimum_coverage_percent": 4.43
+          "minimum_area_sq_mi": 38.68,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 1.712,
-          "minimum_coverage_percent": 2.21
+          "minimum_area_sq_mi": 19.34,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.685,
-          "minimum_coverage_percent": 0.89
+          "minimum_area_sq_mi": 7.736,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -2087,26 +2177,32 @@
         -110.524131,
         38.743179
       ],
-      "scale_factor": 1.4176,
-      "fill_target_ft3": 25517,
-      "flush_target_ft3": 51033,
+      "scale_factor": 1.0,
+      "technical_length_miles": 0.75,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 1.0,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 52442,
+      "storage_basis": "User technical-section length and Zero G-equivalent storage rate",
+      "flush_target_ft3": 104884,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 0.964,
-          "minimum_coverage_percent": 29.62
+          "minimum_area_sq_mi": 1.627,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.482,
-          "minimum_coverage_percent": 14.81
+          "minimum_area_sq_mi": 0.813,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.193,
-          "minimum_coverage_percent": 5.92
+          "minimum_area_sq_mi": 0.325,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
@@ -2219,26 +2315,32 @@
         -110.481232,
         38.835456
       ],
-      "scale_factor": 1.4729,
-      "fill_target_ft3": 26513,
-      "flush_target_ft3": 53026,
+      "scale_factor": 1.6,
+      "technical_length_miles": 1.2,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 1.6,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 83907,
+      "storage_basis": "User technical-section length and Zero G-equivalent storage rate",
+      "flush_target_ft3": 167814,
       "runoff_coefficient": 0.05,
-      "calibration": "federal basin data; field calibration needed",
+      "calibration": "technical-length normalized; morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
       "spatial_rules": [
         {
           "dbz": 50.0,
-          "minimum_area_sq_mi": 1.002,
-          "minimum_coverage_percent": 27.97
+          "minimum_area_sq_mi": 1.791,
+          "minimum_coverage_percent": 50.0
         },
         {
           "dbz": 55.0,
-          "minimum_area_sq_mi": 0.501,
-          "minimum_coverage_percent": 13.98
+          "minimum_area_sq_mi": 0.895,
+          "minimum_coverage_percent": 25.0
         },
         {
           "dbz": 60.0,
-          "minimum_area_sq_mi": 0.2,
-          "minimum_coverage_percent": 5.59
+          "minimum_area_sq_mi": 0.358,
+          "minimum_coverage_percent": 10.0
         }
       ],
       "hydrology": {
