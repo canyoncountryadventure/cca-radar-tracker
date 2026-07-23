@@ -41,18 +41,35 @@ jobs:
       - name: Install tracker dependencies
         run: pip install -r cca-radar-tracker/requirements.txt
 
+      - name: Run backend tests
+        working-directory: cca-radar-tracker
+        run: python -m unittest discover -s tests -v
+
+      - name: Check front-end JavaScript
+        run: node --check cca-radar-tracker/docs/app.js
+
+      - name: Reject stale dashboard wording
+        run: |
+          if grep -RniE "watershed .* area scale|target as 1-hour flow|delivered runoff|little to no expected change in pool depth|scaled intensity gates" \
+            cca-radar-tracker/docs cca-radar-tracker/README.md; then
+            echo "Stale area-scaled or fixed-coefficient dashboard wording remains."
+            exit 1
+          fi
+
       - name: Restore previously published tracker state
         continue-on-error: true
         env:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
         run: |
-          curl --fail --silent --show-error --location --max-time 20             "$STATUS_URL"             --output cca-radar-tracker/docs/data/status.json
+          curl --fail --silent --show-error --location --max-time 20 \
+            "$STATUS_URL" \
+            --output cca-radar-tracker/docs/data/status.json
 
       - name: Analyze new radar frames
         working-directory: cca-radar-tracker
         run: python tracker.py
 
-      - name: Verify technical-section pool model
+      - name: Verify revised refill model
         run: |
           python - <<'PY'
           import json
@@ -73,26 +90,73 @@ jobs:
                   f"Actual:   {actual_formula}"
               )
 
+          expected_targets = {
+              "zerog": 52442,
+              "angel-cove": 34087,
+              "black-hole-white-canyon": 262210,
+              "entrajo": 17830,
+              "hog-canyons": 34087,
+              "leprechaun": 6992,
+              "no-kidding": 28528,
+              "pool-arch": 1748,
+              "alcatraz": 54540,
+              "cable-canyon": 262210,
+              "constrychnine": 20977,
+              "eardley": 87403,
+              "north-fork-iron-wash": 52442,
+              "poe": 90899,
+              "the-squeeze": 152956,
+              "upper-greasewood": 83907,
+              "woody": 17481,
+          }
+          for canyon_id, expected in expected_targets.items():
+              actual = model["canyons"][canyon_id]["fill_target_ft3"]
+              if actual != expected:
+                  raise SystemExit(
+                      f"{canyon_id} target is {actual}; expected {expected}"
+                  )
+
           zerog = model["canyons"]["zerog"]
-          expected = {
+          expected_zero_g = {
               "fill_target_ft3": 52442,
+              "storage_target_ft3": 52442,
               "flush_target_ft3": 104884,
               "technical_length_miles": 0.75,
               "pothole_modifier": 0.0,
           }
           errors = {
               key: {"expected": value, "actual": zerog.get(key)}
-              for key, value in expected.items()
+              for key, value in expected_zero_g.items()
               if zerog.get(key) != value
           }
           if errors:
-              raise SystemExit(f"Zero G model verification failed: {errors}")
+              raise SystemExit(f"Zero G verification failed: {errors}")
 
-          print("Verified new pool model:")
-          print(json.dumps({
-              "target_formula": actual_formula,
-              "zerog": {key: zerog[key] for key in expected},
-          }, indent=2))
+          for canyon_id, canyon in model["canyons"].items():
+              stale = {"scale_factor", "runoff_coefficient"}.intersection(canyon)
+              if stale:
+                  raise SystemExit(
+                      f"{canyon_id} still contains obsolete fields: {sorted(stale)}"
+                  )
+
+          explanation = model["method"].get("direct_runoff_explanation", "")
+          if "No fixed runoff coefficient is used" not in explanation:
+              raise SystemExit("Direct-runoff method text was not updated")
+          if "runoff_coefficient_explanation" in model["method"]:
+              raise SystemExit("Obsolete runoff_coefficient_explanation remains in model metadata")
+
+          config = json.loads(Path("cca-radar-tracker/config.json").read_text(encoding="utf-8"))
+          obsolete_config = {
+              "runoff_coefficient",
+              "reference_area_sq_mi",
+              "reference_fill_volume_ft3",
+              "area_exponent",
+              "reference_spatial_rules",
+          }.intersection(config["model"])
+          if obsolete_config:
+              raise SystemExit(f"Obsolete config keys remain: {sorted(obsolete_config)}")
+
+          print("Verified revised pool-refill model and front-end data contract.")
           PY
 
       - name: Commit generated model metadata
@@ -104,11 +168,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "model.json is already current; no commit needed."
           else
-            git commit -m "Update generated canyon pool model"
+            git commit -m "Update generated canyon refill model"
             git push
           fi
 
-      - name: Send email when a new storm qualifies
+      - name: Send email when a new major refill event qualifies
         working-directory: cca-radar-tracker
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
