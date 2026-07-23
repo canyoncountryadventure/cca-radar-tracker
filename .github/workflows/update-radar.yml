@@ -12,7 +12,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
@@ -45,11 +45,68 @@ jobs:
         continue-on-error: true
         env:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
-        run: curl --fail --silent --show-error --location --max-time 20 "$STATUS_URL" --output cca-radar-tracker/docs/data/status.json
+        run: |
+          curl --fail --silent --show-error --location --max-time 20             "$STATUS_URL"             --output cca-radar-tracker/docs/data/status.json
 
       - name: Analyze new radar frames
         working-directory: cca-radar-tracker
         run: python tracker.py
+
+      - name: Verify technical-section pool model
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("cca-radar-tracker/docs/data/model.json")
+          model = json.loads(path.read_text(encoding="utf-8"))
+
+          expected_formula = (
+              "Fill target = 52,442 ft³ × (technical-section length ÷ 0.75 mi) "
+              "× (1 + canyon pothole modifier)"
+          )
+          actual_formula = model["method"]["target_formula"]
+          if actual_formula != expected_formula:
+              raise SystemExit(
+                  "Wrong target formula generated.\n"
+                  f"Expected: {expected_formula}\n"
+                  f"Actual:   {actual_formula}"
+              )
+
+          zerog = model["canyons"]["zerog"]
+          expected = {
+              "fill_target_ft3": 52442,
+              "flush_target_ft3": 104884,
+              "technical_length_miles": 0.75,
+              "pothole_modifier": 0.0,
+          }
+          errors = {
+              key: {"expected": value, "actual": zerog.get(key)}
+              for key, value in expected.items()
+              if zerog.get(key) != value
+          }
+          if errors:
+              raise SystemExit(f"Zero G model verification failed: {errors}")
+
+          print("Verified new pool model:")
+          print(json.dumps({
+              "target_formula": actual_formula,
+              "zerog": {key: zerog[key] for key in expected},
+          }, indent=2))
+          PY
+
+      - name: Commit generated model metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cca-radar-tracker/docs/data/model.json
+
+          if git diff --cached --quiet; then
+            echo "model.json is already current; no commit needed."
+          else
+            git commit -m "Update generated canyon pool model"
+            git push
+          fi
 
       - name: Send email when a new storm qualifies
         working-directory: cca-radar-tracker
@@ -66,13 +123,13 @@ jobs:
           fi
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@v5
 
       - name: Upload website
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v3
         with:
           path: cca-radar-tracker/docs
 
       - name: Publish website
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
