@@ -3,9 +3,16 @@
   "method": {
     "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
     "rainfall_formula": "Z = 300 \u00d7 R^1.4; dBZ capped at 55 for rainfall volume",
-    "runoff_formula": "Estimated delivered runoff = radar rain volume \u00d7 effective runoff coefficient",
+    "runoff_formula": "NRCS direct runoff: S = 1000/CN \u2212 10; Ia = 0.20S; Q = (P \u2212 Ia)\u00b2/(P + 0.80S) when P > Ia",
+    "runoff_coefficient_explanation": "The former fixed 5% coefficient has been removed. Each canyon now uses a composite curve number from USDA SSURGO hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet antecedent-condition results expose uncertainty in infiltration and initial loss.",
+    "peak_flow_formula": "Screening peak CFS = 2 \u00d7 runoff volume \u00f7 triangular hydrograph base time; base time = rain duration + 2 \u00d7 NRCS watershed lag",
+    "peak_flow_explanation": "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. Lag uses USGS 3DEP terrain, supplied pour point, and basin extent. The displayed range reflects dry/normal/wet antecedent conditions.",
     "target_formula": "Fill target = 18,000 ft\u00b3 \u00d7 (watershed area \u00f7 1.36 mi\u00b2)^0.4",
+    "target_explanation": "Only ZeroG's 18,000 ft\u00b3 anchor equals 5 cfs sustained for one hour. Other canyon targets are scaled by drainage area; each dashboard also converts its target back to an equivalent one-hour cfs for readability.",
     "spatial_formula": "Required high-dBZ area = ZeroG reference area \u00d7 (watershed area \u00f7 1.36 mi\u00b2)^0.4",
+    "spatial_explanation": "The heavy-rain footprint gate requires an adequate area of intense rain. It prevents a large watershed receiving widespread light rain, or one isolated noisy pixel, from being called full on volume alone.",
+    "fill_ratio_explanation": "Estimated fill ratio = delivered runoff \u00f7 canyon fill target. A value of 1.0 means the modeled delivered volume equals the provisional target; it is not a measured percentage of pool depth.",
+    "atlas_explanation": "Atlas context compares the watershed-average radar accumulation over the event duration with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is an Atlas-equivalent recurrence context, not a formal watershed areal return interval.",
     "scaling_basis": "The 0.4 drainage-area exponent is a provisional regional transfer based on the supplied USGS StreamStats comparisons; it is not a claim that every canyon behaves identically.",
     "sources": [
       {
@@ -17,24 +24,44 @@
         "url": "https://mesonet.agron.iastate.edu/GIS/rasters.php?rid=2"
       },
       {
+        "label": "NWS radar rainfall estimation and default Z\u2013R relationship",
+        "url": "https://www.weather.gov/mrx/radarrainfallestimates"
+      },
+      {
         "label": "NOAA Atlas 14 precipitation frequency",
         "url": "https://hdsc.nws.noaa.gov/pfds/"
       },
       {
         "label": "USGS StreamStats",
         "url": "https://streamstats.usgs.gov/ss/"
+      },
+      {
+        "label": "USDA Web Soil Survey / SSURGO",
+        "url": "https://websoilsurvey.nrcs.usda.gov/"
+      },
+      {
+        "label": "USGS National Land Cover Database",
+        "url": "https://www.usgs.gov/centers/eros/science/national-land-cover-database"
+      },
+      {
+        "label": "USGS 3D Elevation Program",
+        "url": "https://www.usgs.gov/3d-elevation-program"
+      },
+      {
+        "label": "NRCS National Engineering Handbook, runoff curve-number method",
+        "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf"
       }
     ],
     "classification": {
-      "minor": "Runoff ratio below 0.5 and no spatial intensity gate",
-      "moderate": "Runoff ratio at least 0.5 or a spatial intensity gate was reached",
+      "minor": "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no pool-depth change expected",
+      "moderate": "Runoff ratio at least 1.0 or a heavy-rain footprint gate was reached, but the complete likely-full test was not met",
       "likely_full": "Runoff ratio at least 1.0, spatial gate reached, and at least two wet frames",
       "full_flush": "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames"
     },
     "limitations": [
       "ZeroG is field-informed; other canyon targets are provisional until pool observations calibrate them.",
       "Radar reflectivity is an indirect rainfall estimate and values above 55 dBZ can be hail-contaminated.",
-      "The 5% coefficient represents combined runoff and delivery; antecedent moisture and channel losses vary.",
+      "Curve numbers and NRCS routing are screening estimates; antecedent moisture, exposed bedrock, fractures, channel transmission losses, and pool geometry still require field calibration.",
       "NOAA Atlas 14 values are point-frequency context, not direct proof of runoff or pool condition."
     ]
   },
@@ -50,7 +77,7 @@
       "fill_target_ft3": 17995,
       "flush_target_ft3": 35989,
       "runoff_coefficient": 0.05,
-      "calibration": "field-informed",
+      "calibration": "field-informed + federal basin data",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -68,6 +95,48 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "hydrology": {
+        "name": "ZeroG",
+        "area_sq_mi": 1.359,
+        "curve_number": {
+          "dry": 77.3,
+          "normal": 88.6,
+          "wet": 94.8
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.588,
+          "normal": 0.258,
+          "wet": 0.11
+        },
+        "hydrologic_soil_group_percent": {
+          "C": 4.5,
+          "D": 95.5
+        },
+        "soil_unmapped_percent": 12.6,
+        "soil_group_inferred_percent": 87.4,
+        "land_cover_percent": {
+          "0": 5.5,
+          "11": 0.1,
+          "31": 15.0,
+          "41": 0.0,
+          "42": 1.5,
+          "52": 77.2,
+          "71": 0.6
+        },
+        "elevation_min_ft": 4529,
+        "elevation_mean_ft": 5123,
+        "elevation_max_ft": 6098,
+        "mean_slope_percent": 54.5,
+        "hydraulic_length_miles": 2.51,
+        "lag_hours": 0.25,
+        "time_of_concentration_hours": 0.42,
+        "streamstats": {
+          "BSLDEM10M": 47.227,
+          "DRNAREA": 1.36,
+          "ELEV": 5152.636
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.096,
@@ -142,7 +211,7 @@
       "fill_target_ft3": 147762,
       "flush_target_ft3": 295524,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -160,6 +229,57 @@
           "minimum_coverage_percent": 0.43
         }
       ],
+      "hydrology": {
+        "name": "Black Hole of White Canyon",
+        "area_sq_mi": 262.582,
+        "curve_number": {
+          "dry": 57.4,
+          "normal": 75.4,
+          "wet": 87.8
+        },
+        "initial_abstraction_inches": {
+          "dry": 1.487,
+          "normal": 0.652,
+          "wet": 0.278
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 24.4,
+          "B": 5.6,
+          "C": 6.0,
+          "D": 63.9
+        },
+        "soil_unmapped_percent": 0.8,
+        "soil_group_inferred_percent": 84.4,
+        "land_cover_percent": {
+          "0": 7.9,
+          "21": 0.5,
+          "22": 0.1,
+          "23": 0.0,
+          "31": 1.5,
+          "41": 2.7,
+          "42": 31.4,
+          "43": 0.2,
+          "52": 55.5,
+          "71": 0.2,
+          "81": 0.0,
+          "82": 0.0,
+          "90": 0.0,
+          "95": 0.0
+        },
+        "elevation_min_ft": 3613,
+        "elevation_mean_ft": 6146,
+        "elevation_max_ft": 9053,
+        "mean_slope_percent": 23.8,
+        "hydraulic_length_miles": 33.97,
+        "lag_hours": 4.75,
+        "time_of_concentration_hours": 7.91,
+        "streamstats": {
+          "BSLDEM10M": 21.262,
+          "DRNAREA": 263.0,
+          "ELEV": 6165.623
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.107,
@@ -234,7 +354,7 @@
       "fill_target_ft3": 16637,
       "flush_target_ft3": 33274,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -252,6 +372,46 @@
           "minimum_coverage_percent": 11.25
         }
       ],
+      "hydrology": {
+        "name": "Leprechaun",
+        "area_sq_mi": 1.117,
+        "curve_number": {
+          "dry": 70.6,
+          "normal": 84.5,
+          "wet": 92.8
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.834,
+          "normal": 0.366,
+          "wet": 0.156
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 21.7,
+          "D": 78.3
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 8.8,
+          "21": 0.0,
+          "31": 33.8,
+          "52": 56.3,
+          "71": 1.1
+        },
+        "elevation_min_ft": 4538,
+        "elevation_mean_ft": 5057,
+        "elevation_max_ft": 5338,
+        "mean_slope_percent": 15.9,
+        "hydraulic_length_miles": 2.31,
+        "lag_hours": 0.51,
+        "time_of_concentration_hours": 0.85,
+        "streamstats": {
+          "BSLDEM10M": 17.581,
+          "DRNAREA": 1.12,
+          "ELEV": 5055.903
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.105,
@@ -326,7 +486,7 @@
       "fill_target_ft3": 11838,
       "flush_target_ft3": 23675,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -344,6 +504,45 @@
           "minimum_coverage_percent": 18.75
         }
       ],
+      "hydrology": {
+        "name": "Woody",
+        "area_sq_mi": 0.477,
+        "curve_number": {
+          "dry": 80.9,
+          "normal": 90.6,
+          "wet": 95.8
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.471,
+          "normal": 0.206,
+          "wet": 0.088
+        },
+        "hydrologic_soil_group_percent": {
+          "D": 100.0
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 6.1,
+          "21": 0.1,
+          "31": 47.2,
+          "52": 42.0,
+          "71": 4.7
+        },
+        "elevation_min_ft": 4295,
+        "elevation_mean_ft": 4631,
+        "elevation_max_ft": 4892,
+        "mean_slope_percent": 22.6,
+        "hydraulic_length_miles": 1.02,
+        "lag_hours": 0.18,
+        "time_of_concentration_hours": 0.29,
+        "streamstats": {
+          "BSLDEM10M": 24.055,
+          "DRNAREA": 0.48,
+          "ELEV": 4633.866
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.102,
@@ -418,7 +617,7 @@
       "fill_target_ft3": 18659,
       "flush_target_ft3": 37319,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -436,6 +635,51 @@
           "minimum_coverage_percent": 9.47
         }
       ],
+      "hydrology": {
+        "name": "Hog Canyons",
+        "area_sq_mi": 1.488,
+        "curve_number": {
+          "dry": 59.3,
+          "normal": 76.9,
+          "wet": 88.6
+        },
+        "initial_abstraction_inches": {
+          "dry": 1.372,
+          "normal": 0.601,
+          "wet": 0.257
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 52.5,
+          "D": 47.5
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 4.1,
+          "21": 0.0,
+          "23": 0.0,
+          "24": 0.0,
+          "31": 27.4,
+          "42": 0.4,
+          "52": 65.7,
+          "71": 1.8,
+          "90": 0.4,
+          "95": 0.2
+        },
+        "elevation_min_ft": 4325,
+        "elevation_mean_ft": 5008,
+        "elevation_max_ft": 5318,
+        "mean_slope_percent": 27.0,
+        "hydraulic_length_miles": 1.93,
+        "lag_hours": 0.43,
+        "time_of_concentration_hours": 0.72,
+        "streamstats": {
+          "BSLDEM10M": 24.257,
+          "DRNAREA": 1.49,
+          "ELEV": 4999.06
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.103,
@@ -510,7 +754,7 @@
       "fill_target_ft3": 10338,
       "flush_target_ft3": 20677,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -528,6 +772,46 @@
           "minimum_coverage_percent": 22.97
         }
       ],
+      "hydrology": {
+        "name": "No Kidding",
+        "area_sq_mi": 0.34,
+        "curve_number": {
+          "dry": 68.1,
+          "normal": 82.9,
+          "wet": 91.9
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.938,
+          "normal": 0.411,
+          "wet": 0.176
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 24.3,
+          "D": 75.7
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 7.0,
+          "21": 0.1,
+          "31": 20.3,
+          "52": 70.8,
+          "71": 1.9
+        },
+        "elevation_min_ft": 4663,
+        "elevation_mean_ft": 5185,
+        "elevation_max_ft": 5339,
+        "mean_slope_percent": 9.2,
+        "hydraulic_length_miles": 1.5,
+        "lag_hours": 0.5,
+        "time_of_concentration_hours": 0.83,
+        "streamstats": {
+          "BSLDEM10M": 8.507,
+          "DRNAREA": 0.34,
+          "ELEV": 5182.722
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.105,
@@ -602,7 +886,7 @@
       "fill_target_ft3": 18205,
       "flush_target_ft3": 36409,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -620,6 +904,48 @@
           "minimum_coverage_percent": 9.83
         }
       ],
+      "hydrology": {
+        "name": "Angel Cove",
+        "area_sq_mi": 1.399,
+        "curve_number": {
+          "dry": 48.6,
+          "normal": 68.3,
+          "wet": 83.5
+        },
+        "initial_abstraction_inches": {
+          "dry": 2.116,
+          "normal": 0.928,
+          "wet": 0.396
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 77.5,
+          "B": 8.3,
+          "D": 14.1
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 76.4,
+        "land_cover_percent": {
+          "0": 7.8,
+          "11": 0.0,
+          "31": 4.6,
+          "42": 0.2,
+          "52": 86.1,
+          "90": 1.3
+        },
+        "elevation_min_ft": 4124,
+        "elevation_mean_ft": 4857,
+        "elevation_max_ft": 4964,
+        "mean_slope_percent": 11.6,
+        "hydraulic_length_miles": 2.65,
+        "lag_hours": 1.07,
+        "time_of_concentration_hours": 1.79,
+        "streamstats": {
+          "BSLDEM10M": 9.237,
+          "DRNAREA": 1.4,
+          "ELEV": 4862.671
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.101,
@@ -694,7 +1020,7 @@
       "fill_target_ft3": 10636,
       "flush_target_ft3": 21272,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -712,6 +1038,43 @@
           "minimum_coverage_percent": 22.02
         }
       ],
+      "hydrology": {
+        "name": "Constrychnine",
+        "area_sq_mi": 0.365,
+        "curve_number": {
+          "dry": 76.7,
+          "normal": 88.3,
+          "wet": 94.6
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.607,
+          "normal": 0.266,
+          "wet": 0.114
+        },
+        "hydrologic_soil_group_percent": {
+          "D": 100.0
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 11.9,
+          "31": 4.3,
+          "52": 83.8
+        },
+        "elevation_min_ft": 4678,
+        "elevation_mean_ft": 5240,
+        "elevation_max_ft": 5420,
+        "mean_slope_percent": 17.0,
+        "hydraulic_length_miles": 1.55,
+        "lag_hours": 0.31,
+        "time_of_concentration_hours": 0.52,
+        "streamstats": {
+          "BSLDEM10M": 13.957,
+          "DRNAREA": 0.37,
+          "ELEV": 5246.33
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.105,
@@ -786,7 +1149,7 @@
       "fill_target_ft3": 38138,
       "flush_target_ft3": 76276,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -804,6 +1167,49 @@
           "minimum_coverage_percent": 3.24
         }
       ],
+      "hydrology": {
+        "name": "Alcatraz",
+        "area_sq_mi": 8.887,
+        "curve_number": {
+          "dry": 49.3,
+          "normal": 68.9,
+          "wet": 83.8
+        },
+        "initial_abstraction_inches": {
+          "dry": 2.06,
+          "normal": 0.903,
+          "wet": 0.386
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 77.3,
+          "C": 5.1,
+          "D": 17.6
+        },
+        "soil_unmapped_percent": 6.6,
+        "soil_group_inferred_percent": 12.2,
+        "land_cover_percent": {
+          "0": 5.2,
+          "21": 0.0,
+          "31": 3.1,
+          "42": 0.0,
+          "52": 91.6,
+          "71": 0.0,
+          "90": 0.0
+        },
+        "elevation_min_ft": 4848,
+        "elevation_mean_ft": 5901,
+        "elevation_max_ft": 6295,
+        "mean_slope_percent": 8.6,
+        "hydraulic_length_miles": 7.4,
+        "lag_hours": 2.8,
+        "time_of_concentration_hours": 4.66,
+        "streamstats": {
+          "BSLDEM10M": 3.948,
+          "DRNAREA": 8.89,
+          "ELEV": 5923.132
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.111,
@@ -878,7 +1284,7 @@
       "fill_target_ft3": 18849,
       "flush_target_ft3": 37697,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -896,6 +1302,49 @@
           "minimum_coverage_percent": 9.33
         }
       ],
+      "hydrology": {
+        "name": "Poe",
+        "area_sq_mi": 1.526,
+        "curve_number": {
+          "dry": 78.8,
+          "normal": 89.5,
+          "wet": 95.2
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.537,
+          "normal": 0.235,
+          "wet": 0.101
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 0.7,
+          "D": 99.3
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 95.0,
+        "land_cover_percent": {
+          "0": 8.8,
+          "21": 0.0,
+          "31": 28.5,
+          "42": 0.8,
+          "52": 61.2,
+          "71": 0.4,
+          "90": 0.2,
+          "95": 0.0
+        },
+        "elevation_min_ft": 3894,
+        "elevation_mean_ft": 5774,
+        "elevation_max_ft": 6666,
+        "mean_slope_percent": 44.4,
+        "hydraulic_length_miles": 3.14,
+        "lag_hours": 0.32,
+        "time_of_concentration_hours": 0.54,
+        "streamstats": {
+          "BSLDEM10M": 39.963,
+          "DRNAREA": 1.53,
+          "ELEV": 5766.123
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.112,
@@ -970,7 +1419,7 @@
       "fill_target_ft3": 20073,
       "flush_target_ft3": 40146,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -988,6 +1437,49 @@
           "minimum_coverage_percent": 8.49
         }
       ],
+      "hydrology": {
+        "name": "Entrajo",
+        "area_sq_mi": 1.786,
+        "curve_number": {
+          "dry": 69.7,
+          "normal": 84.0,
+          "wet": 92.5
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.868,
+          "normal": 0.381,
+          "wet": 0.163
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 1.6,
+          "B": 0.0,
+          "D": 98.4
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 81.7,
+        "land_cover_percent": {
+          "0": 8.3,
+          "21": 0.0,
+          "22": 0.0,
+          "42": 33.6,
+          "52": 57.2,
+          "90": 0.6,
+          "95": 0.2
+        },
+        "elevation_min_ft": 5452,
+        "elevation_mean_ft": 6097,
+        "elevation_max_ft": 6707,
+        "mean_slope_percent": 36.9,
+        "hydraulic_length_miles": 2.73,
+        "lag_hours": 0.39,
+        "time_of_concentration_hours": 0.65,
+        "streamstats": {
+          "BSLDEM10M": 29.372,
+          "DRNAREA": 1.79,
+          "ELEV": 6132.221
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.122,
@@ -1062,7 +1554,7 @@
       "fill_target_ft3": 13808,
       "flush_target_ft3": 27617,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1080,6 +1572,45 @@
           "minimum_coverage_percent": 14.88
         }
       ],
+      "hydrology": {
+        "name": "Pool Arch",
+        "area_sq_mi": 0.701,
+        "curve_number": {
+          "dry": 75.0,
+          "normal": 87.3,
+          "wet": 94.1
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.666,
+          "normal": 0.292,
+          "wet": 0.125
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 0.0,
+          "D": 100.0
+        },
+        "soil_unmapped_percent": 0.0,
+        "soil_group_inferred_percent": 26.0,
+        "land_cover_percent": {
+          "0": 20.3,
+          "31": 0.2,
+          "42": 6.7,
+          "52": 72.8
+        },
+        "elevation_min_ft": 4450,
+        "elevation_mean_ft": 5149,
+        "elevation_max_ft": 5861,
+        "mean_slope_percent": 69.0,
+        "hydraulic_length_miles": 2.73,
+        "lag_hours": 0.25,
+        "time_of_concentration_hours": 0.42,
+        "streamstats": {
+          "BSLDEM10M": 59.586,
+          "DRNAREA": 0.7,
+          "ELEV": 5139.836
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.108,
@@ -1154,7 +1685,7 @@
       "fill_target_ft3": 34721,
       "flush_target_ft3": 69442,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1172,6 +1703,47 @@
           "minimum_coverage_percent": 3.73
         }
       ],
+      "hydrology": {
+        "name": "The Squeeze",
+        "area_sq_mi": 7.028,
+        "curve_number": {
+          "dry": 76.7,
+          "normal": 88.3,
+          "wet": 94.6
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.607,
+          "normal": 0.266,
+          "wet": 0.114
+        },
+        "hydrologic_soil_group_percent": {
+          "C": 2.4,
+          "D": 97.6
+        },
+        "soil_unmapped_percent": 70.5,
+        "soil_group_inferred_percent": 29.5,
+        "land_cover_percent": {
+          "0": 14.5,
+          "21": 0.0,
+          "31": 5.6,
+          "42": 0.0,
+          "52": 79.7,
+          "71": 0.1
+        },
+        "elevation_min_ft": 4604,
+        "elevation_mean_ft": 6004,
+        "elevation_max_ft": 6836,
+        "mean_slope_percent": 34.0,
+        "hydraulic_length_miles": 6.32,
+        "lag_hours": 0.68,
+        "time_of_concentration_hours": 1.13,
+        "streamstats": {
+          "BSLDEM10M": 24.379,
+          "DRNAREA": 7.03,
+          "ELEV": 6027.325
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.104,
@@ -1246,7 +1818,7 @@
       "fill_target_ft3": 27405,
       "flush_target_ft3": 54811,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1264,6 +1836,46 @@
           "minimum_coverage_percent": 5.32
         }
       ],
+      "hydrology": {
+        "name": "Cable Canyon",
+        "area_sq_mi": 3.89,
+        "curve_number": {
+          "dry": 76.5,
+          "normal": 88.2,
+          "wet": 94.6
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.613,
+          "normal": 0.269,
+          "wet": 0.115
+        },
+        "hydrologic_soil_group_percent": {
+          "C": 12.7,
+          "D": 87.3
+        },
+        "soil_unmapped_percent": 8.6,
+        "soil_group_inferred_percent": 91.4,
+        "land_cover_percent": {
+          "0": 7.8,
+          "21": 0.0,
+          "31": 8.9,
+          "42": 0.0,
+          "52": 83.2
+        },
+        "elevation_min_ft": 4990,
+        "elevation_mean_ft": 6021,
+        "elevation_max_ft": 6634,
+        "mean_slope_percent": 42.2,
+        "hydraulic_length_miles": 5.47,
+        "lag_hours": 0.54,
+        "time_of_concentration_hours": 0.91,
+        "streamstats": {
+          "BSLDEM10M": 45.354,
+          "DRNAREA": 3.89,
+          "ELEV": 6041.079
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.104,
@@ -1338,7 +1950,7 @@
       "fill_target_ft3": 90628,
       "flush_target_ft3": 181256,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1356,6 +1968,55 @@
           "minimum_coverage_percent": 0.89
         }
       ],
+      "hydrology": {
+        "name": "Eardley",
+        "area_sq_mi": 77.36,
+        "curve_number": {
+          "dry": 69.9,
+          "normal": 84.1,
+          "wet": 92.5
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.861,
+          "normal": 0.377,
+          "wet": 0.161
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 11.4,
+          "B": 1.1,
+          "C": 4.4,
+          "D": 83.2
+        },
+        "soil_unmapped_percent": 48.2,
+        "soil_group_inferred_percent": 51.8,
+        "land_cover_percent": {
+          "0": 5.8,
+          "11": 0.0,
+          "21": 0.7,
+          "22": 0.2,
+          "23": 0.1,
+          "24": 0.0,
+          "31": 0.3,
+          "41": 0.0,
+          "42": 5.3,
+          "52": 86.8,
+          "71": 0.7,
+          "81": 0.0
+        },
+        "elevation_min_ft": 4770,
+        "elevation_mean_ft": 6669,
+        "elevation_max_ft": 7689,
+        "mean_slope_percent": 18.1,
+        "hydraulic_length_miles": 19.16,
+        "lag_hours": 2.62,
+        "time_of_concentration_hours": 4.37,
+        "streamstats": {
+          "BSLDEM10M": 13.533,
+          "DRNAREA": 77.4,
+          "ELEV": 6721.059
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.1,
@@ -1430,7 +2091,7 @@
       "fill_target_ft3": 25517,
       "flush_target_ft3": 51033,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1448,6 +2109,46 @@
           "minimum_coverage_percent": 5.92
         }
       ],
+      "hydrology": {
+        "name": "North Fork of Iron Wash",
+        "area_sq_mi": 3.254,
+        "curve_number": {
+          "dry": 76.8,
+          "normal": 88.3,
+          "wet": 94.6
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.604,
+          "normal": 0.265,
+          "wet": 0.113
+        },
+        "hydrologic_soil_group_percent": {
+          "C": 3.2,
+          "D": 96.8
+        },
+        "soil_unmapped_percent": 20.2,
+        "soil_group_inferred_percent": 79.8,
+        "land_cover_percent": {
+          "0": 7.7,
+          "31": 8.2,
+          "42": 0.7,
+          "52": 83.2,
+          "71": 0.2
+        },
+        "elevation_min_ft": 4701,
+        "elevation_mean_ft": 5512,
+        "elevation_max_ft": 6370,
+        "mean_slope_percent": 34.7,
+        "hydraulic_length_miles": 3.2,
+        "lag_hours": 0.39,
+        "time_of_concentration_hours": 0.65,
+        "streamstats": {
+          "BSLDEM10M": 37.539,
+          "DRNAREA": 3.25,
+          "ELEV": 5521.428
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.099,
@@ -1522,7 +2223,7 @@
       "fill_target_ft3": 26513,
       "flush_target_ft3": 53026,
       "runoff_coefficient": 0.05,
-      "calibration": "provisional area-scaled",
+      "calibration": "federal basin data; field calibration needed",
       "spatial_rules": [
         {
           "dbz": 50.0,
@@ -1540,6 +2241,49 @@
           "minimum_coverage_percent": 5.59
         }
       ],
+      "hydrology": {
+        "name": "Upper Greasewood",
+        "area_sq_mi": 3.581,
+        "curve_number": {
+          "dry": 72.9,
+          "normal": 86.0,
+          "wet": 93.5
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.742,
+          "normal": 0.325,
+          "wet": 0.139
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 6.8,
+          "C": 1.7,
+          "D": 91.5
+        },
+        "soil_unmapped_percent": 11.9,
+        "soil_group_inferred_percent": 88.1,
+        "land_cover_percent": {
+          "0": 7.0,
+          "11": 0.0,
+          "31": 0.2,
+          "42": 2.3,
+          "52": 90.3,
+          "71": 0.1,
+          "81": 0.0
+        },
+        "elevation_min_ft": 5573,
+        "elevation_mean_ft": 6368,
+        "elevation_max_ft": 6706,
+        "mean_slope_percent": 17.1,
+        "hydraulic_length_miles": 4.46,
+        "lag_hours": 0.79,
+        "time_of_concentration_hours": 1.31,
+        "streamstats": {
+          "BSLDEM10M": 16.431,
+          "DRNAREA": 3.58,
+          "ELEV": 6339.51
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
       "atlas14_inches": {
         "5-min": {
           "1": 0.1,

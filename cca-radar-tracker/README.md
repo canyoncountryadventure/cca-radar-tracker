@@ -22,7 +22,7 @@ R = (Z/300)^(1/1.4) millimeters/hour
 
 This relationship is a compromise estimate, not a rain gauge. The rainfall-rate calculation is capped at 55 dBZ because very high reflectivity may contain hail and should not be converted into ever-increasing liquid rainfall. The original uncapped reflectivity remains available for the heavy-rain footprint test.
 
-## Delivered runoff and the 5% coefficient
+## Canyon-specific runoff losses
 
 Storm rainfall depth is accumulated for every fractional radar cell and averaged across the entire polygon. Rainfall volume is:
 
@@ -30,13 +30,39 @@ Storm rainfall depth is accumulated for every fractional radar cell and averaged
 basin-average rain depth × watershed area
 ```
 
-Estimated water delivered to the pour point is:
+The former fixed 5% coefficient has been removed. Each watershed now has a
+composite NRCS curve number built from USDA SSURGO hydrologic soil groups and
+2021 NLCD land cover. Direct-runoff depth is calculated as:
 
 ```text
-radar rainfall volume × 5%
+S = 1000 / CN - 10
+Ia = 0.20S
+Q = 0                         when P ≤ Ia
+Q = (P - Ia)² / (P + 0.80S)  when P > Ia
 ```
 
-The 5% is a **provisional effective runoff-and-delivery coefficient**, not a measured soil-absorption rate. It collectively represents infiltration, surface storage, evaporation, and transmission losses before runoff reaches the canyon. Antecedent moisture and storm intensity can change it dramatically. It should be recalibrated as field observations become available.
+The dashboard calculates dry, normal, and wet antecedent-condition cases.
+Initial abstraction is therefore canyon-specific rather than a universal
+0.15-inch loss. SSURGO, NLCD, and NRCS equations are science-based screening
+inputs, but they cannot observe current soil moisture, sandstone fractures,
+channel transmission loss, or pool geometry.
+
+## Predicted peak CFS
+
+Runoff volume and flow rate are different quantities. The tracker no longer
+divides event volume by 3,600 and calls the result CFS. It routes each
+dry/normal/wet runoff volume with a volume-conserving triangular hydrograph:
+
+```text
+hydrograph base = rain duration + 2 × watershed lag
+peak CFS = 2 × runoff volume / hydrograph base
+```
+
+Lag is estimated from USGS 3DEP terrain, watershed slope, basin extent, and the
+supplied pour point using the NRCS lag relation. The displayed CFS is a broad
+screening range, not measured discharge. This model correctly reduces the
+recent weak Black Hole, Angel Cove, and Entrajo events to no modeled runoff,
+while retaining the June 21, 2024 ZeroG storm as a full-flush benchmark.
 
 ## Fill targets and one-hour cfs
 
@@ -52,7 +78,9 @@ Other canyon targets are not automatically 5 cfs for one hour. They are provisio
 fill target = 18,000 ft³ × (watershed area / 1.36 mi²)^0.4
 ```
 
-The dashboard converts every target and delivered-runoff volume into a one-hour-equivalent cfs value for intuitive comparison. The 0.4 exponent is a provisional regional transfer informed by the supplied StreamStats comparisons.
+The dashboard still converts the *fill target* to its one-hour equivalent so
+the ZeroG 5-cfs-for-one-hour field anchor remains understandable. It does not
+use that conversion as predicted event flow.
 
 ## Estimated fill ratio and heavy-rain footprint
 
@@ -84,6 +112,7 @@ This is labeled an **Atlas 14 equivalent**, not a formal watershed return interv
 - `tracker.py` — multi-canyon radar, rainfall, runoff, event, and history engine.
 - `watersheds.geojson` — normalized 17-polygon collection.
 - `atlas14.json` — NOAA Atlas 14 point-frequency tables at canyon outlets.
+- `hydrology.json` — SSURGO, NLCD, 3DEP, StreamStats, curve-number, and lag inventory.
 - `config.json` — model and scheduling constants.
 - `send_alert.py` — grouped Gmail notifications with duplicate suppression.
 - `docs/` — interactive GitHub Pages dashboard and generated data.
@@ -114,5 +143,9 @@ The June 21, 2024 ZeroG peak produces approximately 92.5% at 50+ dBZ, 53.8% at 5
 - [NWS radar rainfall estimation and default Z–R relationship](https://www.weather.gov/mrx/radarrainfallestimates)
 - [NOAA Atlas 14 PFDS](https://hdsc.nws.noaa.gov/pfds/)
 - [USGS StreamStats](https://streamstats.usgs.gov/ss/)
+- [USDA Web Soil Survey / SSURGO](https://websoilsurvey.nrcs.usda.gov/)
+- [USGS National Land Cover Database](https://www.usgs.gov/centers/eros/science/national-land-cover-database)
+- [USGS 3D Elevation Program](https://www.usgs.gov/3d-elevation-program)
+- [NRCS National Engineering Handbook, direct runoff](https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf)
 
 These are experimental model estimates, not field confirmation, professional hydrologic advice, or flash-flood guidance.

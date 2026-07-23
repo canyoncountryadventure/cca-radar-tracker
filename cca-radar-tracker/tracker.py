@@ -234,7 +234,9 @@ def rain_depth_inches(dbz: np.ndarray, model: dict[str, Any]) -> np.ndarray:
     return depth
 
 
-def canyon_model(area_sq_mi: float, config: dict[str, Any]) -> dict[str, Any]:
+def canyon_model(
+    area_sq_mi: float, config: dict[str, Any], hydrology: dict[str, Any] | None = None
+) -> dict[str, Any]:
     model = config["model"]
     scale = (area_sq_mi / float(model["reference_area_sq_mi"])) ** float(model["area_exponent"])
     fill_target = float(model["reference_fill_volume_ft3"]) * scale
@@ -248,7 +250,7 @@ def canyon_model(area_sq_mi: float, config: dict[str, Any]) -> dict[str, Any]:
                 "minimum_coverage_percent": round(min(100.0, required_area / area_sq_mi * 100.0), 2),
             }
         )
-    return {
+    result = {
         "scale_factor": round(scale, 4),
         "fill_target_ft3": round(fill_target),
         "flush_target_ft3": round(fill_target * float(model["flush_ratio"])),
@@ -256,10 +258,17 @@ def canyon_model(area_sq_mi: float, config: dict[str, Any]) -> dict[str, Any]:
         "calibration": "field-informed" if math.isclose(area_sq_mi, 1.359, rel_tol=0.01) else "provisional area-scaled",
         "spatial_rules": rules,
     }
+    if hydrology:
+        result["hydrology"] = hydrology
+        result["calibration"] = "field-informed + federal basin data" if math.isclose(
+            area_sq_mi, 1.359, rel_tol=0.01
+        ) else "federal basin data; field calibration needed"
+    return result
 
 
 def build_canyons(
-    collection: dict[str, Any], atlas: dict[str, Any], config: dict[str, Any]
+    collection: dict[str, Any], atlas: dict[str, Any], config: dict[str, Any],
+    hydrology: dict[str, Any] | None = None,
 ) -> tuple[list[Canyon], Grid]:
     supersample = int(config["mask_supersample"])
     padding = int(config["grid_padding_cells"])
@@ -282,7 +291,10 @@ def build_canyons(
                 grid=grid,
                 weights=weights,
                 atlas14=atlas[properties["id"]],
-                model=canyon_model(float(properties["area_sq_mi"]), config),
+                model=canyon_model(
+                    float(properties["area_sq_mi"]), config,
+                    (hydrology or {}).get("canyons", {}).get(properties["id"]),
+                ),
             )
         )
         all_geometry_points.extend(all_points(geometry))
@@ -464,6 +476,45 @@ def atlas_return_period(event: dict[str, Any], canyon: Canyon, frame_minutes: in
     return pairs[-1][0]
 
 
+def nrcs_runoff_depth(rain_inches: float, curve_number: float) -> float:
+    """NRCS direct-runoff depth using the traditional Ia=0.20S relation."""
+    retention = 1000.0 / curve_number - 10.0
+    abstraction = 0.20 * retention
+    if rain_inches <= abstraction:
+        return 0.0
+    return (rain_inches - abstraction) ** 2 / (rain_inches + 0.80 * retention)
+
+
+def apply_hydrologic_model(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]) -> None:
+    """Estimate event volume and peak flow without treating volume/3600 as CFS."""
+    hydrology = canyon.model.get("hydrology")
+    if not hydrology:
+        return
+    rain = float(event.get("basin_rain_inches") or 0.0)
+    area_ft2 = canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
+    duration_hr = event_duration_minutes(event, int(config["model"]["frame_minutes"])) / 60.0
+    lag_hr = max(0.05, float(hydrology["lag_hours"]))
+    volumes: dict[str, int] = {}
+    peaks: dict[str, float] = {}
+    runoff_depths: dict[str, float] = {}
+    for state in ("dry", "normal", "wet"):
+        depth = nrcs_runoff_depth(rain, float(hydrology["curve_number"][state]))
+        volume = depth / 12.0 * area_ft2
+        # A volume-conserving triangular screening hydrograph.  Its base is the
+        # observed rain duration plus two watershed lags; peak = 2V / base.
+        base_seconds = max(300.0, (duration_hr + 2.0 * lag_hr) * 3600.0)
+        runoff_depths[state] = round(depth, 4)
+        volumes[state] = round(volume)
+        peaks[state] = round(2.0 * volume / base_seconds, 2)
+    event["runoff_depth_inches"] = runoff_depths
+    event["estimated_runoff_ft3_range"] = volumes
+    event["estimated_peak_cfs_range"] = peaks
+    event["estimated_runoff_ft3"] = volumes["normal"]
+    event["estimated_peak_cfs"] = peaks["normal"]
+    event["antecedent_condition"] = "normal (central estimate)"
+    event["hydrograph_method"] = "NRCS curve-number loss + volume-conserving triangular routing"
+
+
 def classify_event(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]) -> tuple[str, str]:
     ratio = float(event["estimated_runoff_ft3"]) / float(canyon.model["fill_target_ft3"])
     event["fill_ratio"] = round(ratio, 2)
@@ -480,6 +531,7 @@ def classify_event(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
 
 def event_public(event: dict[str, Any], canyon: Canyon, config: dict[str, Any], include_grid: bool = True) -> dict[str, Any]:
     public = {key: value for key, value in event.items() if key not in {"accumulated_rain_grid_inches"}}
+    apply_hydrologic_model(public, canyon, config)
     classification, label = classify_event(public, canyon, config)
     public["classification"] = classification
     public["classification_label"] = label
@@ -487,7 +539,6 @@ def event_public(event: dict[str, Any], canyon: Canyon, config: dict[str, Any], 
     public["atlas14_basis"] = "watershed-average radar rainfall"
     public["atlas14_duration_minutes"] = event_duration_minutes(public, int(config["model"]["frame_minutes"]))
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
-    public["delivered_runoff_one_hour_cfs"] = round(float(public["estimated_runoff_ft3"]) / 3600.0, 2)
     public["fill_target_one_hour_cfs"] = round(float(canyon.model["fill_target_ft3"]) / 3600.0, 2)
     event_time = parse_utc(public["peak_frame_utc"])
     viewer_query = urllib.parse.urlencode({
@@ -639,8 +690,10 @@ def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, A
         "method": {
             "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
             "rainfall_formula": f"Z = {model['zr_a']} × R^{model['zr_b']}; dBZ capped at {model['rain_dbz_cap']} for rainfall volume",
-            "runoff_formula": "Estimated delivered runoff = radar rain volume × effective runoff coefficient",
-            "runoff_coefficient_explanation": "The 5% value is a provisional effective runoff-and-delivery coefficient. It represents infiltration, surface storage, evaporation, and transmission loss before water reaches the canyon pour point. It is not a measured soil-absorption rate and should be recalibrated with field observations.",
+            "runoff_formula": "NRCS direct runoff: S = 1000/CN − 10; Ia = 0.20S; Q = (P − Ia)²/(P + 0.80S) when P > Ia",
+            "runoff_coefficient_explanation": "The former fixed 5% coefficient has been removed. Each canyon now uses a composite curve number from USDA SSURGO hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet antecedent-condition results expose uncertainty in infiltration and initial loss.",
+            "peak_flow_formula": "Screening peak CFS = 2 × runoff volume ÷ triangular hydrograph base time; base time = rain duration + 2 × NRCS watershed lag",
+            "peak_flow_explanation": "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. Lag uses USGS 3DEP terrain, supplied pour point, and basin extent. The displayed range reflects dry/normal/wet antecedent conditions.",
             "target_formula": "Fill target = 18,000 ft³ × (watershed area ÷ 1.36 mi²)^0.4",
             "target_explanation": "Only ZeroG's 18,000 ft³ anchor equals 5 cfs sustained for one hour. Other canyon targets are scaled by drainage area; each dashboard also converts its target back to an equivalent one-hour cfs for readability.",
             "spatial_formula": "Required high-dBZ area = ZeroG reference area × (watershed area ÷ 1.36 mi²)^0.4",
@@ -654,6 +707,10 @@ def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, A
                 {"label": "NWS radar rainfall estimation and default Z–R relationship", "url": "https://www.weather.gov/mrx/radarrainfallestimates"},
                 {"label": "NOAA Atlas 14 precipitation frequency", "url": "https://hdsc.nws.noaa.gov/pfds/"},
                 {"label": "USGS StreamStats", "url": "https://streamstats.usgs.gov/ss/"},
+                {"label": "USDA Web Soil Survey / SSURGO", "url": "https://websoilsurvey.nrcs.usda.gov/"},
+                {"label": "USGS National Land Cover Database", "url": "https://www.usgs.gov/centers/eros/science/national-land-cover-database"},
+                {"label": "USGS 3D Elevation Program", "url": "https://www.usgs.gov/3d-elevation-program"},
+                {"label": "NRCS National Engineering Handbook, runoff curve-number method", "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf"},
             ],
             "classification": {
                 "minor": "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no pool-depth change expected",
@@ -664,7 +721,7 @@ def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, A
             "limitations": [
                 "ZeroG is field-informed; other canyon targets are provisional until pool observations calibrate them.",
                 "Radar reflectivity is an indirect rainfall estimate and values above 55 dBZ can be hail-contaminated.",
-                "The 5% coefficient represents combined runoff and delivery; antecedent moisture and channel losses vary.",
+                "Curve numbers and NRCS routing are screening estimates; antecedent moisture, exposed bedrock, fractures, channel transmission losses, and pool geometry still require field calibration.",
                 "NOAA Atlas 14 values are point-frequency context, not direct proof of runoff or pool condition.",
             ],
         },
@@ -693,6 +750,7 @@ def main() -> int:
     parser.add_argument("--config", type=Path, default=ROOT / "config.json")
     parser.add_argument("--watersheds", type=Path, default=ROOT / "watersheds.geojson")
     parser.add_argument("--atlas", type=Path, default=ROOT / "atlas14.json")
+    parser.add_argument("--hydrology", type=Path, default=ROOT / "hydrology.json")
     parser.add_argument("--palette", type=Path, default=ROOT / "n0q_palette.json")
     parser.add_argument("--status", type=Path, default=ROOT / "docs/data/status.json")
     parser.add_argument("--model-output", type=Path, default=ROOT / "docs/data/model.json")
@@ -702,7 +760,8 @@ def main() -> int:
     config = json.loads(arguments.config.read_text(encoding="utf-8"))
     collection = json.loads(arguments.watersheds.read_text(encoding="utf-8"))
     atlas = json.loads(arguments.atlas.read_text(encoding="utf-8"))
-    canyons, global_grid = build_canyons(collection, atlas, config)
+    hydrology = json.loads(arguments.hydrology.read_text(encoding="utf-8")) if arguments.hydrology.exists() else {}
+    canyons, global_grid = build_canyons(collection, atlas, config, hydrology)
     palette = load_palette(arguments.palette)
     status = load_status(arguments.status, canyons)
     refresh_status_events(status, canyons, config)

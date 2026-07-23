@@ -131,7 +131,7 @@ function eventHtml(event, emptyText) {
     <dl><div><dt>End</dt><dd>${localDate(event.end_utc)}</dd></div>
     <div><dt>Basin-average rain</dt><dd>${event.basin_rain_inches == null ? "Earlier method" : `${fixed(event.basin_rain_inches, 3)} in`}</dd></div>
     <div><dt>Delivered runoff</dt><dd>${event.estimated_runoff_ft3 == null ? "Not calculated" : `${integer(event.estimated_runoff_ft3)} ft³`}</dd></div>
-    <div><dt>1-hour equivalent</dt><dd>${event.delivered_runoff_one_hour_cfs == null ? "—" : `${fixed(event.delivered_runoff_one_hour_cfs, 2)} cfs`}</dd></div>
+    <div><dt>Predicted peak flow</dt><dd>${event.estimated_peak_cfs == null ? "—" : `${fixed(event.estimated_peak_cfs, 2)} cfs`}</dd></div>
     <div><dt>Peak radar</dt><dd>${event.peak_dbz ?? "—"} dBZ</dd></div>
     <div><dt>Fill ratio</dt><dd>${event.fill_ratio == null ? "—" : `${fixed(event.fill_ratio, 2)}×`}</dd></div></dl>
     <small>${coverageText(event)}</small>`;
@@ -155,7 +155,8 @@ function renderMethodology() {
   $("methodology").innerHTML = `<h4>Equations used</h4><ul>
     <li><b>Radar rainfall:</b> ${method.rainfall_formula}. Reflectivity is logarithmic: Z = 10^(dBZ/10), and solving the NWS Z–R relationship gives rainfall rate R.</li>
     <li><b>Why cap it:</b> Very high reflectivity can represent hail rather than proportionally greater rain, so the rainfall conversion stops increasing at 55 dBZ. The original dBZ remains visible for the heavy-rain test.</li>
-    <li><b>Delivered runoff:</b> ${method.runoff_formula}. ${method.runoff_coefficient_explanation}</li>
+    <li><b>Runoff losses:</b> ${method.runoff_formula}. ${method.runoff_coefficient_explanation}</li>
+    <li><b>Predicted peak flow:</b> ${method.peak_flow_formula}. ${method.peak_flow_explanation}</li>
     <li><b>Fill target:</b> ${method.target_formula}. ${method.target_explanation}</li>
     <li><b>Estimated fill ratio:</b> ${method.fill_ratio_explanation}</li>
     <li><b>Heavy-rain footprint:</b> ${method.spatial_formula}. ${method.spatial_explanation}</li>
@@ -184,7 +185,8 @@ function renderDetail() {
   $("condition-detail").textContent = event ? `Last event: ${localDate(event.start_utc)}. ${meta.plain}` : meta.plain;
   $("metric-rain").textContent = event?.basin_rain_inches == null ? "—" : fixed(event.basin_rain_inches, 3);
   $("metric-runoff").textContent = event?.estimated_runoff_ft3 == null ? "—" : integer(event.estimated_runoff_ft3);
-  $("metric-runoff-cfs").textContent = event?.delivered_runoff_one_hour_cfs == null ? "—" : fixed(event.delivered_runoff_one_hour_cfs, 2);
+  const peakRange = event?.estimated_peak_cfs_range;
+  $("metric-runoff-cfs").textContent = peakRange ? `${fixed(peakRange.dry, 1)}–${fixed(peakRange.wet, 1)}` : "—";
   $("metric-target").textContent = integer(model.fill_target_ft3);
   $("metric-target-cfs").textContent = fixed(model.fill_target_ft3 / 3600, 2);
   $("metric-ratio").textContent = event?.fill_ratio == null ? "—" : `${fixed(event.fill_ratio, 2)}×`;
@@ -201,8 +203,9 @@ function renderDetail() {
   $("calculation-title").textContent = `${canyon.name} calculation`;
   $("calibration-badge").textContent = model.calibration;
   $("calibration-badge").className = `calibration-badge ${model.calibration.startsWith("field") ? "field" : ""}`;
-  $("calculation-summary").innerHTML = `<p><b>${fixed(canyon.area_sq_mi, 3)} mi² watershed</b> × area scale <b>${fixed(model.scale_factor, 4)}</b> produces a likely-fill target of <b>${integer(model.fill_target_ft3)} ft³</b>—equivalent to <b>${fixed(model.fill_target_ft3 / 3600, 2)} cfs for one hour</b>—and a full-flush target of <b>${integer(model.flush_target_ft3)} ft³</b>.</p>`;
-  $("event-equation").innerHTML = event ? `<code>${integer(event.radar_rain_volume_ft3)} ft³ radar rain × ${(model.runoff_coefficient * 100).toFixed(0)}% provisional delivery = ${integer(event.estimated_runoff_ft3)} ft³ delivered runoff</code><code>${integer(event.estimated_runoff_ft3)} ÷ ${integer(model.fill_target_ft3)} = ${fixed(event.fill_ratio, 2)}× estimated fill ratio</code><code>${fixed(event.basin_rain_inches, 3)}″ basin-average rain over ${event.atlas14_duration_minutes || event.wet_frames * 5} minutes ≈ ${atlasLabel(event)} Atlas 14 equivalent</code>` : `<code>Waiting for a measurable rain event to populate the calculation.</code>`;
+  const h = model.hydrology;
+  $("calculation-summary").innerHTML = `<p><b>${fixed(canyon.area_sq_mi, 3)} mi² watershed</b> × area scale <b>${fixed(model.scale_factor, 4)}</b> produces a likely-fill target of <b>${integer(model.fill_target_ft3)} ft³</b>—equivalent to <b>${fixed(model.fill_target_ft3 / 3600, 2)} cfs for one hour</b>—and a full-flush target of <b>${integer(model.flush_target_ft3)} ft³</b>.</p>${h ? `<p>Federal basin inventory: composite NRCS curve number <b>${fixed(h.curve_number.normal, 1)}</b>; initial abstraction <b>${fixed(h.initial_abstraction_inches.normal, 3)}″</b>; mean slope <b>${fixed(h.mean_slope_percent, 1)}%</b>; estimated lag <b>${fixed(h.lag_hours, 2)} hr</b>. Dry and wet soil conditions are calculated as a range.</p>` : ""}`;
+  $("event-equation").innerHTML = event ? `<code>${fixed(event.basin_rain_inches, 3)}″ basin rain → NRCS runoff depth ${event.runoff_depth_inches ? `${fixed(event.runoff_depth_inches.dry, 3)}–${fixed(event.runoff_depth_inches.wet, 3)}″` : "—"}</code><code>Runoff volume ${event.estimated_runoff_ft3_range ? `${integer(event.estimated_runoff_ft3_range.dry)}–${integer(event.estimated_runoff_ft3_range.wet)} ft³` : integer(event.estimated_runoff_ft3)}; routed peak ${peakRange ? `${fixed(peakRange.dry, 2)}–${fixed(peakRange.wet, 2)} cfs` : "—"}</code><code>${integer(event.estimated_runoff_ft3)} ÷ ${integer(model.fill_target_ft3)} = ${fixed(event.fill_ratio, 2)}× central estimated fill ratio</code><code>${fixed(event.basin_rain_inches, 3)}″ basin-average rain over ${event.atlas14_duration_minutes || event.wet_frames * 5} minutes ≈ ${atlasLabel(event)} Atlas 14 equivalent</code>` : `<code>Waiting for a measurable rain event to populate the calculation.</code>`;
   renderRuleTable(model, event); renderAtlas(model); renderMethodology();
 }
 

@@ -18,7 +18,10 @@ class TrackerTests(unittest.TestCase):
         cls.config = json.loads((ROOT / "config.json").read_text())
         cls.collection = json.loads((ROOT / "watersheds.geojson").read_text())
         cls.atlas = json.loads((ROOT / "atlas14.json").read_text())
-        cls.canyons, cls.global_grid = tracker.build_canyons(cls.collection, cls.atlas, cls.config)
+        cls.hydrology = json.loads((ROOT / "hydrology.json").read_text())
+        cls.canyons, cls.global_grid = tracker.build_canyons(
+            cls.collection, cls.atlas, cls.config, cls.hydrology
+        )
         cls.by_id = {c.canyon_id: c for c in cls.canyons}
         cls.palette_by_rgb = tracker.load_palette(ROOT / "n0q_palette.json")
         cls.palette = json.loads((ROOT / "n0q_palette.json").read_text())
@@ -45,11 +48,9 @@ class TrackerTests(unittest.TestCase):
         depth = tracker.rain_depth_inches(dbz, self.config["model"])
         self.assertAlmostEqual(float(depth[0, 0]), 0.208, delta=.003)
 
-    def test_rainfall_volume_matches_zerog_reference_math(self):
-        area = self.by_id["zerog"].area_sq_mi
-        rain_volume = .1 / 12 * area * tracker.SQUARE_FEET_PER_SQUARE_MILE
-        runoff = rain_volume * .05
-        self.assertAlmostEqual(runoff, 15800, delta=100)
+    def test_nrcs_initial_abstraction_prevents_weak_event_runoff(self):
+        cn = self.by_id["zerog"].model["hydrology"]["curve_number"]["normal"]
+        self.assertEqual(tracker.nrcs_runoff_depth(.1, cn), 0)
 
     def test_two_frame_target_and_spatial_gate_can_classify_likely_full(self):
         canyon = self.by_id["zerog"]
@@ -70,7 +71,7 @@ class TrackerTests(unittest.TestCase):
         recurrence = tracker.atlas_return_period(event, canyon, 5)
         self.assertLess(recurrence, 1)
 
-    def test_event_public_adds_cfs_and_exact_iem_archive_link(self):
+    def test_event_public_adds_peak_cfs_and_exact_iem_archive_link(self):
         canyon = self.by_id["zerog"]
         event = {
             "start_utc": "2024-06-21T22:10:00Z", "end_utc": "2024-06-21T22:20:00Z",
@@ -78,7 +79,8 @@ class TrackerTests(unittest.TestCase):
             "estimated_runoff_ft3": 18000, "basin_rain_inches": .2, "spatial_gate_seen": True,
         }
         public = tracker.event_public(event, canyon, self.config)
-        self.assertEqual(public["delivered_runoff_one_hour_cfs"], 5)
+        self.assertIn("estimated_peak_cfs", public)
+        self.assertIn("dry", public["estimated_peak_cfs_range"])
         self.assertIn("mode=archive", public["iem_archive_url"])
         self.assertIn("prod=usrad", public["iem_archive_url"])
 
