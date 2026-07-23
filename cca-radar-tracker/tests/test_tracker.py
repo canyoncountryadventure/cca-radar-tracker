@@ -83,9 +83,11 @@ class TrackerTests(unittest.TestCase):
         depth = tracker.rain_depth_inches(dbz, self.config["model"])
         self.assertAlmostEqual(float(depth[0, 0]), 0.208, delta=0.003)
 
-    def test_nrcs_initial_abstraction_prevents_weak_event_runoff(self):
+    def test_adjusted_nrcs_initial_abstraction(self):
         cn = self.by_id["zerog"].model["hydrology"]["curve_number"]["normal"]
-        self.assertEqual(tracker.nrcs_runoff_depth(0.1, cn), 0)
+        self.assertAlmostEqual(tracker.nrcs_initial_abstraction(cn), 0.089, delta=0.002)
+        self.assertEqual(tracker.nrcs_runoff_depth(0.05, cn), 0)
+        self.assertGreater(tracker.nrcs_runoff_depth(0.10, cn), 0)
 
     def test_storage_spatial_and_duration_tests_classify_likely_full(self):
         canyon = self.by_id["zerog"]
@@ -190,6 +192,8 @@ class TrackerTests(unittest.TestCase):
         method = metadata["method"]
         self.assertIn("52,442 ft³", method["target_formula"])
         self.assertIn("No fixed runoff coefficient", method["direct_runoff_explanation"])
+        self.assertIn("S0.05", method["runoff_formula"])
+        self.assertIn("HSG D", method["direct_runoff_explanation"])
         self.assertNotIn("runoff_coefficient_explanation", method)
         self.assertIn("not a measured pool-depth percentage", method["fill_ratio_explanation"])
         self.assertIn("pools may be full", method["classification"]["likely_full"])
