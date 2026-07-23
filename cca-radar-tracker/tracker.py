@@ -135,6 +135,10 @@ FIXED_SPATIAL_RULES = (
     {"dbz": 60.0, "minimum_coverage_percent": 10.0},
 )
 
+MINOR_REFILL_RATIO = 0.25
+SUBSTANTIAL_REFILL_RATIO = 0.50
+LARGE_REFILL_RATIO = 0.75
+
 
 def utc_text(value: datetime) -> str:
     return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -399,12 +403,14 @@ def pool_storage_target(canyon_id: str) -> dict[str, Any]:
     }
 
 
+
 def canyon_model(
     canyon_id: str,
     area_sq_mi: float,
     config: dict[str, Any],
     hydrology: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """Build the canyon-specific storage target and fixed radar-footprint gates."""
     model = config["model"]
     storage = pool_storage_target(canyon_id)
 
@@ -422,14 +428,17 @@ def canyon_model(
 
     fill_target = int(storage["fill_target_ft3"])
     result: dict[str, Any] = {
-        "scale_factor": round(fill_target / ZERO_G_STORAGE_FT3, 4),
         **storage,
+        "storage_target_ft3": fill_target,
         "flush_target_ft3": round(fill_target * float(model["flush_ratio"])),
-        "runoff_coefficient": float(model.get("runoff_coefficient", 0.05)),
+        "modifier_percent": round(float(storage["pothole_modifier"]) * 100.0, 1),
+        "storage_rate_percent_of_zerog": round(
+            float(storage["storage_rate_multiplier"]) * 100.0, 1
+        ),
         "calibration": (
-            "measured Zero G depression storage + federal basin data"
+            "Measured Zero G depression storage; runoff and routing remain modeled"
             if canyon_id == "zerog"
-            else "technical-length normalized; morphology-adjusted; field calibration needed"
+            else "Technical-length normalized and morphology-adjusted; field calibration needed"
         ),
         "target_method": (
             "52,442 ft3 × (technical length / 0.75 mi) × (1 + pothole modifier)"
@@ -500,12 +509,19 @@ def grid_list(values: np.ndarray, digits: int = 3) -> list[list[float | None]]:
     ]
 
 
+
 def analyze_canyon_image(
     image: Image.Image,
     canyon: Canyon,
     palette: dict[tuple[int, int, int], int],
     config: dict[str, Any],
 ) -> tuple[dict[str, Any], np.ndarray]:
+    """Measure radar rain and intense-rain coverage for one canyon watershed.
+
+    No fixed runoff coefficient is applied at the frame level. Event runoff is
+    calculated later from the accumulated basin-average rainfall with each
+    canyon's dry/normal/wet NRCS curve numbers.
+    """
     dbz, indices = image_to_dbz(image, palette)
     total_weight = float(canyon.weights.sum())
     unknown_weight = float(canyon.weights[indices < 0].sum())
@@ -514,9 +530,6 @@ def analyze_canyon_image(
     rain_volume = (
         basin_rain / 12.0 * canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
     )
-    # Kept for frame-level display and peak-frame selection. Event classification
-    # is recalculated with canyon-specific NRCS curve numbers in apply_hydrologic_model.
-    frame_runoff = rain_volume * float(config["model"].get("runoff_coefficient", 0.05))
 
     coverages: dict[str, float] = {}
     rules = []
@@ -559,7 +572,6 @@ def analyze_canyon_image(
             "spatial_gate": any(rule["qualified"] for rule in rules),
             "frame_basin_rain_inches": round(basin_rain, 4),
             "frame_rain_volume_ft3": round(rain_volume),
-            "frame_estimated_runoff_ft3": round(frame_runoff),
             "wet": wet,
             "unknown_watershed_percent": round(
                 100.0 * unknown_weight / total_weight, 1
@@ -744,19 +756,27 @@ def nrcs_runoff_depth(rain_inches: float, curve_number: float) -> float:
     )
 
 
+
 def apply_hydrologic_model(
     event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
 ) -> None:
-    """Estimate direct runoff volume and routed peak flow for dry/normal/wet CNs."""
+    """Estimate NRCS direct runoff and a routed screening peak.
+
+    These volumes are generated-runoff estimates at the watershed scale. They
+    do not explicitly subtract transmission losses between the watershed and
+    the technical canyon.
+    """
     hydrology = canyon.model.get("hydrology")
     if not hydrology:
+        event["hydrology_available"] = False
         return
 
     rain = float(event.get("basin_rain_inches") or 0.0)
     area_ft2 = canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
-    duration_hr = event_duration_minutes(
+    duration_minutes = event_duration_minutes(
         event, int(config["model"]["frame_minutes"])
-    ) / 60.0
+    )
+    duration_hr = duration_minutes / 60.0
     lag_hr = max(0.05, float(hydrology["lag_hours"]))
 
     volumes: dict[str, int] = {}
@@ -774,44 +794,134 @@ def apply_hydrologic_model(
         volumes[state] = round(volume)
         peaks[state] = round(2.0 * volume / base_seconds, 2)
 
+    event["hydrology_available"] = True
     event["runoff_depth_inches"] = runoff_depths
-    event["estimated_runoff_ft3_range"] = volumes
-    event["estimated_peak_cfs_range"] = peaks
-    event["estimated_runoff_ft3"] = volumes["normal"]
-    event["estimated_peak_cfs"] = peaks["normal"]
+    event["direct_runoff_ft3_range"] = volumes
+    event["direct_runoff_ft3"] = volumes["normal"]
+    event["routed_peak_cfs_range"] = peaks
+    event["routed_peak_cfs"] = peaks["normal"]
+
     event["antecedent_condition"] = "normal (central estimate)"
-    event["hydrograph_method"] = (
-        "NRCS curve-number loss + volume-conserving triangular routing"
+    event["storm_duration_minutes"] = duration_minutes
+    event["wet_duration_minutes"] = (
+        int(event.get("wet_frames") or 0)
+        * int(config["model"]["frame_minutes"])
     )
+    event["hydrograph_method"] = (
+        "NRCS curve-number direct runoff + volume-conserving triangular routing"
+    )
+
 
 
 def classify_event(
     event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
 ) -> tuple[str, str]:
+    """Classify estimated pool response with transparent decision tests."""
     target = float(canyon.model["fill_target_ft3"])
     if target <= 0:
         raise ValueError(f"Invalid fill target for {canyon.canyon_id}: {target}")
 
-    ratio = float(event["estimated_runoff_ft3"]) / target
-    event["fill_ratio"] = round(ratio, 2)
-    enough_frames = int(event["wet_frames"]) >= int(
-        config["model"]["minimum_wet_frames_for_likely"]
+    central_runoff = float(
+        event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))
+        or 0.0
     )
-    gate = bool(event["spatial_gate_seen"])
+    ratio = central_runoff / target
+    event["fill_ratio"] = round(ratio, 2)
 
-    if ratio >= float(config["model"]["flush_ratio"]) and gate and enough_frames:
-        return (
-            "full_flush",
-            "Very high likelihood — full pools and completely new water",
+    runoff_range = event.get(
+        "direct_runoff_ft3_range", event.get("estimated_runoff_ft3_range", {})
+    )
+    event["fill_ratio_range"] = {
+        state: round(float(volume) / target, 2)
+        for state, volume in runoff_range.items()
+    }
+
+    required_frames = int(config["model"]["minimum_wet_frames_for_likely"])
+    enough_frames = int(event.get("wet_frames") or 0) >= required_frames
+    gate = bool(event.get("spatial_gate_seen"))
+    storage_met = ratio >= 1.0
+    flush_met = ratio >= float(config["model"]["flush_ratio"])
+
+    event["decision_tests"] = {
+        "storage_target_met": storage_met,
+        "flush_target_met": flush_met,
+        "heavy_rain_footprint_met": gate,
+        "minimum_wet_duration_met": enough_frames,
+        "minimum_wet_frames_required": required_frames,
+    }
+
+    if flush_met and gate and enough_frames:
+        label = "Strong flush likely — pools likely full"
+        reason = (
+            "Estimated watershed runoff was at least twice the provisional empty-storage "
+            "target, and both the intense-rain footprint and duration checks passed. "
+            "This indicates a strong refill/flush event, not a direct field observation."
         )
-    if ratio >= 1.0 and gate and enough_frames:
-        return (
-            "likely_full",
-            "High likelihood — pools substantially or fully refilled",
+        code = "full_flush"
+    elif storage_met and gate and enough_frames:
+        label = "Major refill likely — pools may be full"
+        reason = (
+            "Estimated watershed runoff met the provisional empty-storage target, and both "
+            "the intense-rain footprint and duration checks passed. Existing pool "
+            "levels and channel losses remain unknown."
         )
-    if ratio >= 1.0 or gate:
-        return "moderate", "Some new water possible — partial pool refill"
-    return "minor", "Little to no expected change in pool depth"
+        code = "likely_full"
+    elif storage_met:
+        missing = []
+        if not gate:
+            missing.append("intense-rain footprint")
+        if not enough_frames:
+            missing.append("minimum wet duration")
+        label = "Potential major refill — confirmation tests incomplete"
+        reason = (
+            "Estimated watershed runoff met the provisional empty-storage target, but the "
+            + " and ".join(missing)
+            + " check"
+            + ("s were" if len(missing) != 1 else " was")
+            + " not met."
+        )
+        code = "moderate"
+    elif ratio >= LARGE_REFILL_RATIO:
+        label = "Large partial refill possible — full pools uncertain"
+        reason = (
+            f"Estimated watershed runoff was {ratio:.0%} of the provisional empty-storage "
+            "target. That supports a large partial refill and could fill pools that were "
+            "already partly full, but it does not meet the full empty-storage target."
+        )
+        code = "moderate"
+    elif ratio >= SUBSTANTIAL_REFILL_RATIO:
+        label = "Substantial partial refill possible"
+        reason = (
+            f"Estimated watershed runoff was {ratio:.0%} of the provisional empty-storage "
+            "target. A meaningful partial refill is possible, but full pools are not supported."
+        )
+        code = "moderate"
+    elif ratio >= MINOR_REFILL_RATIO:
+        label = "Some pool refill possible"
+        reason = (
+            f"Estimated watershed runoff was {ratio:.0%} of the provisional empty-storage "
+            "target. Some pools may have gained water, but the modeled volume is limited."
+        )
+        code = "moderate"
+    elif gate:
+        label = "Localized intense rain detected — refill uncertain"
+        reason = (
+            "An intense-rain footprint threshold was reached, but estimated watershed "
+            "runoff remained below 25% of the provisional empty-storage target."
+        )
+        code = "moderate"
+    else:
+        label = "No meaningful pool refill indicated"
+        reason = (
+            "Estimated watershed runoff was below 25% of the provisional empty-storage "
+            "target and no intense-rain footprint threshold was reached."
+        )
+        code = "minor"
+
+    event["classification_explanation"] = reason
+    event["condition_statement"] = label
+    return code, label
+
 
 
 def event_public(
@@ -826,6 +936,12 @@ def event_public(
         if key not in {"accumulated_rain_grid_inches"}
     }
     apply_hydrologic_model(public, canyon, config)
+    if not public.get("hydrology_available"):
+        public.setdefault("direct_runoff_ft3", 0)
+        public.setdefault("direct_runoff_ft3_range", {})
+        public.setdefault("routed_peak_cfs", 0.0)
+        public.setdefault("routed_peak_cfs_range", {})
+
     classification, label = classify_event(public, canyon, config)
     public["classification"] = classification
     public["classification_label"] = label
@@ -837,8 +953,13 @@ def event_public(
         public, int(config["model"]["frame_minutes"])
     )
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
-    public["fill_target_one_hour_cfs"] = round(
-        float(canyon.model["fill_target_ft3"]) / 3600.0, 2
+    public["storage_target_ft3"] = int(canyon.model["fill_target_ft3"])
+    public["flush_target_ft3"] = int(canyon.model["flush_target_ft3"])
+    public["storage_deficit_ft3"] = max(
+        0, int(canyon.model["fill_target_ft3"]) - int(public["direct_runoff_ft3"])
+    )
+    public["storage_excess_ft3"] = max(
+        0, int(public["direct_runoff_ft3"]) - int(canyon.model["fill_target_ft3"])
     )
 
     event_time = parse_utc(public["peak_frame_utc"])
@@ -866,6 +987,7 @@ def event_public(
     return public
 
 
+
 def start_event(
     timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray
 ) -> dict[str, Any]:
@@ -882,14 +1004,13 @@ def start_event(
         },
         "basin_rain_inches": analysis["frame_basin_rain_inches"],
         "radar_rain_volume_ft3": analysis["frame_rain_volume_ft3"],
-        "estimated_runoff_ft3": analysis["frame_estimated_runoff_ft3"],
         "spatial_gate_seen": analysis["spatial_gate"],
         "max_pixel_storm_inches": round(float(np.nanmax(rain)), 3),
         "accumulated_rain_grid_inches": grid_list(rain, 4),
         "peak_grid_dbz": analysis["grid_dbz"],
         "grid_bbox": analysis["grid_bbox"],
         "peak_frame_utc": utc_text(timestamp),
-        "peak_frame_runoff_ft3": analysis["frame_estimated_runoff_ft3"],
+        "peak_frame_rain_volume_ft3": analysis["frame_rain_volume_ft3"],
     }
 
 
@@ -900,29 +1021,27 @@ def update_open_event(
     rain: np.ndarray,
 ) -> None:
     event["end_utc"] = utc_text(timestamp)
-    event["frames"] += 1
-    event["wet_frames"] += 1
+    event["frames"] = int(event.get("frames") or 0) + 1
+    event["wet_frames"] = int(event.get("wet_frames") or 0) + 1
     event["basin_rain_inches"] = round(
-        float(event["basin_rain_inches"])
+        float(event.get("basin_rain_inches") or 0.0)
         + analysis["frame_basin_rain_inches"],
         4,
     )
     event["radar_rain_volume_ft3"] = round(
-        float(event["radar_rain_volume_ft3"])
+        float(event.get("radar_rain_volume_ft3") or 0.0)
         + analysis["frame_rain_volume_ft3"]
     )
-    event["estimated_runoff_ft3"] = round(
-        float(event["estimated_runoff_ft3"])
-        + analysis["frame_estimated_runoff_ft3"]
-    )
     event["spatial_gate_seen"] = bool(
-        event["spatial_gate_seen"] or analysis["spatial_gate"]
+        event.get("spatial_gate_seen") or analysis["spatial_gate"]
     )
     event["peak_dbz"] = max(
         event.get("peak_dbz") or -999,
         analysis.get("maximum_dbz") or -999,
     )
 
+    event.setdefault("peak_coverage_percent", {})
+    event.setdefault("peak_covered_area_sq_mi", {})
     for key, value in analysis["coverage_percent"].items():
         event["peak_coverage_percent"][key] = max(
             event["peak_coverage_percent"].get(key, 0), value
@@ -941,11 +1060,15 @@ def update_open_event(
     event["accumulated_rain_grid_inches"] = grid_list(accumulated, 4)
     event["max_pixel_storm_inches"] = round(float(np.nanmax(accumulated)), 3)
 
-    if analysis["frame_estimated_runoff_ft3"] >= event.get(
-        "peak_frame_runoff_ft3", -1
-    ):
-        event["peak_frame_runoff_ft3"] = analysis[
-            "frame_estimated_runoff_ft3"
+    previous_peak = float(
+        event.get(
+            "peak_frame_rain_volume_ft3",
+            event.get("peak_frame_runoff_ft3", -1),
+        )
+    )
+    if analysis["frame_rain_volume_ft3"] >= previous_peak:
+        event["peak_frame_rain_volume_ft3"] = analysis[
+            "frame_rain_volume_ft3"
         ]
         event["peak_frame_utc"] = utc_text(timestamp)
         event["peak_grid_dbz"] = analysis["grid_dbz"]
@@ -1051,6 +1174,7 @@ def scheduled_timestamps(
     ]
 
 
+
 def model_metadata(
     canyons: list[Canyon], config: dict[str, Any]
 ) -> dict[str, Any]:
@@ -1061,24 +1185,31 @@ def model_metadata(
             "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
             "rainfall_formula": (
                 f"Z = {model['zr_a']} × R^{model['zr_b']}; dBZ capped at "
-                f"{model['rain_dbz_cap']} for rainfall volume"
+                f"{model['rain_dbz_cap']} for rainfall-volume conversion"
+            ),
+            "rainfall_explanation": (
+                "The tracker converts each five-minute radar frame to rainfall, then "
+                "area-weights the pixels inside the watershed polygon. Radar rainfall "
+                "is an estimate and may be biased by hail, beam geometry, or evaporation."
             ),
             "runoff_formula": (
                 "NRCS direct runoff: S = 1000/CN − 10; Ia = 0.20S; "
                 "Q = (P − Ia)²/(P + 0.80S) when P > Ia"
             ),
-            "runoff_coefficient_explanation": (
-                "Event classification uses composite NRCS curve numbers from SSURGO "
-                "hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet "
-                "antecedent-condition estimates expose uncertainty in initial loss."
+            "direct_runoff_explanation": (
+                "No fixed runoff coefficient is used. Accumulated basin-average radar "
+                "rainfall is converted to dry, normal, and wet direct-runoff estimates "
+                "with canyon-specific composite curve numbers from SSURGO soils and "
+                "2021 NLCD land cover. The central display uses the normal condition."
             ),
             "peak_flow_formula": (
-                "Screening peak CFS = 2 × runoff volume ÷ triangular hydrograph base time; "
-                "base time = rain duration + 2 × NRCS watershed lag"
+                "Screening peak CFS = 2 × direct-runoff volume ÷ triangular hydrograph "
+                "base time; base time = rain duration + 2 × NRCS watershed lag"
             ),
             "peak_flow_explanation": (
-                "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. "
-                "Lag uses USGS 3DEP terrain, supplied pour point, and basin extent."
+                "Peak flow is a routed screening estimate. Lag uses USGS 3DEP terrain, "
+                "the supplied outlet, and basin extent. It is not used by itself to declare "
+                "pools full."
             ),
             "target_formula": (
                 "Fill target = 52,442 ft³ × (technical-section length ÷ 0.75 mi) "
@@ -1086,29 +1217,39 @@ def model_metadata(
             ),
             "target_explanation": (
                 "Zero G is anchored to the 1-meter depression inventory of 114 depressions "
-                "totaling 1,485.0 m³. Other targets are normalized by technical-section length "
-                "and adjusted using user-assigned canyon morphology modifiers."
+                "totaling 1,485.0 m³ (52,442 ft³). Other canyons are normalized by user-"
+                "supplied technical-section length and adjusted for relative pothole/pool "
+                "storage density. These are provisional empty-storage targets."
             ),
             "spatial_formula": (
                 "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, "
                 "or 60+ dBZ over 10%"
             ),
             "spatial_explanation": (
-                "The same watershed-percentage gate applies to every canyon. It prevents "
-                "light basin-wide rain or one isolated radar pixel from being labeled full."
+                "The same watershed-percentage gate applies to every canyon. It is a "
+                "storm-footprint confirmation test and does not replace the runoff-volume test."
             ),
             "fill_ratio_explanation": (
-                "Estimated fill ratio = normal-antecedent-condition direct runoff ÷ canyon "
-                "storage target. A value of 1.0 means modeled runoff equals the provisional "
-                "empty-storage target; it is not a measured pool-depth percentage."
+                "Estimated fill ratio = normal-condition NRCS watershed direct runoff ÷ provisional "
+                "empty-pool storage target. It is not a measured pool-depth percentage and does "
+                "not explicitly subtract channel transmission losses."
             ),
             "atlas_explanation": (
-                "Atlas context compares watershed-average radar accumulation with duration-"
-                "interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet."
+                "Atlas 14 context compares event-duration watershed-average radar rainfall "
+                "with duration-interpolated NOAA Atlas 14 point-frequency depths at the "
+                "canyon outlet. It is context, not a watershed return interval."
             ),
             "scaling_basis": (
-                "Technical-section length replaces watershed-area scaling. Pothole modifiers "
-                "represent storage density and typical pool size relative to Zero G."
+                "Technical-section length replaces drainage-area scaling for pool storage. "
+                "Drainage area remains in the runoff calculation because it controls how "
+                "much watershed runoff a given rain depth can generate."
+            ),
+            "condition_language": (
+                "Condition statements describe modeled refill evidence, not observed pool depth. "
+                "Below 25% of the empty-storage target is reported as no meaningful refill "
+                "unless an intense-rain footprint is detected. 'Likely full' requires the "
+                "storage-volume, intense-rain footprint, "
+                "and minimum-duration tests to pass together."
             ),
             "sources": [
                 {
@@ -1126,10 +1267,6 @@ def model_metadata(
                 {
                     "label": "NOAA Atlas 14 precipitation frequency",
                     "url": "https://hdsc.nws.noaa.gov/pfds/",
-                },
-                {
-                    "label": "USGS StreamStats",
-                    "url": "https://streamstats.usgs.gov/ss/",
                 },
                 {
                     "label": "USDA Web Soil Survey / SSURGO",
@@ -1150,38 +1287,55 @@ def model_metadata(
             ],
             "classification": {
                 "minor": (
-                    "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no "
-                    "pool-depth change expected"
+                    "Normal-condition runoff below 25% of the empty-storage target and no "
+                    "intense-rain footprint: no meaningful refill indicated"
                 ),
-                "moderate": (
-                    "Runoff ratio at least 1.0 or a heavy-rain footprint gate was reached, "
-                    "but the complete likely-full test was not met"
+                "some_refill": (
+                    "Runoff ratio from 0.25 through 0.49: some pool refill possible"
+                ),
+                "substantial_partial": (
+                    "Runoff ratio from 0.50 through 0.74: substantial partial refill possible"
+                ),
+                "large_partial": (
+                    "Runoff ratio from 0.75 through 0.99: large partial refill possible; "
+                    "full pools remain uncertain"
+                ),
+                "confirmation_incomplete": (
+                    "Runoff ratio at least 1.0 without both confirmation tests: the empty-storage "
+                    "volume threshold was met, but a likely-full statement is withheld"
                 ),
                 "likely_full": (
-                    "Runoff ratio at least 1.0, spatial gate reached, and at least two wet frames"
+                    "Runoff ratio at least 1.0, intense-rain footprint reached, and at "
+                    "least two wet five-minute frames: major refill likely; pools may be full"
                 ),
                 "full_flush": (
-                    "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames"
+                    "Runoff ratio at least 2.0, intense-rain footprint reached, and at "
+                    "least two wet five-minute frames: strong refill/flush likely; pools likely full"
                 ),
             },
             "limitations": [
                 (
-                    "Only Zero G has a mapped depression-volume anchor. Other targets remain "
-                    "provisional until field observations or canyon-specific terrain analysis "
-                    "calibrate technical length and pool-storage modifiers."
+                    "Only Zero G has a mapped depression-volume anchor. Other storage "
+                    "targets depend on technical-section lengths and user-assigned "
+                    "morphology modifiers."
                 ),
                 (
-                    "Radar reflectivity is an indirect rainfall estimate and values above "
-                    "55 dBZ can be hail-contaminated."
+                    "NRCS direct runoff is generated watershed runoff, not a measurement "
+                    "of water delivered to every pothole. Bedrock fractures, channel "
+                    "transmission losses, diversions, and disconnected subbasins can reduce delivery."
                 ),
                 (
-                    "Curve numbers and routing are screening estimates; antecedent moisture, "
-                    "bedrock fractures, channel transmission loss, and existing pool water "
-                    "can materially change actual conditions."
+                    "Existing pool level is unknown. A partly full canyon needs less new "
+                    "water than the provisional empty-storage target, while evaporation "
+                    "and leakage can reduce retained water after a storm."
                 ),
                 (
-                    "NOAA Atlas 14 values are point-frequency context, not direct proof of "
-                    "runoff or pool condition."
+                    "Radar reflectivity is an indirect rainfall estimate; hail and radar "
+                    "sampling can bias both rainfall volume and the intense-rain footprint."
+                ),
+                (
+                    "Peak CFS and NOAA Atlas 14 equivalent are context only and do not "
+                    "independently determine pool condition."
                 ),
             ],
         },

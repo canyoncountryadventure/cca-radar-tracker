@@ -15,19 +15,9 @@
     "rain_dbz_cap": 55,
     "minimum_rain_dbz": 5,
     "storm_dbz_threshold": 35,
-    "runoff_coefficient": 0.05,
-    "reference_area_sq_mi": 1.36,
-    "reference_fill_volume_ft3": 18000,
-    "area_exponent": 0.4,
-    "moderate_ratio": 0.5,
     "flush_ratio": 2.0,
     "minimum_wet_frames_for_likely": 2,
-    "event_gap_minutes": 15,
-    "reference_spatial_rules": [
-      {"dbz": 50, "reference_area_sq_mi": 0.68},
-      {"dbz": 55, "reference_area_sq_mi": 0.34},
-      {"dbz": 60, "reference_area_sq_mi": 0.136}
-    ]
+    "event_gap_minutes": 15
   },
   "iem_historical_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi",
   "iem_current_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi",
