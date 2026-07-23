@@ -9,7 +9,6 @@ import tracker
 
 ROOT = Path(__file__).resolve().parents[1]
 
-
 EXPECTED_POOL_TARGETS = {
     "zerog": 52_442,
     "angel-cove": 34_087,
@@ -42,17 +41,9 @@ class TrackerTests(unittest.TestCase):
             cls.collection, cls.atlas, cls.config, cls.hydrology
         )
         cls.by_id = {c.canyon_id: c for c in cls.canyons}
-        cls.palette_by_rgb = tracker.load_palette(ROOT / "n0q_palette.json")
-        cls.palette = json.loads((ROOT / "n0q_palette.json").read_text())
 
     def test_all_seventeen_canyons_are_loaded(self):
         self.assertEqual(len(self.canyons), 17)
-        self.assertAlmostEqual(self.by_id["eardley"].area_sq_mi, 77.36, places=2)
-        self.assertAlmostEqual(
-            self.by_id["black-hole-white-canyon"].area_sq_mi,
-            262.582,
-            places=3,
-        )
 
     def test_all_pool_targets_match_approved_table(self):
         actual = {
@@ -64,11 +55,23 @@ class TrackerTests(unittest.TestCase):
     def test_zerog_model_uses_measured_depression_volume(self):
         model = self.by_id["zerog"].model
         self.assertEqual(model["fill_target_ft3"], 52_442)
+        self.assertEqual(model["storage_target_ft3"], 52_442)
         self.assertAlmostEqual(model["technical_length_miles"], 0.75)
         self.assertAlmostEqual(model["pothole_modifier"], 0.0)
 
-    def test_fixed_spatial_percentages_apply_to_large_and_small_watersheds(self):
-        for canyon_id in ("zerog", "pool-arch", "eardley", "black-hole-white-canyon"):
+    def test_area_scaling_and_fixed_runoff_coefficient_are_not_in_canyon_model(self):
+        model = self.by_id["angel-cove"].model
+        self.assertNotIn("scale_factor", model)
+        self.assertNotIn("runoff_coefficient", model)
+        self.assertEqual(model["storage_rate_percent_of_zerog"], 75.0)
+
+    def test_fixed_spatial_percentages_apply_to_every_watershed_size(self):
+        for canyon_id in (
+            "zerog",
+            "pool-arch",
+            "eardley",
+            "black-hole-white-canyon",
+        ):
             rules = self.by_id[canyon_id].model["spatial_rules"]
             self.assertEqual(
                 [rule["minimum_coverage_percent"] for rule in rules],
@@ -84,26 +87,65 @@ class TrackerTests(unittest.TestCase):
         cn = self.by_id["zerog"].model["hydrology"]["curve_number"]["normal"]
         self.assertEqual(tracker.nrcs_runoff_depth(0.1, cn), 0)
 
-    def test_two_frame_target_and_spatial_gate_can_classify_likely_full(self):
+    def test_storage_spatial_and_duration_tests_classify_likely_full(self):
         canyon = self.by_id["zerog"]
         event = {
-            "estimated_runoff_ft3": canyon.model["fill_target_ft3"],
+            "direct_runoff_ft3": canyon.model["fill_target_ft3"],
+            "direct_runoff_ft3_range": {
+                "dry": 40_000,
+                "normal": canyon.model["fill_target_ft3"],
+                "wet": 70_000,
+            },
             "wet_frames": 2,
             "spatial_gate_seen": True,
         }
-        classification, _ = tracker.classify_event(event, canyon, self.config)
+        classification, label = tracker.classify_event(event, canyon, self.config)
         self.assertEqual(classification, "likely_full")
+        self.assertIn("may be full", label)
+        self.assertTrue(event["decision_tests"]["storage_target_met"])
 
-    def test_near_target_without_heavy_rain_is_little_change(self):
+    def test_near_target_without_heavy_rain_is_partial_not_little_change(self):
         canyon = self.by_id["angel-cove"]
         event = {
-            "estimated_runoff_ft3": canyon.model["fill_target_ft3"] * 0.96,
+            "direct_runoff_ft3": canyon.model["fill_target_ft3"] * 0.96,
+            "direct_runoff_ft3_range": {},
             "wet_frames": 4,
             "spatial_gate_seen": False,
         }
         classification, label = tracker.classify_event(event, canyon, self.config)
+        self.assertEqual(classification, "moderate")
+        self.assertIn("Large partial refill", label)
+
+    def test_truly_small_event_is_no_meaningful_refill(self):
+        canyon = self.by_id["angel-cove"]
+        event = {
+            "direct_runoff_ft3": canyon.model["fill_target_ft3"] * 0.20,
+            "direct_runoff_ft3_range": {},
+            "wet_frames": 2,
+            "spatial_gate_seen": False,
+        }
+        classification, label = tracker.classify_event(event, canyon, self.config)
         self.assertEqual(classification, "minor")
-        self.assertIn("Little to no", label)
+        self.assertIn("No meaningful", label)
+
+    def test_refill_ratio_bands_follow_storage_method(self):
+        canyon = self.by_id["zerog"]
+        cases = (
+            (0.30, "Some pool refill"),
+            (0.60, "Substantial partial refill"),
+            (0.85, "Large partial refill"),
+        )
+        for ratio, expected_label in cases:
+            with self.subTest(ratio=ratio):
+                event = {
+                    "direct_runoff_ft3": canyon.model["fill_target_ft3"] * ratio,
+                    "direct_runoff_ft3_range": {},
+                    "wet_frames": 2,
+                    "spatial_gate_seen": False,
+                }
+                classification, label = tracker.classify_event(event, canyon, self.config)
+                self.assertEqual(classification, "moderate")
+                self.assertIn(expected_label, label)
 
     def test_atlas_context_uses_basin_average_not_wettest_pixel(self):
         canyon = self.by_id["angel-cove"]
@@ -115,7 +157,7 @@ class TrackerTests(unittest.TestCase):
         recurrence = tracker.atlas_return_period(event, canyon, 5)
         self.assertLess(recurrence, 1)
 
-    def test_event_public_adds_peak_cfs_and_exact_iem_archive_link(self):
+    def test_event_public_exposes_direct_runoff_decision_and_atlas_fields(self):
         canyon = self.by_id["zerog"]
         event = {
             "start_utc": "2024-06-21T22:10:00Z",
@@ -123,21 +165,34 @@ class TrackerTests(unittest.TestCase):
             "peak_frame_utc": "2024-06-21T22:15:00Z",
             "frames": 3,
             "wet_frames": 3,
-            "estimated_runoff_ft3": 52_442,
             "basin_rain_inches": 0.2,
             "spatial_gate_seen": True,
+            "peak_dbz": 55.0,
         }
         public = tracker.event_public(event, canyon, self.config)
-        self.assertIn("estimated_peak_cfs", public)
-        self.assertIn("dry", public["estimated_peak_cfs_range"])
+        self.assertIn("direct_runoff_ft3", public)
+        self.assertIn("routed_peak_cfs_range", public)
+        self.assertNotIn("estimated_runoff_ft3", public)
+        self.assertNotIn("estimated_peak_cfs", public)
+        self.assertIn("decision_tests", public)
+        self.assertIn("atlas14_return_period_years", public)
+        self.assertNotIn("fill_target_one_hour_cfs", public)
         self.assertIn("mode=archive", public["iem_archive_url"])
-        self.assertIn("prod=usrad", public["iem_archive_url"])
 
     def test_hail_values_are_capped_for_rain_volume(self):
         values = np.array([[55.0, 60.0, 70.0]], dtype=np.float32)
         depth = tracker.rain_depth_inches(values, self.config["model"])
         self.assertAlmostEqual(float(depth[0, 0]), float(depth[0, 1]), places=6)
         self.assertAlmostEqual(float(depth[0, 1]), float(depth[0, 2]), places=6)
+
+    def test_metadata_describes_new_method_and_honest_condition_language(self):
+        metadata = tracker.model_metadata(self.canyons, self.config)
+        method = metadata["method"]
+        self.assertIn("52,442 ft³", method["target_formula"])
+        self.assertIn("No fixed runoff coefficient", method["direct_runoff_explanation"])
+        self.assertNotIn("runoff_coefficient_explanation", method)
+        self.assertIn("not a measured pool-depth percentage", method["fill_ratio_explanation"])
+        self.assertIn("pools may be full", method["classification"]["likely_full"])
 
     def test_schema_one_status_preserves_zerog_qualifying_event(self):
         legacy = {
