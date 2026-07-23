@@ -41,6 +41,45 @@ jobs:
       - name: Install tracker dependencies
         run: pip install -r cca-radar-tracker/requirements.txt
 
+      - name: Stage authoritative watershed polygons
+        run: |
+          python - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
+
+          source = Path("cca-radar-tracker/watersheds.geojson")
+          destination = Path("cca-radar-tracker/docs/watersheds.geojson")
+
+          if not source.exists():
+              raise SystemExit(f"Authoritative watershed file is missing: {source}")
+
+          collection = json.loads(source.read_text(encoding="utf-8"))
+          features = collection.get("features", [])
+          ids = {
+              str(feature.get("properties", {}).get("id", ""))
+              for feature in features
+          }
+
+          if collection.get("type") != "FeatureCollection":
+              raise SystemExit("watersheds.geojson is not a GeoJSON FeatureCollection")
+          if len(features) != 17:
+              raise SystemExit(
+                  f"Expected 17 watershed polygons, found {len(features)}"
+              )
+          if "" in ids or len(ids) != 17:
+              raise SystemExit(
+                  "Every watershed must have one unique nonblank properties.id value"
+              )
+
+          destination.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copyfile(source, destination)
+          print(
+              f"Staged {len(features)} watershed polygons at {destination} "
+              f"({destination.stat().st_size:,} bytes)"
+          )
+          PY
+
       - name: Run backend tests
         working-directory: cca-radar-tracker
         run: python -m unittest discover -s tests -v
@@ -160,19 +199,41 @@ jobs:
           if obsolete_config:
               raise SystemExit(f"Obsolete config keys remain: {sorted(obsolete_config)}")
 
-          print("Verified revised pool-refill model and front-end data contract.")
+          watershed_path = Path("cca-radar-tracker/docs/watersheds.geojson")
+          if not watershed_path.exists():
+              raise SystemExit("Website watershed polygons were not staged")
+
+          watershed_collection = json.loads(
+              watershed_path.read_text(encoding="utf-8")
+          )
+          watershed_ids = {
+              str(feature.get("properties", {}).get("id", ""))
+              for feature in watershed_collection.get("features", [])
+          }
+          model_ids = set(model["canyons"])
+          if watershed_ids != model_ids:
+              raise SystemExit(
+                  "Website polygon IDs do not match model canyon IDs. "
+                  f"Missing polygons: {sorted(model_ids - watershed_ids)}; "
+                  f"extra polygons: {sorted(watershed_ids - model_ids)}"
+              )
+
+          print(
+              "Verified revised pool-refill model, all 17 watershed polygons, "
+              "and the front-end data contract."
+          )
           PY
 
-      - name: Commit generated model metadata
+      - name: Commit generated website reference data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add cca-radar-tracker/docs/data/model.json
+          git add             cca-radar-tracker/docs/data/model.json             cca-radar-tracker/docs/watersheds.geojson
 
           if git diff --cached --quiet; then
-            echo "model.json is already current; no commit needed."
+            echo "Website model and watershed polygons are already current."
           else
-            git commit -m "Update generated canyon refill model"
+            git commit -m "Update canyon model and watershed polygons"
             git push
           fi
 
