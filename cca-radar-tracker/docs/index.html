@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Automated radar-derived slot-canyon pool-condition estimates for Canyon Country Adventures.">
+  <meta name="description" content="Radar-derived slot-canyon pool-refill estimates for Canyon Country Adventures.">
   <title>Slot Canyon Pool Conditions</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynHTYIlgq7waB1hMZbY6xR8R1B9Y=" crossorigin="">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,109 +16,109 @@
       <div>
         <p class="eyebrow">CANYON COUNTRY ADVENTURES</p>
         <h1>Slot Canyon Pool Conditions</h1>
-        <p class="lede">Five-minute radar analysis, storm history, and transparent runoff-volume estimates for 17 canyon watersheds.</p>
+        <p class="hero-copy">Radar rainfall, NRCS watershed-runoff estimates, and canyon-specific pool-storage targets. These are modeled refill estimates, not field observations.</p>
       </div>
-      <div class="system-status"><span id="health-dot" class="health-dot"></span><span id="last-check">Loading tracker</span></div>
+      <div class="health-block">
+        <span id="health-pill" class="health-pill">Loading radar status…</span>
+        <span id="last-updated" class="last-updated"></span>
+      </div>
     </header>
 
-    <section class="overview-section">
-      <div class="section-title-row">
-        <div>
-          <p class="eyebrow">ALL CANYONS</p>
-          <h2>Latest modeled conditions</h2>
+    <div id="error-box" class="error-box" hidden></div>
+
+    <section class="overview-grid" aria-label="Canyon overview">
+      <article class="panel map-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">WATERSHEDS</p>
+            <h2>Radar monitoring basins</h2>
+          </div>
+          <div class="map-note"><p class="panel-note">Blue polygons define the watersheds used for radar averaging and intense-rain coverage. Colored cells show the selected event’s retained radar grid.</p><p id="radar-time" class="radar-time"></p></div>
         </div>
-        <div id="overview-summary" class="overview-summary"></div>
-      </div>
-      <div id="canyon-grid" class="canyon-grid" aria-live="polite"></div>
+        <div id="map" aria-label="Map of monitored canyon watersheds"></div>
+      </article>
+
+      <article class="panel summary-panel">
+        <div class="panel-heading compact">
+          <div>
+            <p class="section-kicker">CURRENT LIST</p>
+            <h2>Canyon model results</h2>
+          </div>
+        </div>
+        <div id="canyon-summary" class="canyon-summary" aria-live="polite"></div>
+      </article>
     </section>
 
-    <section class="detail-shell">
-      <div class="detail-picker">
-        <label for="canyon-select">Detailed canyon analysis</label>
-        <select id="canyon-select"></select>
-      </div>
-
-      <section id="condition-banner" class="condition-banner no-data">
-        <div class="condition-mark" id="condition-mark">···</div>
+    <section class="panel detail-panel" aria-labelledby="detail-heading">
+      <div class="detail-header">
         <div>
-          <p class="eyebrow">LAST RAIN EVENT RESULT</p>
-          <h2 id="condition-label">Loading canyon model</h2>
-          <p id="condition-detail">Waiting for tracker data.</p>
+          <p class="section-kicker">DETAILED CANYON ANALYSIS</p>
+          <h2 id="detail-heading">Selected canyon</h2>
         </div>
-      </section>
-
-      <section class="metric-grid" aria-label="Selected canyon storm statistics">
-        <article class="has-tip" data-tooltip="Average radar-estimated rainfall accumulated across the complete watershed."><span>Basin-average rain</span><strong id="metric-rain">—</strong><small>radar-equivalent inches</small></article>
-        <article class="has-tip" data-tooltip="Central estimate of direct-runoff volume after NRCS soil and land-cover losses. Hover or open methods for the dry-to-wet range."><span>Modeled runoff</span><strong id="metric-runoff">—</strong><small>normal-condition cubic feet</small></article>
-        <article class="has-tip" data-tooltip="Estimated highest flow at the pour point after routing runoff by watershed lag. This is a modeled range—not runoff volume divided by one hour."><span>Predicted peak flow</span><strong id="metric-runoff-cfs">—</strong><small>dry–wet range, cfs</small></article>
-        <article class="has-tip" data-tooltip="Provisional delivered-water volume associated with a meaningful canyon pool refill."><span>Fill target</span><strong id="metric-target">—</strong><small>model cubic feet</small></article>
-        <article class="has-tip" data-tooltip="The fill target expressed as an average flow sustained for one hour. Only ZeroG is anchored directly to 5 cfs for one hour."><span>Target as 1-hour flow</span><strong id="metric-target-cfs">—</strong><small>equivalent cfs for one hour</small></article>
-        <article class="has-tip" data-tooltip="Delivered runoff divided by the fill target. 1.0× means the estimated delivered volume equals the provisional target."><span>Estimated fill ratio</span><strong id="metric-ratio">—</strong><small>runoff ÷ fill target</small></article>
-        <article class="has-tip" data-tooltip="Strongest five-minute reflectivity pixel inside the watershed during the event."><span>Peak radar</span><strong id="metric-dbz">—</strong><small>dBZ</small></article>
-        <article class="has-tip" data-tooltip="Number of consecutive wet radar frames multiplied by five minutes."><span>Wet duration</span><strong id="metric-duration">—</strong><small>five-minute frames</small></article>
-        <article class="has-tip" data-tooltip="Watershed-average rainfall compared with duration-interpolated NOAA Atlas 14 point values. Context only—not a formal areal return interval."><span>Atlas 14 equivalent</span><strong id="metric-atlas">—</strong><small>basin-average recurrence context</small></article>
-        <article class="has-tip" data-tooltip="Total land area draining to the canyon pour point."><span>Drainage area</span><strong id="metric-area">—</strong><small>square miles</small></article>
-      </section>
-
-      <section class="radar-panel panel">
-        <div class="section-title-row compact">
-          <div>
-            <p class="eyebrow">INTERACTIVE PEAK RADAR MAP</p>
-            <h2 id="radar-time">No rain event recorded</h2>
-          </div>
-          <div class="legend">
-            <span><i class="c40"></i>40–49</span><span><i class="c50"></i>50–54</span>
-            <span><i class="c55"></i>55–59</span><span><i class="c60"></i>60+</span>
-          </div>
-        </div>
-        <div id="radar-map" aria-label="Interactive radar, topographic, and satellite map"></div>
-        <p class="canvas-note">Use the layer control to switch between topographic and satellite imagery. White line: watershed boundary. Colored squares: IEM N0Q reflectivity pixels.</p>
-        <a id="iem-archive-link" class="source-button" href="https://mesonet.agron.iastate.edu/current/mcview.phtml" target="_blank" rel="noopener">Open this event in the IEM archived radar viewer ↗</a>
-      </section>
-
-      <div class="two-column">
-        <section class="panel">
-          <p class="eyebrow">LAST RAIN EVENT</p>
-          <div id="rain-event" class="event-copy"><strong>None recorded</strong></div>
-        </section>
-        <section class="panel">
-          <p class="eyebrow">LAST QUALIFYING STORM — RETAINED</p>
-          <div id="qualifying-event" class="event-copy"><strong>None recorded</strong></div>
-        </section>
+        <label class="select-label">
+          <span class="sr-only">Choose canyon</span>
+          <select id="canyon-select"></select>
+        </label>
       </div>
 
-      <section class="panel calculations-panel">
-        <div class="section-title-row compact">
-          <div><p class="eyebrow">SHOW YOUR WORK</p><h2 id="calculation-title">Canyon-specific model</h2></div>
-          <span id="calibration-badge" class="calibration-badge">Provisional</span>
+      <div id="condition-banner" class="condition-banner minor">
+        <div id="condition-icon" class="condition-icon">○</div>
+        <div>
+          <p id="condition-kicker" class="condition-kicker">LAST RAIN EVENT MODEL RESULT</p>
+          <h3 id="condition-title">Loading…</h3>
+          <p id="condition-copy"></p>
         </div>
-        <div id="calculation-summary" class="calculation-summary"></div>
-        <div class="calculation-grid">
-          <div>
-            <h3>Event calculation</h3>
-            <div id="event-equation" class="equation-card"></div>
-          </div>
-          <div>
-            <h3>Scaled intensity gates</h3>
-            <div id="rule-table"></div>
-          </div>
-        </div>
-        <h3>Local NOAA Atlas 14 point precipitation reference</h3>
-        <div id="atlas-table" class="table-wrap"></div>
-        <details>
-          <summary>Methods, formulas, classifications, and limitations</summary>
-          <div id="methodology" class="methodology"></div>
-        </details>
-      </section>
-    </section>
+      </div>
 
-    <footer>
-      <span>Radar: Iowa Environmental Mesonet N0Q composite</span>
-      <span>Frequency context: NOAA Atlas 14 Volume 1</span>
-      <div class="legal-disclaimer"><strong>Important safety and liability disclaimer:</strong> These are experimental, radar-derived estimates—not observations, guarantees, forecasts, or professional hydrologic advice. Actual pool depth, water quality, access, canyon conditions, and flash-flood danger can differ materially. Never use this page to decide whether a canyon is safe. Check official National Weather Service forecasts and warnings, current local conditions, land-manager guidance, and your own on-site assessment. Canyon travel is inherently hazardous; users are solely responsible for their decisions and risk.</div>
-    </footer>
+      <div id="metrics-grid" class="metrics-grid"></div>
+
+      <div class="events-grid">
+        <article id="last-rain-event" class="event-card"></article>
+        <article id="last-major-event" class="event-card"></article>
+      </div>
+
+      <article class="work-card">
+        <div class="work-heading">
+          <div>
+            <p class="section-kicker">SHOW YOUR WORK</p>
+            <h2 id="calculation-title">Canyon calculation</h2>
+          </div>
+          <span id="calibration-badge" class="calibration-badge"></span>
+        </div>
+
+        <div class="calculation-block">
+          <h3>Pool-storage target</h3>
+          <div id="storage-calculation"></div>
+        </div>
+
+        <div class="work-grid">
+          <div>
+            <h3>Storm, watershed runoff, and storage comparison</h3>
+            <div id="hydrology-calculation" class="calculation-stack"></div>
+          </div>
+          <div>
+            <h3>Condition decision</h3>
+            <div id="decision-calculation" class="decision-list"></div>
+          </div>
+        </div>
+
+        <div class="gate-section">
+          <div>
+            <h3>Fixed intensity-footprint gates</h3>
+            <p>The same watershed percentages apply to every canyon. Any one row can satisfy the storm-footprint check.</p>
+          </div>
+          <div id="intensity-gates" class="table-wrap"></div>
+        </div>
+      </article>
+
+      <details class="methods-card">
+        <summary>Methods, formulas, classifications, and limitations</summary>
+        <div id="methods-content" class="methods-content"></div>
+      </details>
+    </section>
   </main>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js" defer></script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
 </body>
 </html>

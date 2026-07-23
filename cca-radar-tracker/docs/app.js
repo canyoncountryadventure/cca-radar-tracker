@@ -1,75 +1,216 @@
+"use strict";
+
 const DATA_ROOT = "data";
 const TIME_ZONE = "America/Denver";
+const BLUE = "#3f98ff";
+const BLUE_BRIGHT = "#73b8ff";
+
 const $ = (id) => document.getElementById(id);
 
-const classes = {
-  full_flush: { rank: 4, short: "Full flush", mark: "◆", css: "full-flush", score: 100, plain: "Strong evidence that the pools fully refilled and the canyon received completely new water." },
-  likely_full: { rank: 3, short: "Likely full", mark: "●", css: "likely-full", score: 78, plain: "The storm met both the water-volume and heavy-rain tests; substantial or complete refill is likely." },
-  moderate: { rank: 2, short: "Partial refill", mark: "◐", css: "moderate", score: 48, plain: "Some new water is possible, but the evidence is not strong enough to call the pools full." },
-  minor: { rank: 1, short: "Little change", mark: "○", css: "minor", score: 16, plain: "The modeled storm was too small or too gentle to expect a meaningful change in pool depth." },
-  legacy_spatial_trigger: { rank: 2, short: "Earlier trigger", mark: "!", css: "moderate", score: 48, plain: "This event came from the earlier ZeroG trigger method and does not have every current calculation." },
-  no_data: { rank: 0, short: "No event", mark: "—", css: "no-data", score: 0, plain: "No measurable rain event has been recorded for this watershed yet." },
+const conditionMeta = {
+  full_flush: { rank: 4, mark: "◆", css: "full_flush", short: "Strong flush likely" },
+  likely_full: { rank: 3, mark: "●", css: "likely_full", short: "Major refill likely" },
+  moderate: { rank: 2, mark: "◐", css: "moderate", short: "Refill possible" },
+  minor: { rank: 1, mark: "○", css: "minor", short: "No meaningful refill indicated" },
+  legacy_spatial_trigger: { rank: 2, mark: "!", css: "moderate", short: "Earlier radar trigger" },
+  none: { rank: 0, mark: "·", css: "none", short: "No rain event recorded" },
 };
 
-let state = { status: null, model: null, watersheds: null, selected: "zerog" };
-let map;
-let radarLayer;
-let watershedLayer;
+const app = {
+  model: null,
+  status: null,
+  watersheds: null,
+  selectedId: null,
+  map: null,
+  watershedLayer: null,
+  radarLayer: null,
+  layersById: new Map(),
+};
 
-function localDate(value) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: TIME_ZONE, month: "short", day: "numeric", year: "numeric",
-    hour: "numeric", minute: "2-digit", timeZoneName: "short",
-  }).format(new Date(value));
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function localTime(value) {
-  return new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit" }).format(new Date(value));
-}
-
-function integer(value) { return value == null ? "—" : Math.round(value).toLocaleString("en-US"); }
-function fixed(value, digits = 2) { return value == null ? "—" : Number(value).toFixed(digits); }
-function selectedCanyon() { return state.status.canyons[state.selected]; }
-function selectedModel() { return state.model.canyons[state.selected]; }
-function selectedFeature() { return state.watersheds.features.find((feature) => feature.properties.id === state.selected); }
-function latestClassification(canyon) { return canyon.last_rain_event?.classification || "no_data"; }
-
-function eventAge(event) {
-  if (!event?.end_utc) return "No recorded rain event";
-  const now = new Date();
-  const end = new Date(event.end_utc);
-  const dateParts = (date) => new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
-  if (dateParts(now) === dateParts(end)) return `Today · ${localTime(event.end_utc)}`;
-  const days = Math.floor((now - end) / 86400000);
-  if (days === 1) return `Yesterday · ${localTime(event.end_utc)}`;
-  return `${days} days ago`;
-}
-
-function renderOverview() {
-  const canyons = Object.values(state.status.canyons).sort((a, b) => {
-    const rank = classes[latestClassification(b)].rank - classes[latestClassification(a)].rank;
-    return rank || a.name.localeCompare(b.name);
+function number(value, digits = 0) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  return numeric.toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   });
-  const counts = { full_flush: 0, likely_full: 0, moderate: 0, minor: 0, no_data: 0 };
-  canyons.forEach((canyon) => { counts[latestClassification(canyon)] = (counts[latestClassification(canyon)] || 0) + 1; });
-  $("overview-summary").innerHTML = `<b>${counts.full_flush + counts.likely_full}</b> likely full · <b>${counts.moderate}</b> possible partial refill · <b>${counts.minor}</b> little change`;
-  $("canyon-grid").innerHTML = canyons.map((canyon) => {
-    const event = canyon.last_rain_event;
-    const meta = classes[latestClassification(canyon)];
-    const ratio = event?.fill_ratio == null ? "—" : `${fixed(event.fill_ratio, 2)}× estimated fill ratio`;
-    return `<button class="canyon-card ${meta.css} ${canyon.id === state.selected ? "selected" : ""}" data-canyon="${canyon.id}" data-tooltip="${meta.plain}">
-      <span class="card-state">${meta.mark} ${meta.short}</span><strong>${canyon.name}</strong>
-      <span>${eventAge(event)}</span><small>${ratio}</small>
-      <span class="likelihood-track" aria-hidden="true"><i style="width:${meta.score}%"></i></span>
-    </button>`;
-  }).join("");
-  document.querySelectorAll(".canyon-card").forEach((button) => button.addEventListener("click", () => {
-    state.selected = button.dataset.canyon;
-    $("canyon-select").value = state.selected;
-    renderOverview(); renderDetail();
-    document.querySelector(".detail-shell").scrollIntoView({ behavior: "smooth", block: "start" });
-  }));
+}
+
+function compactNumber(value, digits = 1) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  if (Math.abs(numeric) >= 1_000_000) return `${number(numeric / 1_000_000, digits)}M`;
+  if (Math.abs(numeric) >= 10_000) return `${number(numeric / 1_000, digits)}k`;
+  return number(numeric, 0);
+}
+
+function dateTime(value) {
+  if (!value) return "Not available";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Not available";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(parsed);
+}
+
+function dateOnly(value) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(parsed);
+}
+
+function eventDuration(event) {
+  if (!event) return 0;
+  if (Number.isFinite(Number(event.storm_duration_minutes))) return Number(event.storm_duration_minutes);
+  if (event.start_utc && event.end_utc) {
+    const minutes = Math.round((new Date(event.end_utc) - new Date(event.start_utc)) / 60_000) + 5;
+    return Math.max(5, minutes);
+  }
+  return Math.max(0, Number(event.frames || 0) * 5);
+}
+
+function atlasText(event) {
+  const years = Number(event?.atlas14_return_period_years);
+  if (!Number.isFinite(years) || years <= 0) return "Not available";
+  if (years < 1) return "<1 yr equivalent";
+  if (years >= 1000) return "≥1,000 yr equivalent";
+  return `${number(years, years < 10 ? 1 : 0)} yr equivalent`;
+}
+
+function rangeText(values, unit, digits = 0) {
+  if (!values || typeof values !== "object") return `— ${unit}`;
+  const low = Number(values.dry);
+  const high = Number(values.wet);
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return `— ${unit}`;
+  return `${number(low, digits)}–${number(high, digits)} ${unit}`;
+}
+
+function directRunoff(event) {
+  return Number(event?.direct_runoff_ft3 ?? event?.estimated_runoff_ft3 ?? 0);
+}
+
+function directRunoffRange(event) {
+  return event?.direct_runoff_ft3_range ?? event?.estimated_runoff_ft3_range ?? null;
+}
+
+function routedPeak(event) {
+  return Number(event?.routed_peak_cfs ?? event?.estimated_peak_cfs ?? 0);
+}
+
+function routedPeakRange(event) {
+  return event?.routed_peak_cfs_range ?? event?.estimated_peak_cfs_range ?? null;
+}
+
+function eventCondition(event) {
+  if (!event) return conditionMeta.none;
+  return conditionMeta[event.classification] || conditionMeta.none;
+}
+
+function modifierText(model) {
+  const modifier = Number(model.pothole_modifier || 0);
+  const percent = Math.round(Math.abs(modifier) * 100);
+  if (modifier === 0) return "Same rate as Zero G";
+  return `${percent}% ${modifier > 0 ? "higher" : "lower"} than Zero G`;
+}
+
+function fetchJson(path) {
+  const separator = path.includes("?") ? "&" : "?";
+  return fetch(`${path}${separator}v=${Date.now()}`, { cache: "no-store" }).then((response) => {
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  });
+}
+
+function canyonStatus(id) {
+  return app.status?.canyons?.[id] || {};
+}
+
+function selectedModel() {
+  return app.model?.canyons?.[app.selectedId] || null;
+}
+
+function selectedStatus() {
+  return canyonStatus(app.selectedId);
+}
+
+function setHealth() {
+  const health = app.status?.health || {};
+  const pill = $("health-pill");
+  pill.textContent = health.message || "Radar status unavailable";
+  pill.className = `health-pill ${health.ok === false ? "bad" : "ok"}`;
+  const checked = app.status?.last_checked_utc || app.status?.latest_frame_utc;
+  $("last-updated").textContent = checked ? `Last checked ${dateTime(checked)}` : "";
+}
+
+function populateSelect() {
+  const select = $("canyon-select");
+  select.innerHTML = "";
+  Object.entries(app.model.canyons)
+    .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+    .forEach(([id, canyon]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = canyon.name;
+      select.append(option);
+    });
+  select.addEventListener("change", () => selectCanyon(select.value, true));
+}
+
+function renderSummary() {
+  const container = $("canyon-summary");
+  const rows = Object.entries(app.model.canyons).map(([id, model]) => {
+    const event = canyonStatus(id).last_rain_event;
+    const meta = eventCondition(event);
+    return { id, model, event, meta };
+  });
+  rows.sort((a, b) => b.meta.rank - a.meta.rank || a.model.name.localeCompare(b.model.name));
+
+  container.innerHTML = rows.map(({ id, model, event, meta }) => `
+    <button type="button" class="summary-row ${meta.css} ${id === app.selectedId ? "selected" : ""}" data-canyon-id="${escapeHtml(id)}">
+      <span class="summary-mark">${meta.mark}</span>
+      <span>
+        <span class="summary-name">${escapeHtml(model.name)}</span>
+        <span class="summary-condition">${escapeHtml(event?.classification_label || meta.short)}</span>
+      </span>
+      <span class="summary-date">${event ? dateOnly(event.start_utc) : "—"}</span>
+    </button>
+  `).join("");
+
+  container.querySelectorAll("[data-canyon-id]").forEach((button) => {
+    button.addEventListener("click", () => selectCanyon(button.dataset.canyonId, true));
+  });
+}
+
+function watershedStyle(feature) {
+  const selected = feature.properties.id === app.selectedId;
+  return {
+    color: selected ? BLUE_BRIGHT : BLUE,
+    weight: selected ? 4 : 2,
+    opacity: selected ? 1 : 0.92,
+    fillColor: BLUE,
+    fillOpacity: selected ? 0.25 : 0.10,
+  };
 }
 
 function radarColor(value) {
@@ -84,154 +225,379 @@ function radarColor(value) {
 }
 
 function initializeMap() {
-  if (map || typeof L === "undefined") return;
   const topo = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-    maxZoom: 17, attribution: "Map © OpenTopoMap contributors",
+    maxZoom: 17,
+    attribution: "Map © OpenTopoMap contributors",
   });
-  const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-    maxZoom: 19, attribution: "Imagery © Esri and contributors",
-  });
-  map = L.map("radar-map", { layers: [topo], zoomControl: true, preferCanvas: true });
-  radarLayer = L.layerGroup().addTo(map);
-  watershedLayer = L.layerGroup().addTo(map);
-  L.control.layers({ "Topographic": topo, "Satellite": satellite }, { "Radar pixels": radarLayer, "Watershed": watershedLayer }, { collapsed: false }).addTo(map);
+  const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, attribution: "Imagery © Esri and contributors" },
+  );
+
+  app.map = L.map("map", { layers: [topo], zoomControl: true, preferCanvas: true });
+  app.radarLayer = L.layerGroup().addTo(app.map);
+  app.watershedLayer = L.geoJSON(app.watersheds, {
+    style: watershedStyle,
+    onEachFeature(feature, layer) {
+      const id = feature.properties.id;
+      app.layersById.set(id, layer);
+      layer.bindTooltip(feature.properties.name, { sticky: true });
+      layer.on({
+        click: () => selectCanyon(id, true),
+        mouseover: () => layer.setStyle({ color: BLUE_BRIGHT, weight: 4, fillOpacity: 0.20 }),
+        mouseout: () => app.watershedLayer.resetStyle(layer),
+      });
+    },
+  }).addTo(app.map);
+
+  L.control.layers(
+    { Topographic: topo, Satellite: satellite },
+    { "Peak-event radar pixels": app.radarLayer, "Watershed polygons": app.watershedLayer },
+    { collapsed: true },
+  ).addTo(app.map);
+
+  const bounds = app.watershedLayer.getBounds();
+  if (bounds.isValid()) app.map.fitBounds(bounds.pad(0.05));
 }
 
-function drawRadarMap(event, feature) {
-  initializeMap();
-  if (!map) return;
-  radarLayer.clearLayers(); watershedLayer.clearLayers();
-  const outline = L.geoJSON(feature, { style: { color: "#fff", weight: 4, opacity: 1, fillOpacity: 0.03 } }).addTo(watershedLayer);
+function drawSelectedRadar() {
+  if (!app.radarLayer) return;
+  app.radarLayer.clearLayers();
+  const status = selectedStatus();
+  const event = status.last_rain_event || status.latest_analysis;
   const grid = event?.peak_grid_dbz || event?.grid_dbz;
   const bbox = event?.grid_bbox;
-  if (grid?.length && bbox) {
-    const [left, bottom, right, top] = bbox;
-    const rows = grid.length, columns = grid[0].length;
-    const cellWidth = (right - left) / columns, cellHeight = (top - bottom) / rows;
-    grid.forEach((row, r) => row.forEach((value, c) => {
-      if (value == null || value < 10) return;
+  const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
+  $("radar-time").textContent = time
+    ? `Selected event radar: ${dateTime(time)}`
+    : "No retained radar grid for the selected canyon";
+
+  if (!Array.isArray(grid) || !grid.length || !Array.isArray(grid[0]) || !bbox) return;
+  const [left, bottom, right, top] = bbox.map(Number);
+  const rows = grid.length;
+  const columns = grid[0].length;
+  const cellWidth = (right - left) / columns;
+  const cellHeight = (top - bottom) / rows;
+
+  grid.forEach((row, rowIndex) => {
+    row.forEach((rawValue, columnIndex) => {
+      const value = Number(rawValue);
+      if (!Number.isFinite(value) || value < 10) return;
       const color = radarColor(value);
-      L.rectangle([[top - (r + 1) * cellHeight, left + c * cellWidth], [top - r * cellHeight, left + (c + 1) * cellWidth]], {
-        stroke: true, color, weight: 0.45, opacity: 0.9, fillColor: color, fillOpacity: 0.62,
-      }).bindTooltip(`${value} dBZ`).addTo(radarLayer);
-    }));
-  }
-  map.fitBounds(outline.getBounds(), { padding: [24, 24] });
-  setTimeout(() => map.invalidateSize(), 0);
+      L.rectangle(
+        [
+          [top - (rowIndex + 1) * cellHeight, left + columnIndex * cellWidth],
+          [top - rowIndex * cellHeight, left + (columnIndex + 1) * cellWidth],
+        ],
+        {
+          stroke: true,
+          color,
+          weight: 0.45,
+          opacity: 0.9,
+          fillColor: color,
+          fillOpacity: 0.62,
+          interactive: true,
+        },
+      ).bindTooltip(`${number(value, 1)} dBZ`).addTo(app.radarLayer);
+    });
+  });
+}
+
+function updateMapSelection(fit = false) {
+  if (!app.watershedLayer) return;
+  app.watershedLayer.setStyle(watershedStyle);
+  const layer = app.layersById.get(app.selectedId);
+  if (fit && layer) app.map.fitBounds(layer.getBounds().pad(0.35), { maxZoom: 11 });
+  if (layer) layer.bringToFront();
+  drawSelectedRadar();
+  setTimeout(() => app.map.invalidateSize(), 0);
+}
+
+function renderCondition(model, event) {
+  const meta = eventCondition(event);
+  const banner = $("condition-banner");
+  banner.className = `condition-banner ${meta.css}`;
+  $("condition-icon").textContent = meta.mark;
+  $("condition-title").textContent = event?.classification_label || "No rain event recorded";
+  $("condition-kicker").textContent = event ? "LAST RAIN EVENT MODEL RESULT" : "MODEL STATUS";
+  $("condition-copy").textContent = event
+    ? `${dateTime(event.start_utc)}. ${event.classification_explanation || "Model result is provisional and has not been field verified."}`
+    : "No completed radar rain event has been retained for this canyon yet.";
+}
+
+function metricCard(label, value, note) {
+  return `
+    <article class="metric-card">
+      <div class="metric-label">${escapeHtml(label)}</div>
+      <div class="metric-value">${escapeHtml(value)}</div>
+      <div class="metric-note">${escapeHtml(note)}</div>
+    </article>
+  `;
+}
+
+function renderMetrics(model, event) {
+  const runoff = directRunoff(event);
+  const runoffRange = directRunoffRange(event);
+  const peakRange = routedPeakRange(event);
+  const normalIa = Number(model.hydrology?.initial_abstraction_inches?.normal);
+  const rain = Number(event?.basin_rain_inches || 0);
+  const zeroReason = event && runoff === 0 && Number.isFinite(normalIa) && rain <= normalIa
+    ? `rain did not exceed ${number(normalIa, 3)} in initial abstraction`
+    : "normal antecedent-condition estimate";
+
+  const modifier = Number(model.pothole_modifier || 0);
+  const modifierValue = modifier === 0 ? "0%" : `${modifier > 0 ? "+" : "−"}${number(Math.abs(modifier) * 100, 0)}%`;
+
+  const cards = [
+    metricCard("Basin-average radar rain", event ? `${number(event.basin_rain_inches, 3)} in` : "—", "area-weighted event accumulation"),
+    metricCard("Estimated watershed runoff", event ? `${compactNumber(runoff, 1)} ft³` : "—", event ? `${rangeText(runoffRange, "ft³", 0)} dry–wet; ${zeroReason}` : "NRCS direct-runoff estimate; not measured canyon delivery"),
+    metricCard("Routed peak flow — context", event ? rangeText(peakRange, "cfs", 2) : "—", "dry–wet screening range; not a fill trigger by itself"),
+    metricCard("Estimated empty-pool storage", `${number(model.fill_target_ft3, 0)} ft³`, "estimated empty pool/pothole storage"),
+    metricCard("Storage-fill ratio", event ? `${number(event.fill_ratio || 0, 2)}×` : "—", "normal-condition watershed runoff ÷ empty-storage target"),
+    metricCard("Technical section", `${number(model.technical_length_miles, 2)} mi`, `${number(model.length_ratio_to_zerog, 2)}× Zero G length`),
+    metricCard("Pothole-storage adjustment", modifierValue, `${modifierText(model)} per technical mile`),
+    metricCard("Peak radar", event?.peak_dbz != null ? `${number(event.peak_dbz, 1)} dBZ` : "—", "maximum reflectivity inside watershed"),
+    metricCard("Storm duration", event ? `${number(eventDuration(event), 0)} min` : "—", `${number(event?.wet_frames || 0, 0)} wet five-minute frames`),
+    metricCard("Drainage area", `${number(model.area_sq_mi, 3)} mi²`, "used for runoff volume, not pool-storage scaling"),
+  ];
+  $("metrics-grid").innerHTML = cards.join("");
+}
+
+function eventMeta(label, value) {
+  return `<div class="event-meta"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
 }
 
 function coverageText(event) {
-  if (!event?.peak_coverage_percent) return "Heavy-rain coverage unavailable";
-  return `Peak watershed coverage: 50+ dBZ ${event.peak_coverage_percent["50"] || 0}%, 55+ ${event.peak_coverage_percent["55"] || 0}%, 60+ ${event.peak_coverage_percent["60"] || 0}%`;
+  if (!event?.peak_coverage_percent) return "Peak watershed coverage unavailable.";
+  const p = event.peak_coverage_percent;
+  return `Peak watershed coverage: 50+ dBZ ${number(p["50"] || 0, 1)}%, 55+ ${number(p["55"] || 0, 1)}%, 60+ ${number(p["60"] || 0, 1)}%.`;
 }
 
-function eventHtml(event, emptyText) {
-  if (!event) return `<strong>${emptyText}</strong><p>The date and full calculation will remain here after one occurs.</p>`;
-  return `<strong>${localDate(event.start_utc)}</strong><p>${event.classification_label || "Radar trigger"}</p>
-    <dl><div><dt>End</dt><dd>${localDate(event.end_utc)}</dd></div>
-    <div><dt>Basin-average rain</dt><dd>${event.basin_rain_inches == null ? "Earlier method" : `${fixed(event.basin_rain_inches, 3)} in`}</dd></div>
-    <div><dt>Delivered runoff</dt><dd>${event.estimated_runoff_ft3 == null ? "Not calculated" : `${integer(event.estimated_runoff_ft3)} ft³`}</dd></div>
-    <div><dt>Predicted peak flow</dt><dd>${event.estimated_peak_cfs == null ? "—" : `${fixed(event.estimated_peak_cfs, 2)} cfs`}</dd></div>
-    <div><dt>Peak radar</dt><dd>${event.peak_dbz ?? "—"} dBZ</dd></div>
-    <div><dt>Fill ratio</dt><dd>${event.fill_ratio == null ? "—" : `${fixed(event.fill_ratio, 2)}×`}</dd></div></dl>
-    <small>${coverageText(event)}</small>`;
+function renderEventCard(event, title, emptyText) {
+  if (!event) {
+    return `
+      <p class="section-kicker">${escapeHtml(title)}</p>
+      <h3>${escapeHtml(emptyText)}</h3>
+      <p class="empty-state">The model will retain the date and calculation here after a qualifying event is recorded.</p>
+    `;
+  }
+  const runoff = directRunoff(event);
+  const peak = routedPeak(event);
+  const decision = event.decision_tests || {};
+  return `
+    <p class="section-kicker">${escapeHtml(title)}</p>
+    <h3>${escapeHtml(dateTime(event.start_utc))}</h3>
+    <p class="event-result"><strong>${escapeHtml(event.classification_label || "Modeled rain event")}</strong><br>${escapeHtml(event.classification_explanation || "Model classification explanation unavailable.")}</p>
+    <div class="event-meta-grid">
+      ${eventMeta("End", dateTime(event.end_utc))}
+      ${eventMeta("Basin-average rain", `${number(event.basin_rain_inches, 3)} in`)}
+      ${eventMeta("Atlas 14 context", atlasText(event))}
+      ${eventMeta("Estimated watershed runoff", `${number(runoff, 0)} ft³`)}
+      ${eventMeta("Routed peak — context", `${number(peak, 2)} cfs`)}
+      ${eventMeta("Peak radar", `${number(event.peak_dbz, 1)} dBZ`)}
+      ${eventMeta("Fill ratio", `${number(event.fill_ratio || 0, 2)}×`)}
+      ${eventMeta("Heavy-rain footprint", (decision.heavy_rain_footprint_met ?? event.spatial_gate_seen) ? "Passed" : "Not reached")}
+    </div>
+    <p class="event-coverage">${escapeHtml(coverageText(event))}</p>
+    ${event.iem_archive_url ? `<a class="event-link" href="${escapeHtml(event.iem_archive_url)}" target="_blank" rel="noopener">Open archived radar animation</a>` : ""}
+  `;
 }
 
-function renderRuleTable(model, event) {
-  const actual = event?.peak_covered_area_sq_mi || {};
-  $("rule-table").innerHTML = `<p class="plain-note">A heavy-rain footprint is a reality check: enough of the watershed must receive intense rain before the model calls the pools full.</p><div class="table-wrap"><table><thead><tr><th>Intensity</th><th>Required area</th><th>Required %</th><th>Last event peak</th></tr></thead><tbody>${model.spatial_rules.map((rule) => `<tr>
-    <td>${rule.dbz}+ dBZ</td><td>${fixed(rule.minimum_area_sq_mi, 3)} mi²</td><td>${fixed(rule.minimum_coverage_percent, 2)}%</td>
-    <td>${actual[String(Math.round(rule.dbz))] == null ? "—" : `${fixed(actual[String(Math.round(rule.dbz))], 3)} mi²`}</td></tr>`).join("")}</tbody></table></div>`;
+function renderEvents(status) {
+  $("last-rain-event").innerHTML = renderEventCard(
+    status.last_rain_event,
+    "LAST RAIN EVENT",
+    "No rain event recorded"
+  );
+  $("last-major-event").innerHTML = renderEventCard(
+    status.last_qualifying_event,
+    "LAST MAJOR REFILL EVENT — RETAINED",
+    "No likely-full or strong-flush event recorded"
+  );
 }
 
-function renderAtlas(model) {
-  const periods = ["1", "2", "5", "10", "25"];
-  const durations = ["5-min", "10-min", "15-min", "30-min", "60-min"];
-  $("atlas-table").innerHTML = `<table><thead><tr><th>Duration</th>${periods.map((period) => `<th>${period}-yr</th>`).join("")}</tr></thead><tbody>${durations.map((duration) => `<tr><td>${duration}</td>${periods.map((period) => `<td>${fixed(model.atlas14_inches[duration][period], 3)}″</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+function initialAbstraction(curveNumber) {
+  const cn = Number(curveNumber);
+  if (!Number.isFinite(cn) || cn <= 0) return null;
+  return 0.2 * (1000 / cn - 10);
 }
 
-function renderMethodology() {
-  const method = state.model.method;
-  $("methodology").innerHTML = `<h4>Equations used</h4><ul>
-    <li><b>Radar rainfall:</b> ${method.rainfall_formula}. Reflectivity is logarithmic: Z = 10^(dBZ/10), and solving the NWS Z–R relationship gives rainfall rate R.</li>
-    <li><b>Why cap it:</b> Very high reflectivity can represent hail rather than proportionally greater rain, so the rainfall conversion stops increasing at 55 dBZ. The original dBZ remains visible for the heavy-rain test.</li>
-    <li><b>Runoff losses:</b> ${method.runoff_formula}. ${method.runoff_coefficient_explanation}</li>
-    <li><b>Predicted peak flow:</b> ${method.peak_flow_formula}. ${method.peak_flow_explanation}</li>
-    <li><b>Fill target:</b> ${method.target_formula}. ${method.target_explanation}</li>
-    <li><b>Estimated fill ratio:</b> ${method.fill_ratio_explanation}</li>
-    <li><b>Heavy-rain footprint:</b> ${method.spatial_formula}. ${method.spatial_explanation}</li>
-    <li><b>Atlas 14:</b> ${method.atlas_explanation}</li>
-    <li><b>Scaling basis:</b> ${method.scaling_basis}</li></ul>
-    <h4>Classification rules</h4><ul>${Object.values(method.classification).map((value) => `<li>${value}</li>`).join("")}</ul>
-    <h4>Primary sources</h4><ul>${method.sources.map((source) => `<li><a href="${source.url}" target="_blank" rel="noopener">${source.label}</a></li>`).join("")}</ul>
-    <h4>Known limitations</h4><ul>${method.limitations.map((value) => `<li>${value}</li>`).join("")}</ul>`;
+function renderStorageCalculation(model) {
+  const multiplier = Number(model.storage_rate_multiplier);
+  const modifier = Number(model.pothole_modifier);
+  $("storage-calculation").innerHTML = `
+    <p class="formula">52,442 ft³ × (${number(model.technical_length_miles, 2)} mi ÷ 0.75 mi) × ${number(multiplier, 2)} = <strong>${number(model.fill_target_ft3, 0)} ft³</strong></p>
+    <p class="formula-note">The ${number(multiplier, 2)} multiplier equals 1 + (${modifier >= 0 ? "+" : ""}${number(modifier, 2)}). That represents ${escapeHtml(modifierText(model))}. The target is provisional empty storage, not observed current water volume.</p>
+  `;
 }
 
-function atlasLabel(event) {
-  const years = event?.atlas14_return_period_years;
-  if (years == null) return "—";
-  if (years >= 1000) return "≥1,000 yr eq.";
-  if (years < 1) return "<1 yr eq.";
-  return `~${fixed(years, 1)} yr eq.`;
+function renderHydrologyCalculation(model, event) {
+  const container = $("hydrology-calculation");
+  if (!event) {
+    container.innerHTML = `<div class="calc-line">No completed rain event is available.</div>`;
+    return;
+  }
+  const hydro = model.hydrology || {};
+  const cn = Number(hydro.curve_number?.normal);
+  const abstraction = Number(hydro.initial_abstraction_inches?.normal ?? initialAbstraction(cn));
+  const rain = Number(event.basin_rain_inches || 0);
+  const runoff = directRunoff(event);
+  const runoffDepth = Number(event.runoff_depth_inches?.normal || 0);
+  const comparison = Number.isFinite(abstraction)
+    ? (rain <= abstraction
+      ? `${number(rain, 3)} in ≤ ${number(abstraction, 3)} in, so normal-condition direct runoff = 0`
+      : `${number(rain, 3)} in > ${number(abstraction, 3)} in, so the NRCS runoff equation is applied`)
+    : "Initial abstraction unavailable";
+
+  container.innerHTML = [
+    `${number(rain, 3)} in basin-average radar rain over ${number(eventDuration(event), 0)} minutes`,
+    `Normal curve number ${number(cn, 1)}; initial abstraction ${number(abstraction, 3)} in`,
+    comparison,
+    `Runoff depth ${number(runoffDepth, 4)} in; estimated watershed runoff ${number(runoff, 0)} ft³`,
+    `${rangeText(directRunoffRange(event), "ft³", 0)} dry–wet watershed-runoff range`,
+    `${rangeText(routedPeakRange(event), "cfs", 2)} routed peak-flow range`,
+    `${number(runoff, 0)} ÷ ${number(model.fill_target_ft3, 0)} = ${number(event.fill_ratio || 0, 2)}× storage-fill ratio`,
+    `${atlasText(event)} Atlas 14 context from watershed-average radar rain`,
+  ].map((line) => `<div class="calc-line">${escapeHtml(line)}</div>`).join("");
 }
 
-function renderDetail() {
-  const canyon = selectedCanyon(), model = selectedModel(), feature = selectedFeature();
-  const event = canyon.last_rain_event, qualifying = canyon.last_qualifying_event;
-  const key = latestClassification(canyon), meta = classes[key];
-  const banner = $("condition-banner"); banner.className = `condition-banner ${meta.css}`;
-  $("condition-mark").textContent = meta.mark;
-  $("condition-label").textContent = event?.classification_label || "No measurable rain event recorded";
-  $("condition-detail").textContent = event ? `Last event: ${localDate(event.start_utc)}. ${meta.plain}` : meta.plain;
-  $("metric-rain").textContent = event?.basin_rain_inches == null ? "—" : fixed(event.basin_rain_inches, 3);
-  $("metric-runoff").textContent = event?.estimated_runoff_ft3 == null ? "—" : integer(event.estimated_runoff_ft3);
-  const peakRange = event?.estimated_peak_cfs_range;
-  $("metric-runoff-cfs").textContent = peakRange ? `${fixed(peakRange.dry, 1)}–${fixed(peakRange.wet, 1)}` : "—";
-  $("metric-target").textContent = integer(model.fill_target_ft3);
-  $("metric-target-cfs").textContent = fixed(model.fill_target_ft3 / 3600, 2);
-  $("metric-ratio").textContent = event?.fill_ratio == null ? "—" : `${fixed(event.fill_ratio, 2)}×`;
-  $("metric-dbz").textContent = event?.peak_dbz ?? "—";
-  $("metric-duration").textContent = event?.wet_frames ? `${event.wet_frames * 5} min` : "—";
-  $("metric-atlas").textContent = atlasLabel(event);
-  $("metric-area").textContent = fixed(canyon.area_sq_mi, 3);
-  $("radar-time").textContent = event?.peak_frame_utc ? localDate(event.peak_frame_utc) : "Watershed map";
-  drawRadarMap(event || canyon.latest_analysis, feature);
-  const archive = $("iem-archive-link"); archive.href = event?.iem_archive_url || "https://mesonet.agron.iastate.edu/current/mcview.phtml";
-  archive.textContent = event ? "Open this exact date and time in the IEM archived radar viewer ↗" : "Open the IEM radar archive ↗";
-  $("rain-event").innerHTML = eventHtml(event, "No measurable rain event recorded");
-  $("qualifying-event").innerHTML = eventHtml(qualifying, "No likely-full storm recorded");
-  $("calculation-title").textContent = `${canyon.name} calculation`;
-  $("calibration-badge").textContent = model.calibration;
-  $("calibration-badge").className = `calibration-badge ${model.calibration.startsWith("field") ? "field" : ""}`;
-  const h = model.hydrology;
-  $("calculation-summary").innerHTML = `<p><b>${fixed(canyon.area_sq_mi, 3)} mi² watershed</b> × area scale <b>${fixed(model.scale_factor, 4)}</b> produces a likely-fill target of <b>${integer(model.fill_target_ft3)} ft³</b>—equivalent to <b>${fixed(model.fill_target_ft3 / 3600, 2)} cfs for one hour</b>—and a full-flush target of <b>${integer(model.flush_target_ft3)} ft³</b>.</p>${h ? `<p>Federal basin inventory: composite NRCS curve number <b>${fixed(h.curve_number.normal, 1)}</b>; initial abstraction <b>${fixed(h.initial_abstraction_inches.normal, 3)}″</b>; mean slope <b>${fixed(h.mean_slope_percent, 1)}%</b>; estimated lag <b>${fixed(h.lag_hours, 2)} hr</b>. Dry and wet soil conditions are calculated as a range.</p>` : ""}`;
-  $("event-equation").innerHTML = event ? `<code>${fixed(event.basin_rain_inches, 3)}″ basin rain → NRCS runoff depth ${event.runoff_depth_inches ? `${fixed(event.runoff_depth_inches.dry, 3)}–${fixed(event.runoff_depth_inches.wet, 3)}″` : "—"}</code><code>Runoff volume ${event.estimated_runoff_ft3_range ? `${integer(event.estimated_runoff_ft3_range.dry)}–${integer(event.estimated_runoff_ft3_range.wet)} ft³` : integer(event.estimated_runoff_ft3)}; routed peak ${peakRange ? `${fixed(peakRange.dry, 2)}–${fixed(peakRange.wet, 2)} cfs` : "—"}</code><code>${integer(event.estimated_runoff_ft3)} ÷ ${integer(model.fill_target_ft3)} = ${fixed(event.fill_ratio, 2)}× central estimated fill ratio</code><code>${fixed(event.basin_rain_inches, 3)}″ basin-average rain over ${event.atlas14_duration_minutes || event.wet_frames * 5} minutes ≈ ${atlasLabel(event)} Atlas 14 equivalent</code>` : `<code>Waiting for a measurable rain event to populate the calculation.</code>`;
-  renderRuleTable(model, event); renderAtlas(model); renderMethodology();
+function decisionRow(pass, title, detail) {
+  return `
+    <div class="decision-row ${pass ? "pass" : "fail"}">
+      <span class="decision-symbol">${pass ? "✓" : "×"}</span>
+      <span><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail)}</span></span>
+    </div>
+  `;
 }
 
-async function load() {
+function renderDecision(model, event) {
+  const container = $("decision-calculation");
+  if (!event) {
+    container.innerHTML = decisionRow(false, "No event to classify", "A completed radar rain event is required.");
+    return;
+  }
+  const tests = event.decision_tests || {};
+  const ratio = Number(event.fill_ratio || 0);
+  const minimumFrames = Number(tests.minimum_wet_frames_required || 2);
+  container.innerHTML = [
+    decisionRow(Boolean(tests.storage_target_met ?? ratio >= 1), "Empty-storage volume test", `${number(ratio, 2)}×; likely-full threshold is 1.00×`),
+    decisionRow(Boolean(tests.flush_target_met ?? ratio >= 2), "Strong-flush volume test", `${number(ratio, 2)}×; strong-flush threshold is 2.00×`),
+    decisionRow(Boolean(tests.heavy_rain_footprint_met ?? event.spatial_gate_seen), "Intense-rain footprint", "Any one fixed dBZ/coverage gate must pass"),
+    decisionRow(Boolean(tests.minimum_wet_duration_met ?? Number(event.wet_frames || 0) >= minimumFrames), "Minimum wet duration", `${number(event.wet_frames || 0, 0)} wet frames; ${minimumFrames} required`),
+    decisionRow(true, event.classification_label || "Model result", event.classification_explanation || "Classification explanation unavailable"),
+  ].join("");
+}
+
+function renderIntensityGates(model, event) {
+  const rows = (model.spatial_rules || []).map((rule) => {
+    const key = String(Math.round(Number(rule.dbz)));
+    const coverage = Number(event?.peak_coverage_percent?.[key] || 0);
+    const area = Number(event?.peak_covered_area_sq_mi?.[key] || 0);
+    const qualified = coverage + 1e-9 >= Number(rule.minimum_coverage_percent);
+    return `
+      <tr>
+        <td>${number(rule.dbz, 0)}+ dBZ</td>
+        <td>${number(rule.minimum_coverage_percent, 0)}%</td>
+        <td>${number(rule.minimum_area_sq_mi, 3)} mi²</td>
+        <td>${number(coverage, 1)}%</td>
+        <td>${number(area, 3)} mi²</td>
+        <td class="${qualified ? "gate-pass" : "gate-fail"}">${qualified ? "PASS" : "—"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  $("intensity-gates").innerHTML = `
+    <table>
+      <thead><tr><th>Intensity</th><th>Required %</th><th>Required area</th><th>Event peak %</th><th>Event peak area</th><th>Result</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderMethods() {
+  const method = app.model.method || {};
+  const classifications = method.classification || {};
+  const sources = method.sources || [];
+  const limitations = method.limitations || [];
+  $("methods-content").innerHTML = `
+    <h3>Equations and decision inputs</h3>
+    <ul>
+      <li><strong>Radar rainfall:</strong> ${escapeHtml(method.rainfall_formula || "Not available")}. ${escapeHtml(method.rainfall_explanation || "")}</li>
+      <li><strong>Estimated watershed runoff:</strong> ${escapeHtml(method.runoff_formula || "Not available")}. ${escapeHtml(method.direct_runoff_explanation || "")}</li>
+      <li><strong>Routed peak flow — context:</strong> ${escapeHtml(method.peak_flow_formula || "Not available")}. ${escapeHtml(method.peak_flow_explanation || "")}</li>
+      <li><strong>Pool-storage target:</strong> ${escapeHtml(method.target_formula || "Not available")}. ${escapeHtml(method.target_explanation || "")}</li>
+      <li><strong>Intense-rain footprint:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. ${escapeHtml(method.spatial_explanation || "")}</li>
+      <li><strong>Estimated fill ratio:</strong> ${escapeHtml(method.fill_ratio_explanation || "Not available")}</li>
+      <li><strong>Atlas 14 context:</strong> ${escapeHtml(method.atlas_explanation || "Not available")}</li>
+      <li><strong>Why drainage area is still present:</strong> ${escapeHtml(method.scaling_basis || "Not available")}</li>
+    </ul>
+
+    <h3>Classification language</h3>
+    <ul>
+      ${Object.entries(classifications).map(([key, value]) => `<li><strong>${escapeHtml(key.replaceAll("_", " "))}:</strong> ${escapeHtml(value)}</li>`).join("")}
+    </ul>
+    <p>${escapeHtml(method.condition_language || "Condition statements are modeled estimates, not field observations.")}</p>
+
+    <h3>Limitations</h3>
+    <ul>${limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+
+    <h3>Primary sources</h3>
+    <ul>${sources.map((source) => `<li><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.label)}</a></li>`).join("")}</ul>
+  `;
+}
+
+function renderSelected() {
+  const model = selectedModel();
+  const status = selectedStatus();
+  if (!model) return;
+  const event = status.last_rain_event;
+
+  $("detail-heading").textContent = model.name;
+  $("canyon-select").value = app.selectedId;
+  $("calculation-title").textContent = `${model.name} calculation`;
+  $("calibration-badge").textContent = model.calibration || "Provisional model";
+
+  renderCondition(model, event);
+  renderMetrics(model, event);
+  renderEvents(status);
+  renderStorageCalculation(model);
+  renderHydrologyCalculation(model, event);
+  renderDecision(model, event);
+  renderIntensityGates(model, event);
+  renderSummary();
+}
+
+function selectCanyon(id, fitMap = false) {
+  if (!app.model?.canyons?.[id]) return;
+  app.selectedId = id;
+  renderSelected();
+  updateMapSelection(fitMap);
+  history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+}
+
+async function initialize() {
   try {
-    const stamp = Date.now();
-    const [statusResponse, modelResponse, watershedResponse] = await Promise.all([
-      fetch(`${DATA_ROOT}/status.json?v=${stamp}`, { cache: "no-store" }),
-      fetch(`${DATA_ROOT}/model.json?v=${stamp}`, { cache: "no-store" }),
-      fetch(`${DATA_ROOT}/watersheds.geojson`, { cache: "force-cache" }),
+    [app.model, app.status, app.watersheds] = await Promise.all([
+      fetchJson(`${DATA_ROOT}/model.json`),
+      fetchJson(`${DATA_ROOT}/status.json`),
+      fetchJson("watersheds.geojson"),
     ]);
-    if (![statusResponse, modelResponse, watershedResponse].every((response) => response.ok)) throw new Error("One or more dashboard data files could not be loaded");
-    state.status = await statusResponse.json(); state.model = await modelResponse.json(); state.watersheds = await watershedResponse.json();
-    const names = Object.values(state.status.canyons).sort((a, b) => a.name.localeCompare(b.name));
-    $("canyon-select").innerHTML = names.map((canyon) => `<option value="${canyon.id}">${canyon.name}</option>`).join("");
-    $("canyon-select").value = state.selected;
-    $("canyon-select").addEventListener("change", (event) => { state.selected = event.target.value; renderOverview(); renderDetail(); });
-    const health = state.status.health || { ok: false, message: "Unknown tracker status" };
-    $("health-dot").classList.add(health.ok ? "ok" : "bad");
-    $("last-check").textContent = state.status.last_checked_utc ? `Updated ${localDate(state.status.last_checked_utc)}` : health.message;
-    $("health-dot").title = health.message;
-    renderOverview(); renderDetail();
+
+    setHealth();
+    populateSelect();
+    renderMethods();
+    const hashId = decodeURIComponent(location.hash.replace(/^#/, ""));
+    app.selectedId = app.model.canyons[hashId] ? hashId : Object.keys(app.model.canyons)[0];
+    initializeMap();
+    selectCanyon(app.selectedId, false);
   } catch (error) {
-    $("health-dot").classList.add("bad"); $("last-check").textContent = "Dashboard data unavailable";
-    $("condition-label").textContent = "Tracker unavailable"; $("condition-detail").textContent = error.message;
+    console.error(error);
+    const box = $("error-box");
+    box.hidden = false;
+    box.textContent = `Unable to load canyon-condition data: ${error.message}`;
+    $("health-pill").textContent = "Data load failed";
+    $("health-pill").className = "health-pill bad";
   }
 }
 
-load();
+initialize();
