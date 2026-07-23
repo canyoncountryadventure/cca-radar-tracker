@@ -4,8 +4,8 @@
     "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
     "rainfall_formula": "Z = 300 \u00d7 R^1.4; dBZ capped at 55 for rainfall-volume conversion",
     "rainfall_explanation": "The tracker converts each five-minute radar frame to rainfall, then area-weights the pixels inside the watershed polygon. Radar rainfall is an estimate and may be biased by hail, beam geometry, or evaporation.",
-    "runoff_formula": "NRCS direct runoff: S = 1000/CN \u2212 10; Ia = 0.20S; Q = (P \u2212 Ia)\u00b2/(P + 0.80S) when P > Ia",
-    "direct_runoff_explanation": "No fixed runoff coefficient is used. Accumulated basin-average radar rainfall is converted to dry, normal, and wet direct-runoff estimates with canyon-specific composite curve numbers from SSURGO soils and 2021 NLCD land cover. The central display uses the normal condition.",
+    "runoff_formula": "Adjusted NRCS direct runoff: S0.20 = 1000/CN \u2212 10; S0.05 = 1.33 \u00d7 S0.20^1.15; Ia = 0.05S0.05; Q = (P \u2212 Ia)\u00b2/(P + 0.95S0.05) when P > Ia",
+    "direct_runoff_explanation": "No fixed runoff coefficient is used. Accumulated basin-average radar rainfall is converted to dry, normal, and wet direct-runoff estimates with canyon-specific composite curve numbers from SSURGO soils and 2021 NLCD land cover. Traditional table CNs are converted to the Ia/S = 0.05 retention basis before runoff is calculated. Pixels without a usable SSURGO group are conservatively assigned to HSG D. The central display uses the normal condition.",
     "peak_flow_formula": "Screening peak CFS = 2 \u00d7 direct-runoff volume \u00f7 triangular hydrograph base time; base time = rain duration + 2 \u00d7 NRCS watershed lag",
     "peak_flow_explanation": "Peak flow is a routed screening estimate. Lag uses USGS 3DEP terrain, the supplied outlet, and basin extent. It is not used by itself to declare pools full.",
     "target_formula": "Fill target = 52,442 ft\u00b3 \u00d7 (technical-section length \u00f7 0.75 mi) \u00d7 (1 + canyon pothole modifier)",
@@ -48,6 +48,10 @@
       {
         "label": "NRCS runoff curve-number method",
         "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf"
+      },
+      {
+        "label": "Hawkins et al. adjusted 0.05 initial-abstraction method",
+        "url": "https://ponce.sdsu.edu/hawkins_initial_abstraction.pdf"
       }
     ],
     "classification": {
@@ -112,16 +116,22 @@
           "normal": 88.6,
           "wet": 94.8
         },
+        "retention_s05_inches": {
+          "dry": 4.591,
+          "normal": 1.777,
+          "wet": 0.667
+        },
         "initial_abstraction_inches": {
-          "dry": 0.588,
-          "normal": 0.258,
-          "wet": 0.11
+          "dry": 0.23,
+          "normal": 0.089,
+          "wet": 0.033
         },
         "hydrologic_soil_group_percent": {
           "C": 4.5,
           "D": 95.5
         },
         "soil_unmapped_percent": 12.6,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 87.4,
         "land_cover_percent": {
           "0": 5.5,
@@ -144,7 +154,7 @@
           "DRNAREA": 1.36,
           "ELEV": 5152.636
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -253,10 +263,15 @@
           "normal": 75.4,
           "wet": 87.8
         },
+        "retention_s05_inches": {
+          "dry": 13.333,
+          "normal": 5.181,
+          "wet": 1.942
+        },
         "initial_abstraction_inches": {
-          "dry": 1.487,
-          "normal": 0.652,
-          "wet": 0.278
+          "dry": 0.667,
+          "normal": 0.259,
+          "wet": 0.097
         },
         "hydrologic_soil_group_percent": {
           "A": 24.4,
@@ -265,6 +280,7 @@
           "D": 63.9
         },
         "soil_unmapped_percent": 0.8,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 84.4,
         "land_cover_percent": {
           "0": 7.9,
@@ -294,7 +310,7 @@
           "DRNAREA": 263.0,
           "ELEV": 6165.623
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -403,16 +419,22 @@
           "normal": 84.5,
           "wet": 92.8
         },
+        "retention_s05_inches": {
+          "dry": 6.86,
+          "normal": 2.672,
+          "wet": 0.993
+        },
         "initial_abstraction_inches": {
-          "dry": 0.834,
-          "normal": 0.366,
-          "wet": 0.156
+          "dry": 0.343,
+          "normal": 0.134,
+          "wet": 0.05
         },
         "hydrologic_soil_group_percent": {
           "A": 21.7,
           "D": 78.3
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 100.0,
         "land_cover_percent": {
           "0": 8.8,
@@ -542,15 +564,21 @@
           "normal": 90.6,
           "wet": 95.8
         },
+        "retention_s05_inches": {
+          "dry": 3.572,
+          "normal": 1.388,
+          "wet": 0.515
+        },
         "initial_abstraction_inches": {
-          "dry": 0.471,
-          "normal": 0.206,
-          "wet": 0.088
+          "dry": 0.179,
+          "normal": 0.069,
+          "wet": 0.026
         },
         "hydrologic_soil_group_percent": {
           "D": 100.0
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 100.0,
         "land_cover_percent": {
           "0": 6.1,
@@ -680,16 +708,22 @@
           "normal": 76.9,
           "wet": 88.6
         },
+        "retention_s05_inches": {
+          "dry": 12.186,
+          "normal": 4.712,
+          "wet": 1.777
+        },
         "initial_abstraction_inches": {
-          "dry": 1.372,
-          "normal": 0.601,
-          "wet": 0.257
+          "dry": 0.609,
+          "normal": 0.236,
+          "wet": 0.089
         },
         "hydrologic_soil_group_percent": {
           "A": 52.5,
           "D": 47.5
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 100.0,
         "land_cover_percent": {
           "0": 4.1,
@@ -824,16 +858,22 @@
           "normal": 82.9,
           "wet": 91.9
         },
+        "retention_s05_inches": {
+          "dry": 7.854,
+          "normal": 3.058,
+          "wet": 1.15
+        },
         "initial_abstraction_inches": {
-          "dry": 0.938,
-          "normal": 0.411,
-          "wet": 0.176
+          "dry": 0.393,
+          "normal": 0.153,
+          "wet": 0.058
         },
         "hydrologic_soil_group_percent": {
           "A": 24.3,
           "D": 75.7
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 100.0,
         "land_cover_percent": {
           "0": 7.0,
@@ -963,10 +1003,15 @@
           "normal": 68.3,
           "wet": 83.5
         },
+        "retention_s05_inches": {
+          "dry": 20.037,
+          "normal": 7.771,
+          "wet": 2.911
+        },
         "initial_abstraction_inches": {
-          "dry": 2.116,
-          "normal": 0.928,
-          "wet": 0.396
+          "dry": 1.002,
+          "normal": 0.389,
+          "wet": 0.146
         },
         "hydrologic_soil_group_percent": {
           "A": 77.5,
@@ -974,6 +1019,7 @@
           "D": 14.1
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 76.4,
         "land_cover_percent": {
           "0": 7.8,
@@ -1104,15 +1150,21 @@
           "normal": 88.3,
           "wet": 94.6
         },
+        "retention_s05_inches": {
+          "dry": 4.773,
+          "normal": 1.838,
+          "wet": 0.698
+        },
         "initial_abstraction_inches": {
-          "dry": 0.607,
-          "normal": 0.266,
-          "wet": 0.114
+          "dry": 0.239,
+          "normal": 0.092,
+          "wet": 0.035
         },
         "hydrologic_soil_group_percent": {
           "D": 100.0
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 100.0,
         "land_cover_percent": {
           "0": 11.9,
@@ -1240,10 +1292,15 @@
           "normal": 68.9,
           "wet": 83.8
         },
+        "retention_s05_inches": {
+          "dry": 19.402,
+          "normal": 7.526,
+          "wet": 2.838
+        },
         "initial_abstraction_inches": {
-          "dry": 2.06,
-          "normal": 0.903,
-          "wet": 0.386
+          "dry": 0.97,
+          "normal": 0.376,
+          "wet": 0.142
         },
         "hydrologic_soil_group_percent": {
           "A": 77.3,
@@ -1251,6 +1308,7 @@
           "D": 17.6
         },
         "soil_unmapped_percent": 6.6,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 12.2,
         "land_cover_percent": {
           "0": 5.2,
@@ -1273,7 +1331,7 @@
           "DRNAREA": 8.89,
           "ELEV": 5923.132
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -1382,16 +1440,22 @@
           "normal": 89.5,
           "wet": 95.2
         },
+        "retention_s05_inches": {
+          "dry": 4.151,
+          "normal": 1.598,
+          "wet": 0.605
+        },
         "initial_abstraction_inches": {
-          "dry": 0.537,
-          "normal": 0.235,
-          "wet": 0.101
+          "dry": 0.208,
+          "normal": 0.08,
+          "wet": 0.03
         },
         "hydrologic_soil_group_percent": {
           "A": 0.7,
           "D": 99.3
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 95.0,
         "land_cover_percent": {
           "0": 8.8,
@@ -1524,10 +1588,15 @@
           "normal": 84.0,
           "wet": 92.5
         },
+        "retention_s05_inches": {
+          "dry": 7.208,
+          "normal": 2.79,
+          "wet": 1.045
+        },
         "initial_abstraction_inches": {
-          "dry": 0.868,
-          "normal": 0.381,
-          "wet": 0.163
+          "dry": 0.36,
+          "normal": 0.14,
+          "wet": 0.052
         },
         "hydrologic_soil_group_percent": {
           "A": 1.6,
@@ -1535,6 +1604,7 @@
           "D": 98.4
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 81.7,
         "land_cover_percent": {
           "0": 8.3,
@@ -1666,16 +1736,22 @@
           "normal": 87.3,
           "wet": 94.1
         },
+        "retention_s05_inches": {
+          "dry": 5.311,
+          "normal": 2.047,
+          "wet": 0.778
+        },
         "initial_abstraction_inches": {
-          "dry": 0.666,
-          "normal": 0.292,
-          "wet": 0.125
+          "dry": 0.266,
+          "normal": 0.102,
+          "wet": 0.039
         },
         "hydrologic_soil_group_percent": {
           "A": 0.0,
           "D": 100.0
         },
         "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 26.0,
         "land_cover_percent": {
           "0": 20.3,
@@ -1804,16 +1880,22 @@
           "normal": 88.3,
           "wet": 94.6
         },
+        "retention_s05_inches": {
+          "dry": 4.773,
+          "normal": 1.838,
+          "wet": 0.698
+        },
         "initial_abstraction_inches": {
-          "dry": 0.607,
-          "normal": 0.266,
-          "wet": 0.114
+          "dry": 0.239,
+          "normal": 0.092,
+          "wet": 0.035
         },
         "hydrologic_soil_group_percent": {
           "C": 2.4,
           "D": 97.6
         },
         "soil_unmapped_percent": 70.5,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 29.5,
         "land_cover_percent": {
           "0": 14.5,
@@ -1835,7 +1917,7 @@
           "DRNAREA": 7.03,
           "ELEV": 6027.325
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -1944,16 +2026,22 @@
           "normal": 88.2,
           "wet": 94.6
         },
+        "retention_s05_inches": {
+          "dry": 4.835,
+          "normal": 1.859,
+          "wet": 0.698
+        },
         "initial_abstraction_inches": {
-          "dry": 0.613,
-          "normal": 0.269,
-          "wet": 0.115
+          "dry": 0.242,
+          "normal": 0.093,
+          "wet": 0.035
         },
         "hydrologic_soil_group_percent": {
           "C": 12.7,
           "D": 87.3
         },
         "soil_unmapped_percent": 8.6,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 91.4,
         "land_cover_percent": {
           "0": 7.8,
@@ -1974,7 +2062,7 @@
           "DRNAREA": 3.89,
           "ELEV": 6041.079
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -2083,10 +2171,15 @@
           "normal": 84.1,
           "wet": 92.5
         },
+        "retention_s05_inches": {
+          "dry": 7.129,
+          "normal": 2.767,
+          "wet": 1.045
+        },
         "initial_abstraction_inches": {
-          "dry": 0.861,
-          "normal": 0.377,
-          "wet": 0.161
+          "dry": 0.356,
+          "normal": 0.138,
+          "wet": 0.052
         },
         "hydrologic_soil_group_percent": {
           "A": 11.4,
@@ -2095,6 +2188,7 @@
           "D": 83.2
         },
         "soil_unmapped_percent": 48.2,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 51.8,
         "land_cover_percent": {
           "0": 5.8,
@@ -2122,7 +2216,7 @@
           "DRNAREA": 77.4,
           "ELEV": 6721.059
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -2231,16 +2325,22 @@
           "normal": 88.3,
           "wet": 94.6
         },
+        "retention_s05_inches": {
+          "dry": 4.742,
+          "normal": 1.838,
+          "wet": 0.698
+        },
         "initial_abstraction_inches": {
-          "dry": 0.604,
-          "normal": 0.265,
-          "wet": 0.113
+          "dry": 0.237,
+          "normal": 0.092,
+          "wet": 0.035
         },
         "hydrologic_soil_group_percent": {
           "C": 3.2,
           "D": 96.8
         },
         "soil_unmapped_percent": 20.2,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 79.8,
         "land_cover_percent": {
           "0": 7.7,
@@ -2261,7 +2361,7 @@
           "DRNAREA": 3.25,
           "ELEV": 5521.428
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
@@ -2370,10 +2470,15 @@
           "normal": 86.0,
           "wet": 93.5
         },
+        "retention_s05_inches": {
+          "dry": 6.02,
+          "normal": 2.329,
+          "wet": 0.876
+        },
         "initial_abstraction_inches": {
-          "dry": 0.742,
-          "normal": 0.325,
-          "wet": 0.139
+          "dry": 0.301,
+          "normal": 0.116,
+          "wet": 0.044
         },
         "hydrologic_soil_group_percent": {
           "A": 6.8,
@@ -2381,6 +2486,7 @@
           "D": 91.5
         },
         "soil_unmapped_percent": 11.9,
+        "unmapped_soil_assigned_to_hsg": "D",
         "soil_group_inferred_percent": 88.1,
         "land_cover_percent": {
           "0": 7.0,
@@ -2403,7 +2509,7 @@
           "DRNAREA": 3.58,
           "ELEV": 6339.51
         },
-        "parameter_quality": "screening; field calibration required"
+        "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
       },
       "atlas14_inches": {
         "5-min": {
