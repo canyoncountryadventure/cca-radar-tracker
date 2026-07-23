@@ -1,11 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "method": {
-    "curve_number": "NRCS runoff curve number, composite of SSURGO hydrologic soil group and 2021 NLCD land cover",
-    "initial_abstraction": "Ia = 0.20S; S = 1000/CN - 10 inches",
+    "curve_number": "Traditional NRCS table curve numbers composited from SSURGO hydrologic soil group and 2021 NLCD land cover for dry, normal, and wet antecedent conditions.",
+    "soil_uncertainty": "Raster cells without a usable SSURGO map unit or hydrologic soil group are assigned to hydrologic soil group D (high runoff potential) before the composite curve number is calculated. The reported hydrologic_soil_group_percent values already include that conservative assignment.",
+    "initial_abstraction": "Adjusted curve-number method: S0.20 = 1000/CN - 10 inches; S0.05 = 1.33 \u00d7 S0.20^1.15; Ia = 0.05 \u00d7 S0.05.",
+    "direct_runoff": "Q = (P - 0.05S0.05)^2 / (P + 0.95S0.05) when P > 0.05S0.05; otherwise Q = 0.",
     "terrain": "USGS 3DEP elevation and slope sampled within supplied watershed polygon",
-    "lag": "NRCS watershed lag equation; hydraulic length approximated from supplied pour point and basin extent",
-    "warning": "Parameters are screening estimates and require field calibration; they are not measured streamflow."
+    "lag": "NRCS watershed lag equation using the traditional CN retention term; hydraulic length approximated from supplied pour point and basin extent.",
+    "warning": "Parameters are screening estimates. Radar rainfall, curve numbers, routing, channel transmission loss, and pool storage require field calibration; results are not measured streamflow or observed pool depth."
   },
   "canyons": {
     "zerog": {
@@ -16,16 +18,22 @@
         "normal": 88.6,
         "wet": 94.8
       },
+      "retention_s05_inches": {
+        "dry": 4.591,
+        "normal": 1.777,
+        "wet": 0.667
+      },
       "initial_abstraction_inches": {
-        "dry": 0.588,
-        "normal": 0.258,
-        "wet": 0.11
+        "dry": 0.23,
+        "normal": 0.089,
+        "wet": 0.033
       },
       "hydrologic_soil_group_percent": {
         "C": 4.5,
         "D": 95.5
       },
       "soil_unmapped_percent": 12.6,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 87.4,
       "land_cover_percent": {
         "0": 5.5,
@@ -48,7 +56,7 @@
         "DRNAREA": 1.36,
         "ELEV": 5152.636
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "black-hole-white-canyon": {
       "name": "Black Hole of White Canyon",
@@ -58,10 +66,15 @@
         "normal": 75.4,
         "wet": 87.8
       },
+      "retention_s05_inches": {
+        "dry": 13.333,
+        "normal": 5.181,
+        "wet": 1.942
+      },
       "initial_abstraction_inches": {
-        "dry": 1.487,
-        "normal": 0.652,
-        "wet": 0.278
+        "dry": 0.667,
+        "normal": 0.259,
+        "wet": 0.097
       },
       "hydrologic_soil_group_percent": {
         "A": 24.4,
@@ -70,6 +83,7 @@
         "D": 63.9
       },
       "soil_unmapped_percent": 0.8,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 84.4,
       "land_cover_percent": {
         "0": 7.9,
@@ -99,7 +113,7 @@
         "DRNAREA": 263.0,
         "ELEV": 6165.623
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "leprechaun": {
       "name": "Leprechaun",
@@ -109,16 +123,22 @@
         "normal": 84.5,
         "wet": 92.8
       },
+      "retention_s05_inches": {
+        "dry": 6.86,
+        "normal": 2.672,
+        "wet": 0.993
+      },
       "initial_abstraction_inches": {
-        "dry": 0.834,
-        "normal": 0.366,
-        "wet": 0.156
+        "dry": 0.343,
+        "normal": 0.134,
+        "wet": 0.05
       },
       "hydrologic_soil_group_percent": {
         "A": 21.7,
         "D": 78.3
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 100.0,
       "land_cover_percent": {
         "0": 8.8,
@@ -149,15 +169,21 @@
         "normal": 90.6,
         "wet": 95.8
       },
+      "retention_s05_inches": {
+        "dry": 3.572,
+        "normal": 1.388,
+        "wet": 0.515
+      },
       "initial_abstraction_inches": {
-        "dry": 0.471,
-        "normal": 0.206,
-        "wet": 0.088
+        "dry": 0.179,
+        "normal": 0.069,
+        "wet": 0.026
       },
       "hydrologic_soil_group_percent": {
         "D": 100.0
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 100.0,
       "land_cover_percent": {
         "0": 6.1,
@@ -188,16 +214,22 @@
         "normal": 76.9,
         "wet": 88.6
       },
+      "retention_s05_inches": {
+        "dry": 12.186,
+        "normal": 4.712,
+        "wet": 1.777
+      },
       "initial_abstraction_inches": {
-        "dry": 1.372,
-        "normal": 0.601,
-        "wet": 0.257
+        "dry": 0.609,
+        "normal": 0.236,
+        "wet": 0.089
       },
       "hydrologic_soil_group_percent": {
         "A": 52.5,
         "D": 47.5
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 100.0,
       "land_cover_percent": {
         "0": 4.1,
@@ -233,16 +265,22 @@
         "normal": 82.9,
         "wet": 91.9
       },
+      "retention_s05_inches": {
+        "dry": 7.854,
+        "normal": 3.058,
+        "wet": 1.15
+      },
       "initial_abstraction_inches": {
-        "dry": 0.938,
-        "normal": 0.411,
-        "wet": 0.176
+        "dry": 0.393,
+        "normal": 0.153,
+        "wet": 0.058
       },
       "hydrologic_soil_group_percent": {
         "A": 24.3,
         "D": 75.7
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 100.0,
       "land_cover_percent": {
         "0": 7.0,
@@ -273,10 +311,15 @@
         "normal": 68.3,
         "wet": 83.5
       },
+      "retention_s05_inches": {
+        "dry": 20.037,
+        "normal": 7.771,
+        "wet": 2.911
+      },
       "initial_abstraction_inches": {
-        "dry": 2.116,
-        "normal": 0.928,
-        "wet": 0.396
+        "dry": 1.002,
+        "normal": 0.389,
+        "wet": 0.146
       },
       "hydrologic_soil_group_percent": {
         "A": 77.5,
@@ -284,6 +327,7 @@
         "D": 14.1
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 76.4,
       "land_cover_percent": {
         "0": 7.8,
@@ -315,15 +359,21 @@
         "normal": 88.3,
         "wet": 94.6
       },
+      "retention_s05_inches": {
+        "dry": 4.773,
+        "normal": 1.838,
+        "wet": 0.698
+      },
       "initial_abstraction_inches": {
-        "dry": 0.607,
-        "normal": 0.266,
-        "wet": 0.114
+        "dry": 0.239,
+        "normal": 0.092,
+        "wet": 0.035
       },
       "hydrologic_soil_group_percent": {
         "D": 100.0
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 100.0,
       "land_cover_percent": {
         "0": 11.9,
@@ -352,10 +402,15 @@
         "normal": 68.9,
         "wet": 83.8
       },
+      "retention_s05_inches": {
+        "dry": 19.402,
+        "normal": 7.526,
+        "wet": 2.838
+      },
       "initial_abstraction_inches": {
-        "dry": 2.06,
-        "normal": 0.903,
-        "wet": 0.386
+        "dry": 0.97,
+        "normal": 0.376,
+        "wet": 0.142
       },
       "hydrologic_soil_group_percent": {
         "A": 77.3,
@@ -363,6 +418,7 @@
         "D": 17.6
       },
       "soil_unmapped_percent": 6.6,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 12.2,
       "land_cover_percent": {
         "0": 5.2,
@@ -385,7 +441,7 @@
         "DRNAREA": 8.89,
         "ELEV": 5923.132
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "poe": {
       "name": "Poe",
@@ -395,16 +451,22 @@
         "normal": 89.5,
         "wet": 95.2
       },
+      "retention_s05_inches": {
+        "dry": 4.151,
+        "normal": 1.598,
+        "wet": 0.605
+      },
       "initial_abstraction_inches": {
-        "dry": 0.537,
-        "normal": 0.235,
-        "wet": 0.101
+        "dry": 0.208,
+        "normal": 0.08,
+        "wet": 0.03
       },
       "hydrologic_soil_group_percent": {
         "A": 0.7,
         "D": 99.3
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 95.0,
       "land_cover_percent": {
         "0": 8.8,
@@ -438,10 +500,15 @@
         "normal": 84.0,
         "wet": 92.5
       },
+      "retention_s05_inches": {
+        "dry": 7.208,
+        "normal": 2.79,
+        "wet": 1.045
+      },
       "initial_abstraction_inches": {
-        "dry": 0.868,
-        "normal": 0.381,
-        "wet": 0.163
+        "dry": 0.36,
+        "normal": 0.14,
+        "wet": 0.052
       },
       "hydrologic_soil_group_percent": {
         "A": 1.6,
@@ -449,6 +516,7 @@
         "D": 98.4
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 81.7,
       "land_cover_percent": {
         "0": 8.3,
@@ -481,16 +549,22 @@
         "normal": 87.3,
         "wet": 94.1
       },
+      "retention_s05_inches": {
+        "dry": 5.311,
+        "normal": 2.047,
+        "wet": 0.778
+      },
       "initial_abstraction_inches": {
-        "dry": 0.666,
-        "normal": 0.292,
-        "wet": 0.125
+        "dry": 0.266,
+        "normal": 0.102,
+        "wet": 0.039
       },
       "hydrologic_soil_group_percent": {
         "A": 0.0,
         "D": 100.0
       },
       "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 26.0,
       "land_cover_percent": {
         "0": 20.3,
@@ -520,16 +594,22 @@
         "normal": 88.3,
         "wet": 94.6
       },
+      "retention_s05_inches": {
+        "dry": 4.773,
+        "normal": 1.838,
+        "wet": 0.698
+      },
       "initial_abstraction_inches": {
-        "dry": 0.607,
-        "normal": 0.266,
-        "wet": 0.114
+        "dry": 0.239,
+        "normal": 0.092,
+        "wet": 0.035
       },
       "hydrologic_soil_group_percent": {
         "C": 2.4,
         "D": 97.6
       },
       "soil_unmapped_percent": 70.5,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 29.5,
       "land_cover_percent": {
         "0": 14.5,
@@ -551,7 +631,7 @@
         "DRNAREA": 7.03,
         "ELEV": 6027.325
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "cable-canyon": {
       "name": "Cable Canyon",
@@ -561,16 +641,22 @@
         "normal": 88.2,
         "wet": 94.6
       },
+      "retention_s05_inches": {
+        "dry": 4.835,
+        "normal": 1.859,
+        "wet": 0.698
+      },
       "initial_abstraction_inches": {
-        "dry": 0.613,
-        "normal": 0.269,
-        "wet": 0.115
+        "dry": 0.242,
+        "normal": 0.093,
+        "wet": 0.035
       },
       "hydrologic_soil_group_percent": {
         "C": 12.7,
         "D": 87.3
       },
       "soil_unmapped_percent": 8.6,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 91.4,
       "land_cover_percent": {
         "0": 7.8,
@@ -591,7 +677,7 @@
         "DRNAREA": 3.89,
         "ELEV": 6041.079
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "eardley": {
       "name": "Eardley",
@@ -601,10 +687,15 @@
         "normal": 84.1,
         "wet": 92.5
       },
+      "retention_s05_inches": {
+        "dry": 7.129,
+        "normal": 2.767,
+        "wet": 1.045
+      },
       "initial_abstraction_inches": {
-        "dry": 0.861,
-        "normal": 0.377,
-        "wet": 0.161
+        "dry": 0.356,
+        "normal": 0.138,
+        "wet": 0.052
       },
       "hydrologic_soil_group_percent": {
         "A": 11.4,
@@ -613,6 +704,7 @@
         "D": 83.2
       },
       "soil_unmapped_percent": 48.2,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 51.8,
       "land_cover_percent": {
         "0": 5.8,
@@ -640,7 +732,7 @@
         "DRNAREA": 77.4,
         "ELEV": 6721.059
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "north-fork-iron-wash": {
       "name": "North Fork of Iron Wash",
@@ -650,16 +742,22 @@
         "normal": 88.3,
         "wet": 94.6
       },
+      "retention_s05_inches": {
+        "dry": 4.742,
+        "normal": 1.838,
+        "wet": 0.698
+      },
       "initial_abstraction_inches": {
-        "dry": 0.604,
-        "normal": 0.265,
-        "wet": 0.113
+        "dry": 0.237,
+        "normal": 0.092,
+        "wet": 0.035
       },
       "hydrologic_soil_group_percent": {
         "C": 3.2,
         "D": 96.8
       },
       "soil_unmapped_percent": 20.2,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 79.8,
       "land_cover_percent": {
         "0": 7.7,
@@ -680,7 +778,7 @@
         "DRNAREA": 3.25,
         "ELEV": 5521.428
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     },
     "upper-greasewood": {
       "name": "Upper Greasewood",
@@ -690,10 +788,15 @@
         "normal": 86.0,
         "wet": 93.5
       },
+      "retention_s05_inches": {
+        "dry": 6.02,
+        "normal": 2.329,
+        "wet": 0.876
+      },
       "initial_abstraction_inches": {
-        "dry": 0.742,
-        "normal": 0.325,
-        "wet": 0.139
+        "dry": 0.301,
+        "normal": 0.116,
+        "wet": 0.044
       },
       "hydrologic_soil_group_percent": {
         "A": 6.8,
@@ -701,6 +804,7 @@
         "D": 91.5
       },
       "soil_unmapped_percent": 11.9,
+      "unmapped_soil_assigned_to_hsg": "D",
       "soil_group_inferred_percent": 88.1,
       "land_cover_percent": {
         "0": 7.0,
@@ -723,7 +827,7 @@
         "DRNAREA": 3.58,
         "ELEV": 6339.51
       },
-      "parameter_quality": "screening; field calibration required"
+      "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
     }
   }
 }

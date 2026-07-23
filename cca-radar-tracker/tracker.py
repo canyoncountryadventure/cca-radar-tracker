@@ -4,7 +4,7 @@
 Pool-fill targets are normalized to the mapped Zero G depression storage and each
 canyon's technical-section length, then adjusted by the user-defined pothole
 modifier. Heavy-rain gates use fixed watershed percentages for every canyon:
-50+ dBZ over 50%, 55+ dBZ over 25%, or 60+ dBZ over 10%.
+50+ dBZ over 50%, 55+ dBZ over 25%, or 60+ dBZ over 10%. Runoff uses the adjusted curve-number initial-abstraction relation with Ia/S = 0.05.
 """
 
 from __future__ import annotations
@@ -32,6 +32,10 @@ GRID_RESOLUTION = 0.005
 GRID_LEFT_EDGE = -126.0025
 GRID_TOP_EDGE = 50.0025
 SQUARE_FEET_PER_SQUARE_MILE = 5280**2
+
+INITIAL_ABSTRACTION_RATIO = 0.05
+RETENTION_S05_COEFFICIENT = 1.33
+RETENTION_S05_EXPONENT = 1.15
 
 ZERO_G_STORAGE_FT3 = 52_442
 ZERO_G_TECHNICAL_LENGTH_MILES = 0.75
@@ -745,14 +749,39 @@ def atlas_return_period(
     return pairs[-1][0]
 
 
+def nrcs_retention_s20(curve_number: float) -> float:
+    """Traditional table-CN retention, in inches, based on Ia/S = 0.20."""
+    if not 0.0 < curve_number <= 100.0:
+        raise ValueError(f"Curve number must be in (0, 100]; received {curve_number}")
+    return max(0.0, 1000.0 / curve_number - 10.0)
+
+
+def nrcs_retention_s05(curve_number: float) -> float:
+    """Convert traditional table-CN retention to the adjusted Ia/S = 0.05 basis."""
+    retention_s20 = nrcs_retention_s20(curve_number)
+    return RETENTION_S05_COEFFICIENT * retention_s20**RETENTION_S05_EXPONENT
+
+
+def nrcs_initial_abstraction(curve_number: float) -> float:
+    """Adjusted initial abstraction, in inches, for a traditional table CN."""
+    return INITIAL_ABSTRACTION_RATIO * nrcs_retention_s05(curve_number)
+
+
 def nrcs_runoff_depth(rain_inches: float, curve_number: float) -> float:
-    """NRCS direct-runoff depth using the traditional Ia=0.20S relation."""
-    retention = 1000.0 / curve_number - 10.0
-    abstraction = 0.20 * retention
+    """Adjusted NRCS direct-runoff depth using Ia/S = 0.05.
+
+    The canyon curve numbers come from traditional NRCS tables developed on the
+    Ia/S = 0.20 basis. Their retention term is therefore converted to S0.05
+    before applying the 0.05 runoff equation.
+    """
+    if rain_inches <= 0.0:
+        return 0.0
+    retention_s05 = nrcs_retention_s05(curve_number)
+    abstraction = INITIAL_ABSTRACTION_RATIO * retention_s05
     if rain_inches <= abstraction:
         return 0.0
     return (rain_inches - abstraction) ** 2 / (
-        rain_inches + 0.80 * retention
+        rain_inches + (1.0 - INITIAL_ABSTRACTION_RATIO) * retention_s05
     )
 
 
@@ -782,10 +811,13 @@ def apply_hydrologic_model(
     volumes: dict[str, int] = {}
     peaks: dict[str, float] = {}
     runoff_depths: dict[str, float] = {}
+    retention_s05: dict[str, float] = {}
+    initial_abstraction: dict[str, float] = {}
     for state in ("dry", "normal", "wet"):
-        depth = nrcs_runoff_depth(
-            rain, float(hydrology["curve_number"][state])
-        )
+        curve_number = float(hydrology["curve_number"][state])
+        retention_s05[state] = round(nrcs_retention_s05(curve_number), 4)
+        initial_abstraction[state] = round(nrcs_initial_abstraction(curve_number), 4)
+        depth = nrcs_runoff_depth(rain, curve_number)
         volume = depth / 12.0 * area_ft2
         base_seconds = max(
             300.0, (duration_hr + 2.0 * lag_hr) * 3600.0
@@ -795,6 +827,8 @@ def apply_hydrologic_model(
         peaks[state] = round(2.0 * volume / base_seconds, 2)
 
     event["hydrology_available"] = True
+    event["retention_s05_inches"] = retention_s05
+    event["initial_abstraction_inches"] = initial_abstraction
     event["runoff_depth_inches"] = runoff_depths
     event["direct_runoff_ft3_range"] = volumes
     event["direct_runoff_ft3"] = volumes["normal"]
@@ -1193,14 +1227,18 @@ def model_metadata(
                 "is an estimate and may be biased by hail, beam geometry, or evaporation."
             ),
             "runoff_formula": (
-                "NRCS direct runoff: S = 1000/CN − 10; Ia = 0.20S; "
-                "Q = (P − Ia)²/(P + 0.80S) when P > Ia"
+                "Adjusted NRCS direct runoff: S0.20 = 1000/CN − 10; "
+                "S0.05 = 1.33 × S0.20^1.15; Ia = 0.05S0.05; "
+                "Q = (P − Ia)²/(P + 0.95S0.05) when P > Ia"
             ),
             "direct_runoff_explanation": (
                 "No fixed runoff coefficient is used. Accumulated basin-average radar "
                 "rainfall is converted to dry, normal, and wet direct-runoff estimates "
                 "with canyon-specific composite curve numbers from SSURGO soils and "
-                "2021 NLCD land cover. The central display uses the normal condition."
+                "2021 NLCD land cover. Traditional table CNs are converted to the "
+                "Ia/S = 0.05 retention basis before runoff is calculated. Pixels "
+                "without a usable SSURGO group are conservatively assigned to HSG D. "
+                "The central display uses the normal condition."
             ),
             "peak_flow_formula": (
                 "Screening peak CFS = 2 × direct-runoff volume ÷ triangular hydrograph "
@@ -1283,6 +1321,10 @@ def model_metadata(
                 {
                     "label": "NRCS runoff curve-number method",
                     "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf",
+                },
+                {
+                    "label": "Hawkins et al. adjusted 0.05 initial-abstraction method",
+                    "url": "https://ponce.sdsu.edu/hawkins_initial_abstraction.pdf",
                 },
             ],
             "classification": {
