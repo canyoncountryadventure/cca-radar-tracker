@@ -22,6 +22,8 @@ const app = {
   watersheds: null,
   selectedId: null,
   map: null,
+  baseLayers: {},
+  activeBase: "satellite",
   watershedLayer: null,
   radarLayer: null,
   layersById: new Map(),
@@ -224,19 +226,83 @@ function radarColor(value) {
   return "#ec64cf";
 }
 
-function initializeMap() {
-  const topo = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-    maxZoom: 17,
-    attribution: "Map © OpenTopoMap contributors",
+function setMapButtonState(selector, activeValue) {
+  document.querySelectorAll(selector).forEach((button) => {
+    const value = button.dataset.mapBase || button.dataset.mapOverlay;
+    const active = value === activeValue || activeValue?.has?.(value);
+    button.classList.toggle("active", Boolean(active));
+    button.setAttribute("aria-pressed", String(Boolean(active)));
   });
+}
+
+function setBaseLayer(name) {
+  const next = app.baseLayers[name];
+  if (!app.map || !next || app.activeBase === name) return;
+  const current = app.baseLayers[app.activeBase];
+  if (current && app.map.hasLayer(current)) app.map.removeLayer(current);
+  next.addTo(app.map);
+  app.activeBase = name;
+  setMapButtonState("[data-map-base]", name);
+}
+
+function setOverlayLayer(name, visible) {
+  if (!app.map) return;
+  const layer = name === "radar" ? app.radarLayer : app.watershedLayer;
+  if (!layer) return;
+  if (visible && !app.map.hasLayer(layer)) layer.addTo(app.map);
+  if (!visible && app.map.hasLayer(layer)) app.map.removeLayer(layer);
+  const active = new Set();
+  if (app.radarLayer && app.map.hasLayer(app.radarLayer)) active.add("radar");
+  if (app.watershedLayer && app.map.hasLayer(app.watershedLayer)) active.add("watersheds");
+  setMapButtonState("[data-map-overlay]", active);
+}
+
+function bindMapToggles() {
+  document.querySelectorAll("[data-map-base]").forEach((button) => {
+    button.addEventListener("click", () => setBaseLayer(button.dataset.mapBase));
+  });
+  document.querySelectorAll("[data-map-overlay]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.mapOverlay;
+      setOverlayLayer(name, button.getAttribute("aria-pressed") !== "true");
+    });
+  });
+}
+
+function initializeMap() {
   const satellite = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    { maxZoom: 19, attribution: "Imagery © Esri and contributors" },
+    {
+      maxZoom: 19,
+      attribution: "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+    },
+  );
+  const topo = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Topographic map © Esri and contributors",
+    },
   );
 
-  app.map = L.map("map", { layers: [topo], zoomControl: true, preferCanvas: true });
+  app.baseLayers = { satellite, topo };
+  app.activeBase = "satellite";
+  app.map = L.map("map", {
+    layers: [satellite],
+    zoomControl: true,
+    preferCanvas: true,
+    zoomSnap: 0.25,
+    wheelPxPerZoomLevel: 90,
+  });
+
+  app.map.createPane("radarPane");
+  app.map.getPane("radarPane").style.zIndex = "410";
+  app.map.createPane("watershedPane");
+  app.map.getPane("watershedPane").style.zIndex = "420";
+
   app.radarLayer = L.layerGroup().addTo(app.map);
   app.watershedLayer = L.geoJSON(app.watersheds, {
+    pane: "watershedPane",
     style: watershedStyle,
     onEachFeature(feature, layer) {
       const id = feature.properties.id;
@@ -250,16 +316,17 @@ function initializeMap() {
     },
   }).addTo(app.map);
 
-  L.control.layers(
-    { Topographic: topo, Satellite: satellite },
-    { "Peak-event radar pixels": app.radarLayer, "Watershed polygons": app.watershedLayer },
-    { collapsed: true },
-  ).addTo(app.map);
+  bindMapToggles();
+  setMapButtonState("[data-map-base]", app.activeBase);
+  setOverlayLayer("radar", true);
+  setOverlayLayer("watersheds", true);
 
   const bounds = app.watershedLayer.getBounds();
-  if (bounds.isValid()) app.map.fitBounds(bounds.pad(0.05));
-}
+  if (bounds.isValid()) app.map.fitBounds(bounds.pad(0.05), { maxZoom: 10 });
 
+  requestAnimationFrame(() => app.map.invalidateSize({ pan: false }));
+  window.addEventListener("resize", () => app.map.invalidateSize({ pan: false }));
+}
 function drawSelectedRadar() {
   if (!app.radarLayer) return;
   app.radarLayer.clearLayers();
@@ -297,6 +364,7 @@ function drawSelectedRadar() {
           fillColor: color,
           fillOpacity: 0.62,
           interactive: true,
+          pane: "radarPane",
         },
       ).bindTooltip(`${number(value, 1)} dBZ`).addTo(app.radarLayer);
     });
@@ -308,7 +376,7 @@ function updateMapSelection(fit = false) {
   app.watershedLayer.setStyle(watershedStyle);
   const layer = app.layersById.get(app.selectedId);
   if (fit && layer) app.map.fitBounds(layer.getBounds().pad(0.35), { maxZoom: 11 });
-  if (layer) layer.bringToFront();
+  if (layer && app.map.hasLayer(app.watershedLayer)) layer.bringToFront();
   drawSelectedRadar();
   setTimeout(() => app.map.invalidateSize(), 0);
 }

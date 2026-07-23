@@ -7,7 +7,7 @@
   <meta name="description" content="Radar-derived slot-canyon pool-refill estimates for Canyon Country Adventures.">
   <title>Slot Canyon Pool Conditions</title>
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynHTYIlgq7waB1hMZbY6xR8R1B9Y=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,7 +35,21 @@
           </div>
           <div class="map-note"><p class="panel-note">Blue polygons define the watersheds used for radar averaging and intense-rain coverage. Colored cells show the selected event’s retained radar grid.</p><p id="radar-time" class="radar-time"></p></div>
         </div>
-        <div id="map" aria-label="Map of monitored canyon watersheds"></div>
+        <div class="map-frame">
+          <div id="map" aria-label="Map of monitored canyon watersheds"></div>
+          <div class="map-toolbar" aria-label="Map layers">
+            <div class="map-toggle-group" aria-label="Basemap">
+              <span class="map-toggle-label">Base</span>
+              <button type="button" class="map-toggle active" data-map-base="satellite" aria-pressed="true">Satellite</button>
+              <button type="button" class="map-toggle" data-map-base="topo" aria-pressed="false">Topo</button>
+            </div>
+            <div class="map-toggle-group" aria-label="Overlays">
+              <span class="map-toggle-label">Layers</span>
+              <button type="button" class="map-toggle active" data-map-overlay="radar" aria-pressed="true">Radar</button>
+              <button type="button" class="map-toggle active" data-map-overlay="watersheds" aria-pressed="true">Watersheds</button>
+            </div>
+          </div>
+        </div>
       </article>
 
       <article class="panel summary-panel">
