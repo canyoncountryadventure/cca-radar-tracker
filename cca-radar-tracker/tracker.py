@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Analyze IEM N0Q radar for every CCA canyon and update the dashboard data."""
+"""Analyze IEM N0Q radar for every CCA canyon and update the dashboard data.
+
+Pool-fill targets are normalized to the mapped Zero G depression storage and each
+canyon's technical-section length, then adjusted by the user-defined pothole
+modifier. Heavy-rain gates use fixed watershed percentages for every canyon:
+50+ dBZ over 50%, 55+ dBZ over 25%, or 60+ dBZ over 10%.
+"""
 
 from __future__ import annotations
 
@@ -20,13 +26,114 @@ from typing import Any, Iterable
 import numpy as np
 from PIL import Image, ImageDraw
 
-
 ROOT = Path(__file__).resolve().parent
 UTC = timezone.utc
 GRID_RESOLUTION = 0.005
 GRID_LEFT_EDGE = -126.0025
 GRID_TOP_EDGE = 50.0025
 SQUARE_FEET_PER_SQUARE_MILE = 5280**2
+
+ZERO_G_STORAGE_FT3 = 52_442
+ZERO_G_TECHNICAL_LENGTH_MILES = 0.75
+
+# Modifier convention:
+#   0.00 = same pothole-storage rate per technical mile as Zero G
+#  -0.25 = 25% less storage per technical mile
+#  +0.50 = 50% more storage per technical mile
+#  +1.00 = twice the storage per technical mile
+CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
+    "zerog": {
+        "technical_length_miles": 0.75,
+        "pothole_modifier": 0.00,
+        "basis": "Zero G 1-meter depression inventory: 114 depressions totaling 1,485.0 m3 (52,442 ft3)",
+    },
+    "black-hole-white-canyon": {
+        "technical_length_miles": 2.50,
+        "pothole_modifier": 0.50,
+        "basis": "User technical-section length and continuous-water/pool morphology adjustment",
+    },
+    "leprechaun": {
+        "technical_length_miles": 1.00,
+        "pothole_modifier": -0.90,
+        "basis": "User technical-section length and very-low persistent pool-storage adjustment",
+    },
+    "woody": {
+        "technical_length_miles": 0.25,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
+    "hog-canyons": {
+        "technical_length_miles": 0.65,
+        "pothole_modifier": -0.25,
+        "basis": "User technical-section length and lower pothole-storage adjustment",
+    },
+    "no-kidding": {
+        "technical_length_miles": 0.34,
+        "pothole_modifier": 0.20,
+        "basis": "User technical-section length and higher pothole-storage adjustment",
+    },
+    "angel-cove": {
+        "technical_length_miles": 0.65,
+        "pothole_modifier": -0.25,
+        "basis": "User technical-section length and lower pothole-storage adjustment",
+    },
+    "constrychnine": {
+        "technical_length_miles": 0.60,
+        "pothole_modifier": -0.50,
+        "basis": "User technical-section length and lower pothole-storage adjustment",
+    },
+    "alcatraz": {
+        "technical_length_miles": 0.65,
+        "pothole_modifier": 0.20,
+        "basis": "User technical-section length and higher pothole-storage adjustment",
+    },
+    "poe": {
+        "technical_length_miles": 0.65,
+        "pothole_modifier": 1.00,
+        "basis": "User technical-section length and large-keeper-pothole adjustment",
+    },
+    "entrajo": {
+        "technical_length_miles": 0.85,
+        "pothole_modifier": -0.70,
+        "basis": "User technical-section length; result closely matches prior 1-meter depression estimate",
+    },
+    "pool-arch": {
+        "technical_length_miles": 0.10,
+        "pothole_modifier": -0.75,
+        "basis": "User technical-section length and low-storage adjustment",
+    },
+    "the-squeeze": {
+        "technical_length_miles": 1.25,
+        "pothole_modifier": 0.75,
+        "basis": "User technical-section length and pothole-dense adjustment",
+    },
+    "cable-canyon": {
+        "technical_length_miles": 2.50,
+        "pothole_modifier": 0.50,
+        "basis": "User technical-section length and higher pool-storage adjustment",
+    },
+    "eardley": {
+        "technical_length_miles": 1.00,
+        "pothole_modifier": 0.25,
+        "basis": "User technical-section length and higher pool-storage adjustment",
+    },
+    "north-fork-iron-wash": {
+        "technical_length_miles": 0.75,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
+    "upper-greasewood": {
+        "technical_length_miles": 1.20,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
+}
+
+FIXED_SPATIAL_RULES = (
+    {"dbz": 50.0, "minimum_coverage_percent": 50.0},
+    {"dbz": 55.0, "minimum_coverage_percent": 25.0},
+    {"dbz": 60.0, "minimum_coverage_percent": 10.0},
+)
 
 
 def utc_text(value: datetime) -> str:
@@ -80,7 +187,9 @@ class Canyon:
     model: dict[str, Any]
 
 
-def geometry_rings(geometry: dict[str, Any]) -> list[tuple[list[list[float]], list[list[list[float]]]]]:
+def geometry_rings(
+    geometry: dict[str, Any],
+) -> list[tuple[list[list[float]], list[list[list[float]]]]]:
     if geometry["type"] == "Polygon":
         return [(geometry["coordinates"][0], geometry["coordinates"][1:])]
     if geometry["type"] == "MultiPolygon":
@@ -101,10 +210,12 @@ def aligned_grid_for_points(points: Iterable[list[float]], padding_cells: int) -
     maximum_x = max(point[0] for point in points)
     minimum_y = min(point[1] for point in points)
     maximum_y = max(point[1] for point in points)
+
     first_column = math.floor((minimum_x - GRID_LEFT_EDGE) / GRID_RESOLUTION) - padding_cells
     last_column = math.floor((maximum_x - GRID_LEFT_EDGE) / GRID_RESOLUTION) + padding_cells
     first_row = math.floor((GRID_TOP_EDGE - maximum_y) / GRID_RESOLUTION) - padding_cells
     last_row = math.floor((GRID_TOP_EDGE - minimum_y) / GRID_RESOLUTION) + padding_cells
+
     return Grid(
         left=GRID_LEFT_EDGE + first_column * GRID_RESOLUTION,
         right=GRID_LEFT_EDGE + (last_column + 1) * GRID_RESOLUTION,
@@ -136,6 +247,7 @@ def watershed_weights(geometry: dict[str, Any], grid: Grid, supersample: int) ->
         draw.polygon(pixels(exterior), fill=255)
         for hole in holes:
             draw.polygon(pixels(hole), fill=0)
+
     values = np.asarray(mask, dtype=np.float32) / 255.0
     return values.reshape(grid.height, supersample, grid.width, supersample).mean(axis=(1, 3))
 
@@ -147,9 +259,13 @@ def load_palette(path: Path) -> dict[tuple[int, int, int], int]:
 
 def latest_iem_timestamp(config: dict[str, Any]) -> datetime:
     request = urllib.request.Request(
-        config["iem_current_png_url"], method="HEAD", headers={"User-Agent": "CCA-PoolFill-Radar/2.0"}
+        config["iem_current_png_url"],
+        method="HEAD",
+        headers={"User-Agent": "CCA-PoolFill-Radar/3.0"},
     )
-    with urllib.request.urlopen(request, timeout=int(config["request_timeout_seconds"])) as response:
+    with urllib.request.urlopen(
+        request, timeout=int(config["request_timeout_seconds"])
+    ) as response:
         modified = response.headers.get("Last-Modified")
     if not modified:
         raise RuntimeError("IEM current radar response did not include Last-Modified")
@@ -167,12 +283,14 @@ def fetch_radar_image(
         current_offset = int((latest_reference - timestamp).total_seconds() // 60)
         if current_offset < 0 or current_offset > 55 or current_offset % 5:
             current_offset = None
+
     if current_offset is None:
         endpoint, layer = config["iem_historical_wms_url"], "nexrad-n0q-wmst"
     else:
         endpoint = config["iem_current_wms_url"]
         suffix = "" if current_offset == 0 else f"-m{current_offset:02d}m"
         layer = f"nexrad-n0q-900913{suffix}-conus"
+
     query = {
         "SERVICE": "WMS",
         "VERSION": "1.1.1",
@@ -188,17 +306,22 @@ def fetch_radar_image(
     }
     if current_offset is None:
         query["TIME"] = timestamp.strftime("%Y-%m-%dT%H:%M:00Z")
+
     url = f"{endpoint}?{urllib.parse.urlencode(query)}"
     error: Exception | None = None
     for attempt in range(int(config["request_retries"])):
         try:
-            request = urllib.request.Request(url, headers={"User-Agent": "CCA-PoolFill-Radar/2.0"})
-            with urllib.request.urlopen(request, timeout=int(config["request_timeout_seconds"])) as response:
+            request = urllib.request.Request(
+                url, headers={"User-Agent": "CCA-PoolFill-Radar/3.0"}
+            )
+            with urllib.request.urlopen(
+                request, timeout=int(config["request_timeout_seconds"])
+            ) as response:
                 image = Image.open(io.BytesIO(response.read())).convert("RGBA")
             if image.size != (grid.width, grid.height):
                 raise ValueError(f"Unexpected WMS image size {image.size}")
             return image
-        except Exception as exc:
+        except Exception as exc:  # pragma: no cover - network failure path
             error = exc
             if attempt + 1 < int(config["request_retries"]):
                 time.sleep(2**attempt)
@@ -211,69 +334,124 @@ def crop_for_grid(image: Image.Image, source: Grid, target: Grid) -> Image.Image
     return image.crop((left, top, left + target.width, top + target.height))
 
 
-def image_to_dbz(image: Image.Image, palette: dict[tuple[int, int, int], int]) -> tuple[np.ndarray, np.ndarray]:
+def image_to_dbz(
+    image: Image.Image, palette: dict[tuple[int, int, int], int]
+) -> tuple[np.ndarray, np.ndarray]:
     pixels = np.asarray(image.convert("RGBA"), dtype=np.uint8)
     indices = np.zeros(pixels.shape[:2], dtype=np.int16)
     for row in range(indices.shape[0]):
         for column in range(indices.shape[1]):
             if pixels[row, column, 3] == 0:
                 continue
-            indices[row, column] = palette.get(tuple(int(x) for x in pixels[row, column, :3]), -1)
+            indices[row, column] = palette.get(
+                tuple(int(x) for x in pixels[row, column, :3]), -1
+            )
     dbz = indices.astype(np.float32) * 0.5 - 32.5
     dbz[indices <= 0] = np.nan
     return dbz, indices
 
 
 def rain_depth_inches(dbz: np.ndarray, model: dict[str, Any]) -> np.ndarray:
-    capped = np.minimum(np.nan_to_num(dbz, nan=-999.0), float(model["rain_dbz_cap"]))
+    capped = np.minimum(
+        np.nan_to_num(dbz, nan=-999.0), float(model["rain_dbz_cap"])
+    )
     valid = capped >= float(model["minimum_rain_dbz"])
     depth = np.zeros(dbz.shape, dtype=np.float32)
     reflectivity = np.power(10.0, capped[valid] / 10.0)
-    rate_mm_hour = np.power(reflectivity / float(model["zr_a"]), 1.0 / float(model["zr_b"]))
-    depth[valid] = rate_mm_hour / 25.4 * float(model["frame_minutes"]) / 60.0
+    rate_mm_hour = np.power(
+        reflectivity / float(model["zr_a"]), 1.0 / float(model["zr_b"])
+    )
+    depth[valid] = (
+        rate_mm_hour / 25.4 * float(model["frame_minutes"]) / 60.0
+    )
     return depth
 
 
+def pool_storage_target(canyon_id: str) -> dict[str, Any]:
+    try:
+        source = CANYON_POOL_STORAGE[canyon_id]
+    except KeyError as exc:
+        raise KeyError(
+            f"No technical-section pool-storage parameters are defined for {canyon_id!r}"
+        ) from exc
+
+    technical_length = float(source["technical_length_miles"])
+    modifier = float(source["pothole_modifier"])
+    if technical_length <= 0:
+        raise ValueError(f"Technical length must be positive for {canyon_id}")
+    if modifier <= -1.0:
+        raise ValueError(
+            f"Pothole modifier must be greater than -1.0 for {canyon_id}; received {modifier}"
+        )
+
+    length_ratio = technical_length / ZERO_G_TECHNICAL_LENGTH_MILES
+    storage_rate_multiplier = 1.0 + modifier
+    fill_target = round(
+        ZERO_G_STORAGE_FT3 * length_ratio * storage_rate_multiplier
+    )
+    return {
+        "technical_length_miles": technical_length,
+        "pothole_modifier": modifier,
+        "length_ratio_to_zerog": round(length_ratio, 4),
+        "storage_rate_multiplier": round(storage_rate_multiplier, 4),
+        "fill_target_ft3": fill_target,
+        "storage_basis": str(source["basis"]),
+    }
+
+
 def canyon_model(
-    area_sq_mi: float, config: dict[str, Any], hydrology: dict[str, Any] | None = None
+    canyon_id: str,
+    area_sq_mi: float,
+    config: dict[str, Any],
+    hydrology: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model = config["model"]
-    scale = (area_sq_mi / float(model["reference_area_sq_mi"])) ** float(model["area_exponent"])
-    fill_target = float(model["reference_fill_volume_ft3"]) * scale
+    storage = pool_storage_target(canyon_id)
+
     rules = []
-    for rule in model["reference_spatial_rules"]:
-        required_area = min(area_sq_mi, float(rule["reference_area_sq_mi"]) * scale)
+    for rule in FIXED_SPATIAL_RULES:
+        minimum_coverage = float(rule["minimum_coverage_percent"])
+        required_area = area_sq_mi * minimum_coverage / 100.0
         rules.append(
             {
                 "dbz": float(rule["dbz"]),
                 "minimum_area_sq_mi": round(required_area, 3),
-                "minimum_coverage_percent": round(min(100.0, required_area / area_sq_mi * 100.0), 2),
+                "minimum_coverage_percent": minimum_coverage,
             }
         )
-    result = {
-        "scale_factor": round(scale, 4),
-        "fill_target_ft3": round(fill_target),
+
+    fill_target = int(storage["fill_target_ft3"])
+    result: dict[str, Any] = {
+        "scale_factor": round(fill_target / ZERO_G_STORAGE_FT3, 4),
+        **storage,
         "flush_target_ft3": round(fill_target * float(model["flush_ratio"])),
-        "runoff_coefficient": float(model["runoff_coefficient"]),
-        "calibration": "field-informed" if math.isclose(area_sq_mi, 1.359, rel_tol=0.01) else "provisional area-scaled",
+        "runoff_coefficient": float(model.get("runoff_coefficient", 0.05)),
+        "calibration": (
+            "measured Zero G depression storage + federal basin data"
+            if canyon_id == "zerog"
+            else "technical-length normalized; morphology-adjusted; field calibration needed"
+        ),
+        "target_method": (
+            "52,442 ft3 × (technical length / 0.75 mi) × (1 + pothole modifier)"
+        ),
         "spatial_rules": rules,
     }
     if hydrology:
         result["hydrology"] = hydrology
-        result["calibration"] = "field-informed + federal basin data" if math.isclose(
-            area_sq_mi, 1.359, rel_tol=0.01
-        ) else "federal basin data; field calibration needed"
     return result
 
 
 def build_canyons(
-    collection: dict[str, Any], atlas: dict[str, Any], config: dict[str, Any],
+    collection: dict[str, Any],
+    atlas: dict[str, Any],
+    config: dict[str, Any],
     hydrology: dict[str, Any] | None = None,
 ) -> tuple[list[Canyon], Grid]:
     supersample = int(config["mask_supersample"])
     padding = int(config["grid_padding_cells"])
-    canyons = []
+    canyons: list[Canyon] = []
     all_geometry_points: list[list[float]] = []
+
     for feature in collection["features"]:
         properties = feature["properties"]
         geometry = feature["geometry"]
@@ -281,23 +459,37 @@ def build_canyons(
         weights = watershed_weights(geometry, grid, supersample)
         if float(weights.sum()) <= 0:
             raise ValueError(f"Watershed mask is empty for {properties['name']}")
+
+        canyon_id = str(properties["id"])
         canyons.append(
             Canyon(
-                canyon_id=properties["id"],
+                canyon_id=canyon_id,
                 name=properties["name"],
                 area_sq_mi=float(properties["area_sq_mi"]),
                 geometry=geometry,
                 outlet=properties["outlet"],
                 grid=grid,
                 weights=weights,
-                atlas14=atlas[properties["id"]],
+                atlas14=atlas[canyon_id],
                 model=canyon_model(
-                    float(properties["area_sq_mi"]), config,
-                    (hydrology or {}).get("canyons", {}).get(properties["id"]),
+                    canyon_id,
+                    float(properties["area_sq_mi"]),
+                    config,
+                    (hydrology or {}).get("canyons", {}).get(canyon_id),
                 ),
             )
         )
         all_geometry_points.extend(all_points(geometry))
+
+    expected = set(CANYON_POOL_STORAGE)
+    loaded = {canyon.canyon_id for canyon in canyons}
+    missing = loaded - expected
+    unused = expected - loaded
+    if missing:
+        raise ValueError(f"Pool-storage table is missing canyon IDs: {sorted(missing)}")
+    if unused:
+        raise ValueError(f"Pool-storage table contains unknown canyon IDs: {sorted(unused)}")
+
     return canyons, aligned_grid_for_points(all_geometry_points, padding)
 
 
@@ -319,13 +511,23 @@ def analyze_canyon_image(
     unknown_weight = float(canyon.weights[indices < 0].sum())
     rain = rain_depth_inches(dbz, config["model"])
     basin_rain = float((rain * canyon.weights).sum() / total_weight)
-    rain_volume = basin_rain / 12.0 * canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
-    runoff = rain_volume * float(config["model"]["runoff_coefficient"])
+    rain_volume = (
+        basin_rain / 12.0 * canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
+    )
+    # Kept for frame-level display and peak-frame selection. Event classification
+    # is recalculated with canyon-specific NRCS curve numbers in apply_hydrologic_model.
+    frame_runoff = rain_volume * float(config["model"].get("runoff_coefficient", 0.05))
+
     coverages: dict[str, float] = {}
     rules = []
+    comparison_dbz = np.nan_to_num(dbz, nan=-999.0)
     for rule in canyon.model["spatial_rules"]:
         threshold = float(rule["dbz"])
-        coverage = 100.0 * float(canyon.weights[np.nan_to_num(dbz, nan=-999) >= threshold].sum()) / total_weight
+        coverage = (
+            100.0
+            * float(canyon.weights[comparison_dbz >= threshold].sum())
+            / total_weight
+        )
         covered_area = coverage / 100.0 * canyon.area_sq_mi
         coverages[str(int(threshold))] = round(coverage, 1)
         rules.append(
@@ -333,12 +535,22 @@ def analyze_canyon_image(
                 **rule,
                 "coverage_percent": round(coverage, 1),
                 "covered_area_sq_mi": round(covered_area, 3),
-                "qualified": covered_area + 1e-9 >= float(rule["minimum_area_sq_mi"]),
+                "qualified": coverage + 1e-9
+                >= float(rule["minimum_coverage_percent"]),
             }
         )
+
     watershed_values = dbz[canyon.weights > 0]
-    maximum = float(np.nanmax(watershed_values)) if np.any(np.isfinite(watershed_values)) else None
-    wet = bool(maximum is not None and maximum >= float(config["model"]["storm_dbz_threshold"]))
+    maximum = (
+        float(np.nanmax(watershed_values))
+        if np.any(np.isfinite(watershed_values))
+        else None
+    )
+    wet = bool(
+        maximum is not None
+        and maximum >= float(config["model"]["storm_dbz_threshold"])
+    )
+
     return (
         {
             "maximum_dbz": None if maximum is None else round(maximum, 1),
@@ -347,9 +559,11 @@ def analyze_canyon_image(
             "spatial_gate": any(rule["qualified"] for rule in rules),
             "frame_basin_rain_inches": round(basin_rain, 4),
             "frame_rain_volume_ft3": round(rain_volume),
-            "frame_estimated_runoff_ft3": round(runoff),
+            "frame_estimated_runoff_ft3": round(frame_runoff),
             "wet": wet,
-            "unknown_watershed_percent": round(100.0 * unknown_weight / total_weight, 1),
+            "unknown_watershed_percent": round(
+                100.0 * unknown_weight / total_weight, 1
+            ),
             "grid_dbz": grid_list(dbz, 1),
             "grid_bbox": canyon.grid.bbox,
         },
@@ -367,7 +581,10 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
         "last_rain_event": None,
         "last_qualifying_event": None,
         "events": [],
-        "notification": {"last_emailed_event_start_utc": None, "last_email_sent_utc": None},
+        "notification": {
+            "last_emailed_event_start_utc": None,
+            "last_email_sent_utc": None,
+        },
     }
 
 
@@ -377,7 +594,10 @@ def empty_status(canyons: list[Canyon] | None = None) -> dict[str, Any]:
         "monitoring_started_utc": None,
         "last_checked_utc": None,
         "latest_frame_utc": None,
-        "canyons": {c.canyon_id: empty_canyon_status(c) for c in (canyons or [])},
+        "canyons": {
+            canyon.canyon_id: empty_canyon_status(canyon)
+            for canyon in (canyons or [])
+        },
         "health": {"ok": True, "message": "Waiting for first radar check"},
     }
 
@@ -388,7 +608,7 @@ def legacy_event(event: dict[str, Any] | None) -> dict[str, Any] | None:
     return {
         **event,
         "classification": "legacy_spatial_trigger",
-        "classification_label": "Legacy ZeroG radar trigger",
+        "classification_label": "Legacy Zero G radar trigger",
         "estimated_runoff_ft3": None,
         "fill_ratio": None,
         "basin_rain_inches": None,
@@ -404,33 +624,53 @@ def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
         existing = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return fresh
+
     if existing.get("schema_version") == 2:
         for canyon in canyons:
-            existing.setdefault("canyons", {}).setdefault(canyon.canyon_id, empty_canyon_status(canyon))
+            existing.setdefault("canyons", {}).setdefault(
+                canyon.canyon_id, empty_canyon_status(canyon)
+            )
         return existing
+
     if existing.get("schema_version") == 1:
         fresh["monitoring_started_utc"] = existing.get("monitoring_started_utc")
         fresh["last_checked_utc"] = existing.get("last_checked_utc")
         fresh["latest_frame_utc"] = existing.get("latest_frame_utc")
         zerog = fresh["canyons"]["zerog"]
-        zerog["last_qualifying_event"] = legacy_event(existing.get("last_qualifying_event"))
-        zerog["events"] = [legacy_event(event) for event in existing.get("events", []) if event]
-        fresh["health"] = {"ok": True, "message": "Earlier ZeroG history preserved; multi-canyon monitoring active"}
+        zerog["last_qualifying_event"] = legacy_event(
+            existing.get("last_qualifying_event")
+        )
+        zerog["events"] = [
+            legacy_event(event) for event in existing.get("events", []) if event
+        ]
+        fresh["health"] = {
+            "ok": True,
+            "message": "Earlier Zero G history preserved; multi-canyon monitoring active",
+        }
     return fresh
 
 
-def refresh_status_events(status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]) -> None:
-    """Recalculate retained events when display/model definitions improve."""
+def refresh_status_events(
+    status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]
+) -> None:
+    """Recalculate retained events when target or display definitions change."""
     for canyon in canyons:
         canyon_status = status.get("canyons", {}).get(canyon.canyon_id, {})
         for key in ("last_rain_event", "last_qualifying_event"):
             event = canyon_status.get(key)
-            if event and event.get("estimated_runoff_ft3") is not None and event.get("frames"):
+            if (
+                event
+                and event.get("estimated_runoff_ft3") is not None
+                and event.get("frames")
+            ):
                 canyon_status[key] = event_public(event, canyon, config)
+
         refreshed = []
         for event in canyon_status.get("events", []):
             if event.get("estimated_runoff_ft3") is not None and event.get("frames"):
-                refreshed.append(event_public(event, canyon, config, include_grid=False))
+                refreshed.append(
+                    event_public(event, canyon, config, include_grid=False)
+                )
             else:
                 refreshed.append(event)
         canyon_status["events"] = refreshed
@@ -438,16 +678,27 @@ def refresh_status_events(status: dict[str, Any], canyons: list[Canyon], config:
 
 def event_duration_minutes(event: dict[str, Any], frame_minutes: int) -> int:
     if event.get("start_utc") and event.get("end_utc"):
-        elapsed = int((parse_utc(event["end_utc"]) - parse_utc(event["start_utc"])).total_seconds() // 60)
+        elapsed = int(
+            (
+                parse_utc(event["end_utc"]) - parse_utc(event["start_utc"])
+            ).total_seconds()
+            // 60
+        )
         return max(frame_minutes, elapsed + frame_minutes)
     return max(frame_minutes, int(event["frames"]) * frame_minutes)
 
 
-def atlas_return_period(event: dict[str, Any], canyon: Canyon, frame_minutes: int) -> float | None:
+def atlas_return_period(
+    event: dict[str, Any], canyon: Canyon, frame_minutes: int
+) -> float | None:
     duration = event_duration_minutes(event, frame_minutes)
     supported = [5, 10, 15, 30, 60]
-    lower = max((value for value in supported if value <= duration), default=supported[0])
-    upper = min((value for value in supported if value >= duration), default=supported[-1])
+    lower = max(
+        (value for value in supported if value <= duration), default=supported[0]
+    )
+    upper = min(
+        (value for value in supported if value >= duration), default=supported[-1]
+    )
     periods = sorted(float(period) for period in canyon.atlas14[f"{lower}-min"])
 
     def duration_depth(period: float) -> float:
@@ -455,24 +706,30 @@ def atlas_return_period(event: dict[str, Any], canyon: Canyon, frame_minutes: in
         if lower == upper:
             return low_depth
         high_depth = float(canyon.atlas14[f"{upper}-min"][str(int(period))])
-        fraction = (math.log(duration) - math.log(lower)) / (math.log(upper) - math.log(lower))
-        return math.exp(math.log(low_depth) + fraction * (math.log(high_depth) - math.log(low_depth)))
+        fraction = (math.log(duration) - math.log(lower)) / (
+            math.log(upper) - math.log(lower)
+        )
+        return math.exp(
+            math.log(low_depth)
+            + fraction * (math.log(high_depth) - math.log(low_depth))
+        )
 
-    # Compare the storm's watershed-average accumulated depth with local Atlas
-    # 14 point-frequency depths. This is an "Atlas-equivalent" context, not a
-    # formal areal return period; Atlas 14 does not supply watershed ARFs here.
     depth = float(event.get("basin_rain_inches") or 0)
     pairs = [(period, duration_depth(period)) for period in periods]
     if depth <= 0:
         return None
     if depth <= pairs[0][1]:
         return round(max(0.1, pairs[0][0] * depth / pairs[0][1]), 1)
-    for (p1, d1), (p2, d2) in zip(pairs, pairs[1:]):
-        if d1 <= depth <= d2:
-            fraction = (depth - d1) / (d2 - d1)
-            return round(math.exp(math.log(p1) + fraction * (math.log(p2) - math.log(p1))), 1)
-    # Atlas 14 tables stop at 1,000 years. Do not imply precision beyond NOAA's
-    # published range when a radar-derived depth exceeds the final quantile.
+    for (period1, depth1), (period2, depth2) in zip(pairs, pairs[1:]):
+        if depth1 <= depth <= depth2:
+            fraction = (depth - depth1) / (depth2 - depth1)
+            return round(
+                math.exp(
+                    math.log(period1)
+                    + fraction * (math.log(period2) - math.log(period1))
+                ),
+                1,
+            )
     return pairs[-1][0]
 
 
@@ -482,78 +739,136 @@ def nrcs_runoff_depth(rain_inches: float, curve_number: float) -> float:
     abstraction = 0.20 * retention
     if rain_inches <= abstraction:
         return 0.0
-    return (rain_inches - abstraction) ** 2 / (rain_inches + 0.80 * retention)
+    return (rain_inches - abstraction) ** 2 / (
+        rain_inches + 0.80 * retention
+    )
 
 
-def apply_hydrologic_model(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]) -> None:
-    """Estimate event volume and peak flow without treating volume/3600 as CFS."""
+def apply_hydrologic_model(
+    event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
+) -> None:
+    """Estimate direct runoff volume and routed peak flow for dry/normal/wet CNs."""
     hydrology = canyon.model.get("hydrology")
     if not hydrology:
         return
+
     rain = float(event.get("basin_rain_inches") or 0.0)
     area_ft2 = canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
-    duration_hr = event_duration_minutes(event, int(config["model"]["frame_minutes"])) / 60.0
+    duration_hr = event_duration_minutes(
+        event, int(config["model"]["frame_minutes"])
+    ) / 60.0
     lag_hr = max(0.05, float(hydrology["lag_hours"]))
+
     volumes: dict[str, int] = {}
     peaks: dict[str, float] = {}
     runoff_depths: dict[str, float] = {}
     for state in ("dry", "normal", "wet"):
-        depth = nrcs_runoff_depth(rain, float(hydrology["curve_number"][state]))
+        depth = nrcs_runoff_depth(
+            rain, float(hydrology["curve_number"][state])
+        )
         volume = depth / 12.0 * area_ft2
-        # A volume-conserving triangular screening hydrograph.  Its base is the
-        # observed rain duration plus two watershed lags; peak = 2V / base.
-        base_seconds = max(300.0, (duration_hr + 2.0 * lag_hr) * 3600.0)
+        base_seconds = max(
+            300.0, (duration_hr + 2.0 * lag_hr) * 3600.0
+        )
         runoff_depths[state] = round(depth, 4)
         volumes[state] = round(volume)
         peaks[state] = round(2.0 * volume / base_seconds, 2)
+
     event["runoff_depth_inches"] = runoff_depths
     event["estimated_runoff_ft3_range"] = volumes
     event["estimated_peak_cfs_range"] = peaks
     event["estimated_runoff_ft3"] = volumes["normal"]
     event["estimated_peak_cfs"] = peaks["normal"]
     event["antecedent_condition"] = "normal (central estimate)"
-    event["hydrograph_method"] = "NRCS curve-number loss + volume-conserving triangular routing"
+    event["hydrograph_method"] = (
+        "NRCS curve-number loss + volume-conserving triangular routing"
+    )
 
 
-def classify_event(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]) -> tuple[str, str]:
-    ratio = float(event["estimated_runoff_ft3"]) / float(canyon.model["fill_target_ft3"])
+def classify_event(
+    event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
+) -> tuple[str, str]:
+    target = float(canyon.model["fill_target_ft3"])
+    if target <= 0:
+        raise ValueError(f"Invalid fill target for {canyon.canyon_id}: {target}")
+
+    ratio = float(event["estimated_runoff_ft3"]) / target
     event["fill_ratio"] = round(ratio, 2)
-    enough_frames = int(event["wet_frames"]) >= int(config["model"]["minimum_wet_frames_for_likely"])
+    enough_frames = int(event["wet_frames"]) >= int(
+        config["model"]["minimum_wet_frames_for_likely"]
+    )
     gate = bool(event["spatial_gate_seen"])
+
     if ratio >= float(config["model"]["flush_ratio"]) and gate and enough_frames:
-        return "full_flush", "Very high likelihood — full pools and completely new water"
+        return (
+            "full_flush",
+            "Very high likelihood — full pools and completely new water",
+        )
     if ratio >= 1.0 and gate and enough_frames:
-        return "likely_full", "High likelihood — pools substantially or fully refilled"
+        return (
+            "likely_full",
+            "High likelihood — pools substantially or fully refilled",
+        )
     if ratio >= 1.0 or gate:
         return "moderate", "Some new water possible — partial pool refill"
     return "minor", "Little to no expected change in pool depth"
 
 
-def event_public(event: dict[str, Any], canyon: Canyon, config: dict[str, Any], include_grid: bool = True) -> dict[str, Any]:
-    public = {key: value for key, value in event.items() if key not in {"accumulated_rain_grid_inches"}}
+def event_public(
+    event: dict[str, Any],
+    canyon: Canyon,
+    config: dict[str, Any],
+    include_grid: bool = True,
+) -> dict[str, Any]:
+    public = {
+        key: value
+        for key, value in event.items()
+        if key not in {"accumulated_rain_grid_inches"}
+    }
     apply_hydrologic_model(public, canyon, config)
     classification, label = classify_event(public, canyon, config)
     public["classification"] = classification
     public["classification_label"] = label
-    public["atlas14_return_period_years"] = atlas_return_period(public, canyon, int(config["model"]["frame_minutes"]))
+    public["atlas14_return_period_years"] = atlas_return_period(
+        public, canyon, int(config["model"]["frame_minutes"])
+    )
     public["atlas14_basis"] = "watershed-average radar rainfall"
-    public["atlas14_duration_minutes"] = event_duration_minutes(public, int(config["model"]["frame_minutes"]))
+    public["atlas14_duration_minutes"] = event_duration_minutes(
+        public, int(config["model"]["frame_minutes"])
+    )
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
-    public["fill_target_one_hour_cfs"] = round(float(canyon.model["fill_target_ft3"]) / 3600.0, 2)
+    public["fill_target_one_hour_cfs"] = round(
+        float(canyon.model["fill_target_ft3"]) / 3600.0, 2
+    )
+
     event_time = parse_utc(public["peak_frame_utc"])
-    viewer_query = urllib.parse.urlencode({
-        "prod": "usrad", "java": "script", "mode": "archive", "frames": max(12, int(public["frames"]) + 6),
-        "interval": int(config["model"]["frame_minutes"]), "year": event_time.year, "month": event_time.month,
-        "day": event_time.day, "hour": event_time.hour, "minute": event_time.minute,
-    })
-    public["iem_archive_url"] = f"https://mesonet.agron.iastate.edu/current/mcview.phtml?{viewer_query}"
+    viewer_query = urllib.parse.urlencode(
+        {
+            "prod": "usrad",
+            "java": "script",
+            "mode": "archive",
+            "frames": max(12, int(public["frames"]) + 6),
+            "interval": int(config["model"]["frame_minutes"]),
+            "year": event_time.year,
+            "month": event_time.month,
+            "day": event_time.day,
+            "hour": event_time.hour,
+            "minute": event_time.minute,
+        }
+    )
+    public["iem_archive_url"] = (
+        "https://mesonet.agron.iastate.edu/current/mcview.phtml?"
+        f"{viewer_query}"
+    )
     if not include_grid:
         public.pop("peak_grid_dbz", None)
         public.pop("grid_bbox", None)
     return public
 
 
-def start_event(timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray) -> dict[str, Any]:
+def start_event(
+    timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray
+) -> dict[str, Any]:
     return {
         "start_utc": utc_text(timestamp),
         "end_utc": utc_text(timestamp),
@@ -562,7 +877,8 @@ def start_event(timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray)
         "peak_dbz": analysis["maximum_dbz"],
         "peak_coverage_percent": dict(analysis["coverage_percent"]),
         "peak_covered_area_sq_mi": {
-            str(int(rule["dbz"])): rule["covered_area_sq_mi"] for rule in analysis["spatial_rules"]
+            str(int(rule["dbz"])): rule["covered_area_sq_mi"]
+            for rule in analysis["spatial_rules"]
         },
         "basin_rain_inches": analysis["frame_basin_rain_inches"],
         "radar_rain_volume_ft3": analysis["frame_rain_volume_ft3"],
@@ -578,34 +894,67 @@ def start_event(timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray)
 
 
 def update_open_event(
-    event: dict[str, Any], timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray
+    event: dict[str, Any],
+    timestamp: datetime,
+    analysis: dict[str, Any],
+    rain: np.ndarray,
 ) -> None:
     event["end_utc"] = utc_text(timestamp)
     event["frames"] += 1
     event["wet_frames"] += 1
-    event["basin_rain_inches"] = round(float(event["basin_rain_inches"]) + analysis["frame_basin_rain_inches"], 4)
-    event["radar_rain_volume_ft3"] = round(float(event["radar_rain_volume_ft3"]) + analysis["frame_rain_volume_ft3"])
-    event["estimated_runoff_ft3"] = round(float(event["estimated_runoff_ft3"]) + analysis["frame_estimated_runoff_ft3"])
-    event["spatial_gate_seen"] = bool(event["spatial_gate_seen"] or analysis["spatial_gate"])
-    event["peak_dbz"] = max(event.get("peak_dbz") or -999, analysis.get("maximum_dbz") or -999)
+    event["basin_rain_inches"] = round(
+        float(event["basin_rain_inches"])
+        + analysis["frame_basin_rain_inches"],
+        4,
+    )
+    event["radar_rain_volume_ft3"] = round(
+        float(event["radar_rain_volume_ft3"])
+        + analysis["frame_rain_volume_ft3"]
+    )
+    event["estimated_runoff_ft3"] = round(
+        float(event["estimated_runoff_ft3"])
+        + analysis["frame_estimated_runoff_ft3"]
+    )
+    event["spatial_gate_seen"] = bool(
+        event["spatial_gate_seen"] or analysis["spatial_gate"]
+    )
+    event["peak_dbz"] = max(
+        event.get("peak_dbz") or -999,
+        analysis.get("maximum_dbz") or -999,
+    )
+
     for key, value in analysis["coverage_percent"].items():
-        event["peak_coverage_percent"][key] = max(event["peak_coverage_percent"].get(key, 0), value)
+        event["peak_coverage_percent"][key] = max(
+            event["peak_coverage_percent"].get(key, 0), value
+        )
     for rule in analysis["spatial_rules"]:
         key = str(int(rule["dbz"]))
         event["peak_covered_area_sq_mi"][key] = max(
-            event["peak_covered_area_sq_mi"].get(key, 0), rule["covered_area_sq_mi"]
+            event["peak_covered_area_sq_mi"].get(key, 0),
+            rule["covered_area_sq_mi"],
         )
-    accumulated = np.asarray(event["accumulated_rain_grid_inches"], dtype=np.float32) + rain
+
+    accumulated = (
+        np.asarray(event["accumulated_rain_grid_inches"], dtype=np.float32)
+        + rain
+    )
     event["accumulated_rain_grid_inches"] = grid_list(accumulated, 4)
     event["max_pixel_storm_inches"] = round(float(np.nanmax(accumulated)), 3)
-    if analysis["frame_estimated_runoff_ft3"] >= event.get("peak_frame_runoff_ft3", -1):
-        event["peak_frame_runoff_ft3"] = analysis["frame_estimated_runoff_ft3"]
+
+    if analysis["frame_estimated_runoff_ft3"] >= event.get(
+        "peak_frame_runoff_ft3", -1
+    ):
+        event["peak_frame_runoff_ft3"] = analysis[
+            "frame_estimated_runoff_ft3"
+        ]
         event["peak_frame_utc"] = utc_text(timestamp)
         event["peak_grid_dbz"] = analysis["grid_dbz"]
         event["grid_bbox"] = analysis["grid_bbox"]
 
 
-def finalize_event(canyon_status: dict[str, Any], canyon: Canyon, config: dict[str, Any]) -> None:
+def finalize_event(
+    canyon_status: dict[str, Any], canyon: Canyon, config: dict[str, Any]
+) -> None:
     event = canyon_status.get("open_event")
     if not event:
         return
@@ -614,7 +963,7 @@ def finalize_event(canyon_status: dict[str, Any], canyon: Canyon, config: dict[s
     events = canyon_status.setdefault("events", [])
     if not events or events[0].get("start_utc") != public["start_utc"]:
         events.insert(0, event_public(event, canyon, config, include_grid=False))
-        del events[12:]
+    del events[12:]
     canyon_status["open_event"] = None
 
 
@@ -628,21 +977,29 @@ def update_canyon_event(
 ) -> None:
     event = canyon_status.get("open_event")
     gap = int(config["model"]["event_gap_minutes"])
+
     if analysis["wet"]:
-        if event and timestamp - parse_utc(event["end_utc"]) > timedelta(minutes=gap):
+        if event and timestamp - parse_utc(event["end_utc"]) > timedelta(
+            minutes=gap
+        ):
             finalize_event(canyon_status, canyon, config)
             event = None
+
         if event is None:
             event = start_event(timestamp, analysis, rain)
             canyon_status["open_event"] = event
         else:
             update_open_event(event, timestamp, analysis, rain)
+
         public = event_public(event, canyon, config)
         canyon_status["last_rain_event"] = public
         if public["classification"] in {"likely_full", "full_flush"}:
             canyon_status["last_qualifying_event"] = public
         return
-    if event and timestamp - parse_utc(event["end_utc"]) >= timedelta(minutes=gap):
+
+    if event and timestamp - parse_utc(event["end_utc"]) >= timedelta(
+        minutes=gap
+    ):
         finalize_event(canyon_status, canyon, config)
 
 
@@ -655,7 +1012,9 @@ def process_timestamp(
     config: dict[str, Any],
     latest_reference: datetime | None = None,
 ) -> dict[str, Any]:
-    global_image = fetch_radar_image(timestamp, global_grid, config, latest_reference)
+    global_image = fetch_radar_image(
+        timestamp, global_grid, config, latest_reference
+    )
     summary = {}
     for canyon in canyons:
         image = crop_for_grid(global_image, global_grid, canyon.grid)
@@ -663,66 +1022,167 @@ def process_timestamp(
         analysis["frame_utc"] = utc_text(timestamp)
         canyon_status = status["canyons"][canyon.canyon_id]
         canyon_status["latest_analysis"] = analysis
-        update_canyon_event(canyon_status, canyon, timestamp, analysis, rain, config)
+        update_canyon_event(
+            canyon_status, canyon, timestamp, analysis, rain, config
+        )
         summary[canyon.canyon_id] = {
             "maximum_dbz": analysis["maximum_dbz"],
-            "frame_basin_rain_inches": analysis["frame_basin_rain_inches"],
+            "frame_basin_rain_inches": analysis[
+                "frame_basin_rain_inches"
+            ],
             "spatial_gate": analysis["spatial_gate"],
         }
     status["latest_frame_utc"] = utc_text(timestamp)
     return summary
 
 
-def scheduled_timestamps(status: dict[str, Any], config: dict[str, Any], latest_complete: datetime) -> list[datetime]:
+def scheduled_timestamps(
+    status: dict[str, Any], config: dict[str, Any], latest_complete: datetime
+) -> list[datetime]:
     last_frame = status.get("latest_frame_utc")
     start = (
         parse_utc(last_frame) + timedelta(minutes=5)
         if last_frame
-        else latest_complete - timedelta(minutes=int(config["schedule_lookback_minutes"]))
+        else latest_complete
+        - timedelta(minutes=int(config["schedule_lookback_minutes"]))
     )
-    return list(iter_five_minutes(start, latest_complete))[: int(config["max_frames_per_run"])]
+    return list(iter_five_minutes(start, latest_complete))[
+        : int(config["max_frames_per_run"])
+    ]
 
 
-def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, Any]:
+def model_metadata(
+    canyons: list[Canyon], config: dict[str, Any]
+) -> dict[str, Any]:
     model = config["model"]
     return {
         "schema_version": 2,
         "method": {
             "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
-            "rainfall_formula": f"Z = {model['zr_a']} × R^{model['zr_b']}; dBZ capped at {model['rain_dbz_cap']} for rainfall volume",
-            "runoff_formula": "NRCS direct runoff: S = 1000/CN − 10; Ia = 0.20S; Q = (P − Ia)²/(P + 0.80S) when P > Ia",
-            "runoff_coefficient_explanation": "The former fixed 5% coefficient has been removed. Each canyon now uses a composite curve number from USDA SSURGO hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet antecedent-condition results expose uncertainty in infiltration and initial loss.",
-            "peak_flow_formula": "Screening peak CFS = 2 × runoff volume ÷ triangular hydrograph base time; base time = rain duration + 2 × NRCS watershed lag",
-            "peak_flow_explanation": "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. Lag uses USGS 3DEP terrain, supplied pour point, and basin extent. The displayed range reflects dry/normal/wet antecedent conditions.",
-            "target_formula": "Fill target = 18,000 ft³ × (watershed area ÷ 1.36 mi²)^0.4",
-            "target_explanation": "Only ZeroG's 18,000 ft³ anchor equals 5 cfs sustained for one hour. Other canyon targets are scaled by drainage area; each dashboard also converts its target back to an equivalent one-hour cfs for readability.",
-            "spatial_formula": "Required high-dBZ area = ZeroG reference area × (watershed area ÷ 1.36 mi²)^0.4",
-            "spatial_explanation": "The heavy-rain footprint gate requires an adequate area of intense rain. It prevents a large watershed receiving widespread light rain, or one isolated noisy pixel, from being called full on volume alone.",
-            "fill_ratio_explanation": "Estimated fill ratio = delivered runoff ÷ canyon fill target. A value of 1.0 means the modeled delivered volume equals the provisional target; it is not a measured percentage of pool depth.",
-            "atlas_explanation": "Atlas context compares the watershed-average radar accumulation over the event duration with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is an Atlas-equivalent recurrence context, not a formal watershed areal return interval.",
-            "scaling_basis": "The 0.4 drainage-area exponent is a provisional regional transfer based on the supplied USGS StreamStats comparisons; it is not a claim that every canyon behaves identically.",
+            "rainfall_formula": (
+                f"Z = {model['zr_a']} × R^{model['zr_b']}; dBZ capped at "
+                f"{model['rain_dbz_cap']} for rainfall volume"
+            ),
+            "runoff_formula": (
+                "NRCS direct runoff: S = 1000/CN − 10; Ia = 0.20S; "
+                "Q = (P − Ia)²/(P + 0.80S) when P > Ia"
+            ),
+            "runoff_coefficient_explanation": (
+                "Event classification uses composite NRCS curve numbers from SSURGO "
+                "hydrologic soil groups and 2021 NLCD land cover. Dry, normal, and wet "
+                "antecedent-condition estimates expose uncertainty in initial loss."
+            ),
+            "peak_flow_formula": (
+                "Screening peak CFS = 2 × runoff volume ÷ triangular hydrograph base time; "
+                "base time = rain duration + 2 × NRCS watershed lag"
+            ),
+            "peak_flow_explanation": (
+                "Peak CFS is a routed screening estimate, not runoff volume divided by one hour. "
+                "Lag uses USGS 3DEP terrain, supplied pour point, and basin extent."
+            ),
+            "target_formula": (
+                "Fill target = 52,442 ft³ × (technical-section length ÷ 0.75 mi) "
+                "× (1 + canyon pothole modifier)"
+            ),
+            "target_explanation": (
+                "Zero G is anchored to the 1-meter depression inventory of 114 depressions "
+                "totaling 1,485.0 m³. Other targets are normalized by technical-section length "
+                "and adjusted using user-assigned canyon morphology modifiers."
+            ),
+            "spatial_formula": (
+                "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, "
+                "or 60+ dBZ over 10%"
+            ),
+            "spatial_explanation": (
+                "The same watershed-percentage gate applies to every canyon. It prevents "
+                "light basin-wide rain or one isolated radar pixel from being labeled full."
+            ),
+            "fill_ratio_explanation": (
+                "Estimated fill ratio = normal-antecedent-condition direct runoff ÷ canyon "
+                "storage target. A value of 1.0 means modeled runoff equals the provisional "
+                "empty-storage target; it is not a measured pool-depth percentage."
+            ),
+            "atlas_explanation": (
+                "Atlas context compares watershed-average radar accumulation with duration-"
+                "interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet."
+            ),
+            "scaling_basis": (
+                "Technical-section length replaces watershed-area scaling. Pothole modifiers "
+                "represent storage density and typical pool size relative to Zero G."
+            ),
             "sources": [
-                {"label": "IEM N0Q composite documentation", "url": "https://mesonet.agron.iastate.edu/docs/nexrad_composites/"},
-                {"label": "IEM N0Q raster and dBZ encoding", "url": "https://mesonet.agron.iastate.edu/GIS/rasters.php?rid=2"},
-                {"label": "NWS radar rainfall estimation and default Z–R relationship", "url": "https://www.weather.gov/mrx/radarrainfallestimates"},
-                {"label": "NOAA Atlas 14 precipitation frequency", "url": "https://hdsc.nws.noaa.gov/pfds/"},
-                {"label": "USGS StreamStats", "url": "https://streamstats.usgs.gov/ss/"},
-                {"label": "USDA Web Soil Survey / SSURGO", "url": "https://websoilsurvey.nrcs.usda.gov/"},
-                {"label": "USGS National Land Cover Database", "url": "https://www.usgs.gov/centers/eros/science/national-land-cover-database"},
-                {"label": "USGS 3D Elevation Program", "url": "https://www.usgs.gov/3d-elevation-program"},
-                {"label": "NRCS National Engineering Handbook, runoff curve-number method", "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf"},
+                {
+                    "label": "IEM N0Q composite documentation",
+                    "url": "https://mesonet.agron.iastate.edu/docs/nexrad_composites/",
+                },
+                {
+                    "label": "IEM N0Q raster and dBZ encoding",
+                    "url": "https://mesonet.agron.iastate.edu/GIS/rasters.php?rid=2",
+                },
+                {
+                    "label": "NWS radar rainfall estimation and default Z–R relationship",
+                    "url": "https://www.weather.gov/mrx/radarrainfallestimates",
+                },
+                {
+                    "label": "NOAA Atlas 14 precipitation frequency",
+                    "url": "https://hdsc.nws.noaa.gov/pfds/",
+                },
+                {
+                    "label": "USGS StreamStats",
+                    "url": "https://streamstats.usgs.gov/ss/",
+                },
+                {
+                    "label": "USDA Web Soil Survey / SSURGO",
+                    "url": "https://websoilsurvey.nrcs.usda.gov/",
+                },
+                {
+                    "label": "USGS National Land Cover Database",
+                    "url": "https://www.usgs.gov/centers/eros/science/national-land-cover-database",
+                },
+                {
+                    "label": "USGS 3D Elevation Program",
+                    "url": "https://www.usgs.gov/3d-elevation-program",
+                },
+                {
+                    "label": "NRCS runoff curve-number method",
+                    "url": "https://directives.nrcs.usda.gov/sites/default/files2/1720460920/Chapter%2010%20-%20Estimation%20of%20Direct%20Runoff%20from%20Storm%20Rainfall.pdf",
+                },
             ],
             "classification": {
-                "minor": "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no pool-depth change expected",
-                "moderate": "Runoff ratio at least 1.0 or a heavy-rain footprint gate was reached, but the complete likely-full test was not met",
-                "likely_full": "Runoff ratio at least 1.0, spatial gate reached, and at least two wet frames",
-                "full_flush": "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames",
+                "minor": (
+                    "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no "
+                    "pool-depth change expected"
+                ),
+                "moderate": (
+                    "Runoff ratio at least 1.0 or a heavy-rain footprint gate was reached, "
+                    "but the complete likely-full test was not met"
+                ),
+                "likely_full": (
+                    "Runoff ratio at least 1.0, spatial gate reached, and at least two wet frames"
+                ),
+                "full_flush": (
+                    "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames"
+                ),
             },
             "limitations": [
-                "ZeroG is field-informed; other canyon targets are provisional until pool observations calibrate them.",
-                "Radar reflectivity is an indirect rainfall estimate and values above 55 dBZ can be hail-contaminated.",
-                "Curve numbers and NRCS routing are screening estimates; antecedent moisture, exposed bedrock, fractures, channel transmission losses, and pool geometry still require field calibration.",
-                "NOAA Atlas 14 values are point-frequency context, not direct proof of runoff or pool condition.",
+                (
+                    "Only Zero G has a mapped depression-volume anchor. Other targets remain "
+                    "provisional until field observations or canyon-specific terrain analysis "
+                    "calibrate technical length and pool-storage modifiers."
+                ),
+                (
+                    "Radar reflectivity is an indirect rainfall estimate and values above "
+                    "55 dBZ can be hail-contaminated."
+                ),
+                (
+                    "Curve numbers and routing are screening estimates; antecedent moisture, "
+                    "bedrock fractures, channel transmission loss, and existing pool water "
+                    "can materially change actual conditions."
+                ),
+                (
+                    "NOAA Atlas 14 values are point-frequency context, not direct proof of "
+                    "runoff or pool condition."
+                ),
             ],
         },
         "canyons": {
@@ -741,27 +1201,49 @@ def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, A
 def save_json(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+    temporary.write_text(
+        json.dumps(value, indent=2) + "\n", encoding="utf-8"
+    )
     temporary.replace(path)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=ROOT / "config.json")
-    parser.add_argument("--watersheds", type=Path, default=ROOT / "watersheds.geojson")
+    parser.add_argument(
+        "--watersheds", type=Path, default=ROOT / "watersheds.geojson"
+    )
     parser.add_argument("--atlas", type=Path, default=ROOT / "atlas14.json")
-    parser.add_argument("--hydrology", type=Path, default=ROOT / "hydrology.json")
-    parser.add_argument("--palette", type=Path, default=ROOT / "n0q_palette.json")
-    parser.add_argument("--status", type=Path, default=ROOT / "docs/data/status.json")
-    parser.add_argument("--model-output", type=Path, default=ROOT / "docs/data/model.json")
-    parser.add_argument("--at", help="Analyze one UTC frame, for example 2024-06-21T22:25:00Z")
+    parser.add_argument(
+        "--hydrology", type=Path, default=ROOT / "hydrology.json"
+    )
+    parser.add_argument(
+        "--palette", type=Path, default=ROOT / "n0q_palette.json"
+    )
+    parser.add_argument(
+        "--status", type=Path, default=ROOT / "docs/data/status.json"
+    )
+    parser.add_argument(
+        "--model-output", type=Path, default=ROOT / "docs/data/model.json"
+    )
+    parser.add_argument(
+        "--at", help="Analyze one UTC frame, for example 2024-06-21T22:25:00Z"
+    )
     parser.add_argument("--dry-run", action="store_true")
     arguments = parser.parse_args()
+
     config = json.loads(arguments.config.read_text(encoding="utf-8"))
     collection = json.loads(arguments.watersheds.read_text(encoding="utf-8"))
     atlas = json.loads(arguments.atlas.read_text(encoding="utf-8"))
-    hydrology = json.loads(arguments.hydrology.read_text(encoding="utf-8")) if arguments.hydrology.exists() else {}
-    canyons, global_grid = build_canyons(collection, atlas, config, hydrology)
+    hydrology = (
+        json.loads(arguments.hydrology.read_text(encoding="utf-8"))
+        if arguments.hydrology.exists()
+        else {}
+    )
+
+    canyons, global_grid = build_canyons(
+        collection, atlas, config, hydrology
+    )
     palette = load_palette(arguments.palette)
     status = load_status(arguments.status, canyons)
     refresh_status_events(status, canyons, config)
@@ -770,33 +1252,54 @@ def main() -> int:
     if arguments.at:
         timestamp = floor_five_minutes(parse_utc(arguments.at))
         working_status = empty_status(canyons) if arguments.dry_run else status
-        result = process_timestamp(timestamp, working_status, canyons, global_grid, palette, config)
+        result = process_timestamp(
+            timestamp, working_status, canyons, global_grid, palette, config
+        )
         print(json.dumps(result, indent=2))
         if not arguments.dry_run:
-            working_status["monitoring_started_utc"] = working_status["monitoring_started_utc"] or utc_text(timestamp)
+            working_status["monitoring_started_utc"] = (
+                working_status["monitoring_started_utc"] or utc_text(timestamp)
+            )
             working_status["last_checked_utc"] = utc_text(datetime.now(UTC))
-            working_status["health"] = {"ok": True, "message": "Historical radar frame analyzed"}
+            working_status["health"] = {
+                "ok": True,
+                "message": "Historical radar frame analyzed",
+            }
             save_json(arguments.status, working_status)
         return 0
 
     now = datetime.now(UTC)
     latest_reference = latest_iem_timestamp(config)
     timestamps = scheduled_timestamps(status, config, latest_reference)
-    status["monitoring_started_utc"] = status["monitoring_started_utc"] or utc_text(timestamps[0] if timestamps else now)
+    status["monitoring_started_utc"] = status[
+        "monitoring_started_utc"
+    ] or utc_text(timestamps[0] if timestamps else now)
     processed = 0
+
     try:
         for timestamp in timestamps:
-            process_timestamp(timestamp, status, canyons, global_grid, palette, config, latest_reference)
+            process_timestamp(
+                timestamp,
+                status,
+                canyons,
+                global_grid,
+                palette,
+                config,
+                latest_reference,
+            )
             processed += 1
         status["last_checked_utc"] = utc_text(datetime.now(UTC))
         status["health"] = {
             "ok": True,
-            "message": f"Radar check completed; {processed} frame{'s' if processed != 1 else ''} analyzed for {len(canyons)} canyons",
+            "message": (
+                f"Radar check completed; {processed} frame"
+                f"{'s' if processed != 1 else ''} analyzed for {len(canyons)} canyons"
+            ),
         }
         save_json(arguments.status, status)
         print(status["health"]["message"])
         return 0
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - network/runtime failure path
         status["last_checked_utc"] = utc_text(datetime.now(UTC))
         status["health"] = {"ok": False, "message": str(exc)}
         save_json(arguments.status, status)
