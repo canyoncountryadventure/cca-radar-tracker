@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -48,11 +48,15 @@ jobs:
       - name: Check front-end JavaScript
         run: node --check cca-radar-tracker/docs/app.js
 
-      - name: Reject stale dashboard wording
+      - name: Reject stale source wording
         run: |
-          if grep -RniE "watershed .* area scale|target as 1-hour flow|delivered runoff|little to no expected change in pool depth|scaled intensity gates" \
-            cca-radar-tracker/docs cca-radar-tracker/README.md; then
-            echo "Stale area-scaled or fixed-coefficient dashboard wording remains."
+          # Check authored source only. Do not scan docs/data/*.json here because
+          # those generated files are intentionally replaced by tracker.py later.
+          if grep -niE "watershed .* area scale|target as 1-hour flow|delivered runoff|little to no expected change in pool depth|scaled intensity gates" \
+            cca-radar-tracker/docs/app.js \
+            cca-radar-tracker/docs/index.html \
+            cca-radar-tracker/README.md; then
+            echo "Stale area-scaled or fixed-coefficient wording remains in an authored source file."
             exit 1
           fi
 
@@ -187,13 +191,13 @@ jobs:
           fi
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload website
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: cca-radar-tracker/docs
 
       - name: Publish website
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
