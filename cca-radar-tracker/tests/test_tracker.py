@@ -1,4 +1,5 @@
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -14,42 +15,66 @@ ROOT = Path(__file__).resolve().parents[1]
 class TrackerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        geojson = json.loads((ROOT / "watershed.geojson").read_text(encoding="utf-8"))
-        cls.geometry = geojson["features"][0]["geometry"]
-        cls.config = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        cls.config = json.loads((ROOT / "config.json").read_text())
+        cls.collection = json.loads((ROOT / "watersheds.geojson").read_text())
+        cls.atlas = json.loads((ROOT / "atlas14.json").read_text())
+        cls.canyons, cls.global_grid = tracker.build_canyons(cls.collection, cls.atlas, cls.config)
+        cls.by_id = {c.canyon_id: c for c in cls.canyons}
         cls.palette_by_rgb = tracker.load_palette(ROOT / "n0q_palette.json")
-        cls.palette = json.loads((ROOT / "n0q_palette.json").read_text(encoding="utf-8"))
+        cls.palette = json.loads((ROOT / "n0q_palette.json").read_text())
 
-    def test_grid_is_aligned_and_contains_watershed(self):
-        grid = tracker.aligned_grid(self.geometry, 2)
-        self.assertGreater(grid.width, 9)
-        self.assertGreater(grid.height, 5)
-        self.assertAlmostEqual((grid.left - tracker.GRID_LEFT_EDGE) / tracker.GRID_RESOLUTION, round((grid.left - tracker.GRID_LEFT_EDGE) / tracker.GRID_RESOLUTION))
+    def test_all_seventeen_canyons_are_loaded(self):
+        self.assertEqual(len(self.canyons), 17)
+        self.assertAlmostEqual(self.by_id["eardley"].area_sq_mi, 77.36, places=2)
+        self.assertAlmostEqual(self.by_id["black-hole-white-canyon"].area_sq_mi, 262.582, places=3)
 
-    def test_mask_has_fractional_boundary_cells(self):
-        grid = tracker.aligned_grid(self.geometry, 2)
-        weights = tracker.watershed_weights(self.geometry, grid, 100)
-        self.assertGreater(weights.sum(), 10)
-        self.assertLess(weights.sum(), 20)
-        self.assertTrue(np.any((weights > 0) & (weights < 1)))
+    def test_zerog_model_reproduces_field_reference(self):
+        model = self.by_id["zerog"].model
+        self.assertAlmostEqual(model["fill_target_ft3"], 18000, delta=20)
+        self.assertAlmostEqual(model["spatial_rules"][0]["minimum_coverage_percent"], 50, delta=.1)
+        self.assertAlmostEqual(model["spatial_rules"][1]["minimum_coverage_percent"], 25, delta=.1)
+        self.assertAlmostEqual(model["spatial_rules"][2]["minimum_coverage_percent"], 10, delta=.1)
 
-    def test_any_independent_rule_can_trigger(self):
-        grid = tracker.aligned_grid(self.geometry, 2)
-        weights = tracker.watershed_weights(self.geometry, grid, 50)
-        image = Image.new("RGB", (grid.width, grid.height), tuple(self.palette[0]))
-        pixels = image.load()
-        covered = np.argwhere(weights > 0)
-        for row, column in covered[: max(1, len(covered) // 3)]:
-            pixels[int(column), int(row)] = tuple(self.palette[185])  # 60 dBZ
-        analysis = tracker.analyze_image(image, weights, self.palette_by_rgb, self.config["thresholds"])
-        self.assertTrue(analysis["qualified"])
+    def test_larger_watershed_uses_declining_percent_not_fixed_percent(self):
+        eardley = self.by_id["eardley"].model
+        self.assertGreater(eardley["fill_target_ft3"], 18000)
+        self.assertLess(eardley["spatial_rules"][0]["minimum_coverage_percent"], 5)
 
-    def test_no_rule_trigger(self):
-        grid = tracker.aligned_grid(self.geometry, 2)
-        weights = tracker.watershed_weights(self.geometry, grid, 50)
-        image = Image.new("RGB", (grid.width, grid.height), tuple(self.palette[164]))  # 49.5 dBZ
-        analysis = tracker.analyze_image(image, weights, self.palette_by_rgb, self.config["thresholds"])
-        self.assertFalse(analysis["qualified"])
+    def test_nws_zr_rain_depth_at_50_dbz(self):
+        dbz = np.array([[50.0]], dtype=np.float32)
+        depth = tracker.rain_depth_inches(dbz, self.config["model"])
+        self.assertAlmostEqual(float(depth[0, 0]), 0.208, delta=.003)
+
+    def test_rainfall_volume_matches_zerog_reference_math(self):
+        area = self.by_id["zerog"].area_sq_mi
+        rain_volume = .1 / 12 * area * tracker.SQUARE_FEET_PER_SQUARE_MILE
+        runoff = rain_volume * .05
+        self.assertAlmostEqual(runoff, 15800, delta=100)
+
+    def test_two_frame_target_and_spatial_gate_can_classify_likely_full(self):
+        canyon = self.by_id["zerog"]
+        event = {"estimated_runoff_ft3": 20000, "wet_frames": 2, "spatial_gate_seen": True}
+        classification, _ = tracker.classify_event(event, canyon, self.config)
+        self.assertEqual(classification, "likely_full")
+
+    def test_hail_values_are_capped_for_rain_volume(self):
+        values = np.array([[55.0, 60.0, 70.0]], dtype=np.float32)
+        depth = tracker.rain_depth_inches(values, self.config["model"])
+        self.assertAlmostEqual(float(depth[0, 0]), float(depth[0, 1]), places=6)
+        self.assertAlmostEqual(float(depth[0, 1]), float(depth[0, 2]), places=6)
+
+    def test_schema_one_status_preserves_zerog_qualifying_event(self):
+        legacy = {
+            "schema_version": 1,
+            "monitoring_started_utc": "2026-07-22T00:00:00Z",
+            "last_qualifying_event": {"start_utc": "2024-06-21T22:25:00Z", "end_utc": "2024-06-21T22:30:00Z"},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "status.json"
+            path.write_text(json.dumps(legacy))
+            migrated = tracker.load_status(path, self.canyons)
+        self.assertEqual(migrated["schema_version"], 2)
+        self.assertEqual(migrated["canyons"]["zerog"]["last_qualifying_event"]["start_utc"], "2024-06-21T22:25:00Z")
 
 
 if __name__ == "__main__":

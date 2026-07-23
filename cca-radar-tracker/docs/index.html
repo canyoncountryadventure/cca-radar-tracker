@@ -4,88 +4,113 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Global Canyon Pool-Fill Radar</title>
+  <meta name="description" content="Automated radar-derived pool-condition estimates for Canyon Country Adventure canyons.">
+  <title>CCA Canyon Pool Conditions</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="shell">
-    <header class="heading">
+    <header class="hero">
       <div>
-        <p class="eyebrow">AUTOMATED RADAR CHECK</p>
-        <h1>Global Canyon Pool Conditions</h1>
+        <p class="eyebrow">CANYON COUNTRY ADVENTURE</p>
+        <h1>Canyon Pool Conditions</h1>
+        <p class="lede">Five-minute radar analysis, storm history, and transparent runoff-volume estimates for 17 canyon watersheds.</p>
       </div>
-      <span id="health-dot" class="health-dot" title="Tracker health"></span>
+      <div class="system-status"><span id="health-dot" class="health-dot"></span><span id="last-check">Loading tracker</span></div>
     </header>
 
-    <section id="status-card" class="status-card loading">
-      <div id="status-icon" class="status-icon">···</div>
-      <div>
-        <p id="status-label" class="status-label">Loading radar status</p>
-        <p id="status-detail" class="status-detail">Waiting for the latest automated check.</p>
-      </div>
-    </section>
-
-    <section class="metrics" aria-label="Latest watershed radar measurements">
-      <article>
-        <span>Maximum</span>
-        <strong id="maximum-dbz">—</strong>
-        <small>dBZ</small>
-      </article>
-      <article>
-        <span>Area ≥50</span>
-        <strong id="coverage-50">—</strong>
-        <small>trigger: 50%</small>
-      </article>
-      <article>
-        <span>Area ≥55</span>
-        <strong id="coverage-55">—</strong>
-        <small>trigger: 25%</small>
-      </article>
-      <article>
-        <span>Area ≥60</span>
-        <strong id="coverage-60">—</strong>
-        <small>trigger: 10%</small>
-      </article>
-    </section>
-
-    <section class="radar-panel">
-      <div class="section-heading">
+    <section class="overview-section">
+      <div class="section-title-row">
         <div>
-          <p class="eyebrow">LATEST FRAME</p>
-          <h2 id="frame-time">No frame analyzed yet</h2>
+          <p class="eyebrow">ALL CANYONS</p>
+          <h2>Latest modeled conditions</h2>
         </div>
-        <div class="legend" aria-label="Reflectivity legend">
-          <span><i class="c40"></i>40–49</span>
-          <span><i class="c50"></i>50–54</span>
-          <span><i class="c55"></i>55–59</span>
-          <span><i class="c60"></i>60+</span>
-        </div>
+        <div id="overview-summary" class="overview-summary"></div>
       </div>
-      <canvas id="radar-canvas" width="720" height="360" aria-label="Radar grid with watershed boundary"></canvas>
+      <div id="canyon-grid" class="canyon-grid" aria-live="polite"></div>
     </section>
 
-    <section class="event-panel">
-      <p class="eyebrow">LAST QUALIFYING STORM</p>
-      <div id="event-content" class="event-content">
-        <strong>None recorded</strong>
-        <span>Monitoring has not recorded a storm meeting the pool-fill rule.</span>
+    <section class="detail-shell">
+      <div class="detail-picker">
+        <label for="canyon-select">Detailed canyon analysis</label>
+        <select id="canyon-select"></select>
       </div>
-    </section>
 
-    <section class="rules-panel">
-      <p class="eyebrow">POOL-FILL RULE</p>
-      <p>A frame qualifies when <b>any one</b> of these conditions is met:</p>
-      <ul>
-        <li><b>50+ dBZ</b> over at least <b>50%</b> of the watershed</li>
-        <li><b>55+ dBZ</b> over at least <b>25%</b> of the watershed</li>
-        <li><b>60+ dBZ</b> over at least <b>10%</b> of the watershed</li>
-      </ul>
+      <section id="condition-banner" class="condition-banner no-data">
+        <div class="condition-mark" id="condition-mark">···</div>
+        <div>
+          <p class="eyebrow">LAST RAIN EVENT RESULT</p>
+          <h2 id="condition-label">Loading canyon model</h2>
+          <p id="condition-detail">Waiting for tracker data.</p>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Selected canyon storm statistics">
+        <article><span>Basin rain</span><strong id="metric-rain">—</strong><small>radar-equivalent inches</small></article>
+        <article><span>Delivered runoff</span><strong id="metric-runoff">—</strong><small>estimated cubic feet</small></article>
+        <article><span>Fill target</span><strong id="metric-target">—</strong><small>model cubic feet</small></article>
+        <article><span>Target ratio</span><strong id="metric-ratio">—</strong><small>runoff ÷ fill target</small></article>
+        <article><span>Peak radar</span><strong id="metric-dbz">—</strong><small>dBZ</small></article>
+        <article><span>Wet duration</span><strong id="metric-duration">—</strong><small>five-minute frames</small></article>
+        <article><span>Atlas 14 context</span><strong id="metric-atlas">—</strong><small>point recurrence estimate</small></article>
+        <article><span>Drainage area</span><strong id="metric-area">—</strong><small>square miles</small></article>
+      </section>
+
+      <section class="radar-panel panel">
+        <div class="section-title-row compact">
+          <div>
+            <p class="eyebrow">PEAK FRAME FROM LAST RAIN EVENT</p>
+            <h2 id="radar-time">No rain event recorded</h2>
+          </div>
+          <div class="legend">
+            <span><i class="c40"></i>40–49</span><span><i class="c50"></i>50–54</span>
+            <span><i class="c55"></i>55–59</span><span><i class="c60"></i>60+</span>
+          </div>
+        </div>
+        <canvas id="radar-canvas" width="900" height="460" aria-label="Radar reflectivity pixels over the selected watershed"></canvas>
+        <p class="canvas-note">White line: watershed boundary. Reflectivity pixels are the IEM N0Q composite at the event’s strongest modeled frame.</p>
+      </section>
+
+      <div class="two-column">
+        <section class="panel">
+          <p class="eyebrow">LAST RAIN EVENT</p>
+          <div id="rain-event" class="event-copy"><strong>None recorded</strong></div>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">LAST QUALIFYING STORM — RETAINED</p>
+          <div id="qualifying-event" class="event-copy"><strong>None recorded</strong></div>
+        </section>
+      </div>
+
+      <section class="panel calculations-panel">
+        <div class="section-title-row compact">
+          <div><p class="eyebrow">SHOW YOUR WORK</p><h2 id="calculation-title">Canyon-specific model</h2></div>
+          <span id="calibration-badge" class="calibration-badge">Provisional</span>
+        </div>
+        <div id="calculation-summary" class="calculation-summary"></div>
+        <div class="calculation-grid">
+          <div>
+            <h3>Event calculation</h3>
+            <div id="event-equation" class="equation-card"></div>
+          </div>
+          <div>
+            <h3>Scaled intensity gates</h3>
+            <div id="rule-table"></div>
+          </div>
+        </div>
+        <h3>Local NOAA Atlas 14 point precipitation</h3>
+        <div id="atlas-table" class="table-wrap"></div>
+        <details>
+          <summary>Methods, formulas, classifications, and limitations</summary>
+          <div id="methodology" class="methodology"></div>
+        </details>
+      </section>
     </section>
 
     <footer>
-      <span id="last-check">Waiting for first check</span>
       <span>Radar: Iowa Environmental Mesonet N0Q composite</span>
-      <span class="disclaimer">Radar-based pool-fill indicator; not visual confirmation or flash-flood guidance.</span>
+      <span>Frequency context: NOAA Atlas 14 Volume 1</span>
+      <span class="disclaimer">Modeled pool-condition likelihood; not field confirmation or flash-flood guidance.</span>
     </footer>
   </main>
   <script src="app.js" defer></script>
