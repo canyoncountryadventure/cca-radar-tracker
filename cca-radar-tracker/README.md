@@ -1,52 +1,93 @@
-# CCA Canyon Pool Conditions — Version 2
+# Slot Canyon Pool Conditions
 
-Automated five-minute radar analysis for 17 Canyon Country Adventure watersheds. The GitHub Pages dashboard shows every canyon at once and provides a detailed dropdown view with the last rain event, retained last qualifying storm, radar pixels over the watershed, modeled pool condition, local NOAA Atlas 14 context, and the complete canyon-specific calculation.
+Automated five-minute radar analysis for 17 Canyon Country Adventures watersheds. The GitHub Pages dashboard provides an all-canyon overview and detailed canyon view with an interactive topographic/satellite map, radar pixels, the last rain event, retained last likely-full storm, canyon-specific calculations, and NOAA Atlas 14 context.
 
 ## Canyons
 
 ZeroG; Black Hole of White Canyon; Leprechaun; Woody; Hog Canyons; No Kidding; Angel Cove; Constrychnine; Alcatraz; Poe; Entrajo; Pool Arch; The Squeeze; Cable Canyon; Eardley; North Fork of Iron Wash; and Upper Greasewood.
 
-## What runs every 15 minutes
+## Automated operation
 
-GitHub Actions restores the last published state, finds all unprocessed IEM N0Q five-minute frames, analyzes each frame against all 17 polygons, groups wet frames into rain events, sends a grouped email for newly qualifying canyons, and republishes `docs/` to GitHub Pages. The last qualifying storm is retained even after later weak or dry weather.
+GitHub Actions runs four times per hour. It restores the published state, analyzes all new IEM N0Q five-minute frames against all 17 polygons, groups wet frames into events, sends a grouped email for newly likely-full canyons, and republishes the dashboard. The last qualifying event remains available after later weak or dry weather.
 
-## Model
+## Radar-to-rainfall calculation
 
-The tool performs deterministic radar/GIS calculations; it does not ask AI to judge radar colors.
+IEM N0Q reflectivity is decoded to dBZ. Fractional cell-area masks calculate each radar cell's share of a watershed. The NWS default convective relationship is used:
 
-1. Decode IEM N0Q composite reflectivity to dBZ and use fractional radar-cell coverage within each watershed.
-2. Convert dBZ to radar-equivalent rainfall with the NWS default relation `Z = 300 R^1.4`. Reflectivity is capped at 55 dBZ for rainfall-volume calculations to reduce hail inflation.
-3. Calculate storm rainfall volume across the watershed and multiply by a provisional 5% combined runoff-and-delivery coefficient.
-4. Anchor ZeroG to the field estimate that approximately 5 cfs for one hour, or 18,000 ft³, fills its channel pools.
-5. Transfer the target to other watersheds with `18,000 × (area / 1.36)^0.4`. The 0.4 exponent is a provisional regional drainage-area scaling informed by the supplied USGS StreamStats comparisons, not a claim that every canyon behaves identically.
-6. Require both sufficient delivered volume and a scaled high-intensity footprint before declaring likely full or fully flushed/new water.
+```text
+Z = 300 R^1.4
+Z = 10^(dBZ/10)
+R = (Z/300)^(1/1.4) millimeters/hour
+```
 
-The ZeroG spatial reference gates are:
+This relationship is a compromise estimate, not a rain gauge. The rainfall-rate calculation is capped at 55 dBZ because very high reflectivity may contain hail and should not be converted into ever-increasing liquid rainfall. The original uncapped reflectivity remains available for the heavy-rain footprint test.
 
-- 50+ dBZ over 0.68 mi² (50% of ZeroG), or
-- 55+ dBZ over 0.34 mi² (25%), or
-- 60+ dBZ over 0.136 mi² (10%).
+## Delivered runoff and the 5% coefficient
 
-For another watershed, each required high-dBZ area is multiplied by `(area / 1.36)^0.4` and capped at the watershed's full area.
+Storm rainfall depth is accumulated for every fractional radar cell and averaged across the entire polygon. Rainfall volume is:
 
-## Condition classes
+```text
+basin-average rain depth × watershed area
+```
 
-- **Minor:** runoff ratio below 0.5 and no spatial intensity gate.
-- **Moderate / possibly filled somewhat:** runoff ratio at least 0.5, or an intensity gate was reached.
-- **Likely full / new water:** runoff ratio at least 1.0, an intensity gate was reached, and at least two wet five-minute frames occurred.
-- **Full flush / completely new water:** runoff ratio at least 2.0, an intensity gate was reached, and at least two wet frames occurred.
+Estimated water delivered to the pour point is:
 
-These are likelihood estimates, not field confirmation. ZeroG is field-informed; the other canyon targets are provisional until observations can be used for calibration. Radar can miss low-level orographic effects, beam blockage, evaporation, antecedent moisture, and channel losses. This tool is not flash-flood guidance.
+```text
+radar rainfall volume × 5%
+```
 
-## Repository files
+The 5% is a **provisional effective runoff-and-delivery coefficient**, not a measured soil-absorption rate. It collectively represents infiltration, surface storage, evaporation, and transmission losses before runoff reaches the canyon. Antecedent moisture and storm intensity can change it dramatically. It should be recalibrated as field observations become available.
+
+## Fill targets and one-hour cfs
+
+ZeroG is anchored to the field estimate that about 5 cfs for one hour would refill its channel pools:
+
+```text
+5 ft³/s × 3,600 seconds = 18,000 ft³
+```
+
+Other canyon targets are not automatically 5 cfs for one hour. They are provisionally scaled by watershed area:
+
+```text
+fill target = 18,000 ft³ × (watershed area / 1.36 mi²)^0.4
+```
+
+The dashboard converts every target and delivered-runoff volume into a one-hour-equivalent cfs value for intuitive comparison. The 0.4 exponent is a provisional regional transfer informed by the supplied StreamStats comparisons.
+
+## Estimated fill ratio and heavy-rain footprint
+
+```text
+estimated fill ratio = delivered runoff / canyon fill target
+```
+
+`1.0×` means modeled delivered volume equals the provisional target. It is not a measured pool-depth percentage.
+
+The heavy-rain footprint is a second reality check. A scaled minimum area must reach 50, 55, or 60 dBZ. This prevents widespread gentle rain on a huge basin—or one isolated noisy pixel—from being labeled a full refill based on volume alone.
+
+ZeroG reference footprints are 50+ dBZ over 0.68 mi², 55+ over 0.34 mi², or 60+ over 0.136 mi². Other watersheds use the same area exponent.
+
+## Condition tiers
+
+- **Little to no expected change:** fill ratio below 1.0 and no heavy-rain footprint.
+- **Some new water possible / partial refill:** ratio at least 1.0 or a heavy-rain footprint, but the complete likely-full test was not met.
+- **Likely substantially or fully refilled:** ratio at least 1.0, a heavy-rain footprint, and at least two wet five-minute frames.
+- **Full flush / completely new water:** ratio at least 2.0, a heavy-rain footprint, and at least two wet frames.
+
+## NOAA Atlas 14 equivalent
+
+The dashboard now compares the **watershed-average accumulated radar rainfall** over the event's full duration with local NOAA Atlas 14 point-frequency depths at the canyon outlet. Atlas depths are interpolated between standard durations when necessary, and return period is interpolated between the published recurrence curves.
+
+This is labeled an **Atlas 14 equivalent**, not a formal watershed return interval. Atlas 14 supplies point precipitation frequencies; the tracker does not presently apply an areal-reduction factor or model spatial storm probability. It is rainfall-rarity context, not evidence that pools filled.
+
+## Files
 
 - `tracker.py` — multi-canyon radar, rainfall, runoff, event, and history engine.
 - `watersheds.geojson` — normalized 17-polygon collection.
 - `atlas14.json` — NOAA Atlas 14 point-frequency tables at canyon outlets.
 - `config.json` — model and scheduling constants.
-- `send_alert.py` — grouped Gmail notifications with per-event duplicate suppression.
-- `docs/` — responsive GitHub Pages dashboard and generated data.
-- `tools/prepare_watersheds.py` — reproducible polygon normalization and Atlas 14 retrieval.
+- `send_alert.py` — grouped Gmail notifications with duplicate suppression.
+- `docs/` — interactive GitHub Pages dashboard and generated data.
+- `tools/prepare_watersheds.py` — polygon normalization and Atlas retrieval.
 - `tests/` — calculation, migration, and notification tests.
 
 ## Run and verify
@@ -57,38 +98,21 @@ python -m unittest discover -s tests -v
 python tracker.py
 ```
 
-For a single historical frame without changing status:
+Historical frame without changing status:
 
 ```bash
 python tracker.py --at 2024-06-21T22:25:00Z --dry-run
 ```
 
-The known June 21, 2024 ZeroG peak should show roughly 92.6% at 50+ dBZ, 53.4% at 55+ dBZ, and 27.5% at 60+ dBZ. Small differences can occur if IEM rendering changes.
-
-## GitHub Pages and email
-
-Set **Settings → Pages → Source** to **GitHub Actions**. The workflow runs at minutes 7, 22, 37, and 52 of every hour and may start a few minutes late when GitHub is busy.
-
-For alerts, store the Gmail app password as the Actions secret `GMAIL_APP_PASSWORD`. Messages are sent from and to `canyoncountryadventure@gmail.com`. A normal scheduled run sends only for a newly qualifying event; the workflow's manual `Send a test email` option verifies delivery.
-
-## Hostinger Website Builder embed
-
-Add an Embed Code element and paste:
-
-```html
-<iframe
-  src="https://canyoncountryadventure.github.io/cca-radar-tracker/"
-  title="CCA canyon pool conditions"
-  width="100%"
-  height="1800"
-  style="border:0; border-radius:14px; background:#101213;"
-  loading="lazy">
-</iframe>
-```
+The June 21, 2024 ZeroG peak produces approximately 92.5% at 50+ dBZ, 53.8% at 55+ dBZ, and 27.9% at 60+ dBZ.
 
 ## Sources
 
-- [IEM N0Q composite documentation](https://mesonet.agron.iastate.edu/docs/nexrad_composites/)
+- [IEM historical NEXRAD mosaic viewer](https://mesonet.agron.iastate.edu/current/mcview.phtml)
+- [IEM NEXRAD mosaic documentation](https://mesonet.agron.iastate.edu/docs/nexrad_composites/)
 - [IEM N0Q raster and dBZ encoding](https://mesonet.agron.iastate.edu/GIS/rasters.php?rid=2)
+- [NWS radar rainfall estimation and default Z–R relationship](https://www.weather.gov/mrx/radarrainfallestimates)
 - [NOAA Atlas 14 PFDS](https://hdsc.nws.noaa.gov/pfds/)
 - [USGS StreamStats](https://streamstats.usgs.gov/ss/)
+
+These are experimental model estimates, not field confirmation, professional hydrologic advice, or flash-flood guidance.

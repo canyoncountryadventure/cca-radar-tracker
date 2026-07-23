@@ -403,17 +403,54 @@ def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
         zerog = fresh["canyons"]["zerog"]
         zerog["last_qualifying_event"] = legacy_event(existing.get("last_qualifying_event"))
         zerog["events"] = [legacy_event(event) for event in existing.get("events", []) if event]
-        fresh["health"] = {"ok": True, "message": "Migrated Version 1 history; Version 2 monitoring active"}
+        fresh["health"] = {"ok": True, "message": "Earlier ZeroG history preserved; multi-canyon monitoring active"}
     return fresh
 
 
+def refresh_status_events(status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]) -> None:
+    """Recalculate retained events when display/model definitions improve."""
+    for canyon in canyons:
+        canyon_status = status.get("canyons", {}).get(canyon.canyon_id, {})
+        for key in ("last_rain_event", "last_qualifying_event"):
+            event = canyon_status.get(key)
+            if event and event.get("estimated_runoff_ft3") is not None and event.get("frames"):
+                canyon_status[key] = event_public(event, canyon, config)
+        refreshed = []
+        for event in canyon_status.get("events", []):
+            if event.get("estimated_runoff_ft3") is not None and event.get("frames"):
+                refreshed.append(event_public(event, canyon, config, include_grid=False))
+            else:
+                refreshed.append(event)
+        canyon_status["events"] = refreshed
+
+
+def event_duration_minutes(event: dict[str, Any], frame_minutes: int) -> int:
+    if event.get("start_utc") and event.get("end_utc"):
+        elapsed = int((parse_utc(event["end_utc"]) - parse_utc(event["start_utc"])).total_seconds() // 60)
+        return max(frame_minutes, elapsed + frame_minutes)
+    return max(frame_minutes, int(event["frames"]) * frame_minutes)
+
+
 def atlas_return_period(event: dict[str, Any], canyon: Canyon, frame_minutes: int) -> float | None:
-    duration = max(frame_minutes, int(event["frames"]) * frame_minutes)
+    duration = event_duration_minutes(event, frame_minutes)
     supported = [5, 10, 15, 30, 60]
-    selected = min(supported, key=lambda value: abs(value - duration))
-    table = canyon.atlas14[f"{selected}-min"]
-    depth = float(event.get("max_pixel_storm_inches") or 0)
-    pairs = sorted((float(period), float(value)) for period, value in table.items())
+    lower = max((value for value in supported if value <= duration), default=supported[0])
+    upper = min((value for value in supported if value >= duration), default=supported[-1])
+    periods = sorted(float(period) for period in canyon.atlas14[f"{lower}-min"])
+
+    def duration_depth(period: float) -> float:
+        low_depth = float(canyon.atlas14[f"{lower}-min"][str(int(period))])
+        if lower == upper:
+            return low_depth
+        high_depth = float(canyon.atlas14[f"{upper}-min"][str(int(period))])
+        fraction = (math.log(duration) - math.log(lower)) / (math.log(upper) - math.log(lower))
+        return math.exp(math.log(low_depth) + fraction * (math.log(high_depth) - math.log(low_depth)))
+
+    # Compare the storm's watershed-average accumulated depth with local Atlas
+    # 14 point-frequency depths. This is an "Atlas-equivalent" context, not a
+    # formal areal return period; Atlas 14 does not supply watershed ARFs here.
+    depth = float(event.get("basin_rain_inches") or 0)
+    pairs = [(period, duration_depth(period)) for period in periods]
     if depth <= 0:
         return None
     if depth <= pairs[0][1]:
@@ -435,10 +472,10 @@ def classify_event(event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
     if ratio >= float(config["model"]["flush_ratio"]) and gate and enough_frames:
         return "full_flush", "Very high likelihood — full pools and completely new water"
     if ratio >= 1.0 and gate and enough_frames:
-        return "likely_full", "High likelihood — pools likely full"
-    if ratio >= float(config["model"]["moderate_ratio"]) or gate:
-        return "moderate", "Moderate likelihood — pools may have filled somewhat"
-    return "minor", "Minor rainfall — limited pool change expected"
+        return "likely_full", "High likelihood — pools substantially or fully refilled"
+    if ratio >= 1.0 or gate:
+        return "moderate", "Some new water possible — partial pool refill"
+    return "minor", "Little to no expected change in pool depth"
 
 
 def event_public(event: dict[str, Any], canyon: Canyon, config: dict[str, Any], include_grid: bool = True) -> dict[str, Any]:
@@ -447,6 +484,18 @@ def event_public(event: dict[str, Any], canyon: Canyon, config: dict[str, Any], 
     public["classification"] = classification
     public["classification_label"] = label
     public["atlas14_return_period_years"] = atlas_return_period(public, canyon, int(config["model"]["frame_minutes"]))
+    public["atlas14_basis"] = "watershed-average radar rainfall"
+    public["atlas14_duration_minutes"] = event_duration_minutes(public, int(config["model"]["frame_minutes"]))
+    public["atlas14_depth_inches"] = public.get("basin_rain_inches")
+    public["delivered_runoff_one_hour_cfs"] = round(float(public["estimated_runoff_ft3"]) / 3600.0, 2)
+    public["fill_target_one_hour_cfs"] = round(float(canyon.model["fill_target_ft3"]) / 3600.0, 2)
+    event_time = parse_utc(public["peak_frame_utc"])
+    viewer_query = urllib.parse.urlencode({
+        "prod": "usrad", "java": "script", "mode": "archive", "frames": max(12, int(public["frames"]) + 6),
+        "interval": int(config["model"]["frame_minutes"]), "year": event_time.year, "month": event_time.month,
+        "day": event_time.day, "hour": event_time.hour, "minute": event_time.minute,
+    })
+    public["iem_archive_url"] = f"https://mesonet.agron.iastate.edu/current/mcview.phtml?{viewer_query}"
     if not include_grid:
         public.pop("peak_grid_dbz", None)
         public.pop("grid_bbox", None)
@@ -591,18 +640,24 @@ def model_metadata(canyons: list[Canyon], config: dict[str, Any]) -> dict[str, A
             "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
             "rainfall_formula": f"Z = {model['zr_a']} × R^{model['zr_b']}; dBZ capped at {model['rain_dbz_cap']} for rainfall volume",
             "runoff_formula": "Estimated delivered runoff = radar rain volume × effective runoff coefficient",
+            "runoff_coefficient_explanation": "The 5% value is a provisional effective runoff-and-delivery coefficient. It represents infiltration, surface storage, evaporation, and transmission loss before water reaches the canyon pour point. It is not a measured soil-absorption rate and should be recalibrated with field observations.",
             "target_formula": "Fill target = 18,000 ft³ × (watershed area ÷ 1.36 mi²)^0.4",
+            "target_explanation": "Only ZeroG's 18,000 ft³ anchor equals 5 cfs sustained for one hour. Other canyon targets are scaled by drainage area; each dashboard also converts its target back to an equivalent one-hour cfs for readability.",
             "spatial_formula": "Required high-dBZ area = ZeroG reference area × (watershed area ÷ 1.36 mi²)^0.4",
+            "spatial_explanation": "The heavy-rain footprint gate requires an adequate area of intense rain. It prevents a large watershed receiving widespread light rain, or one isolated noisy pixel, from being called full on volume alone.",
+            "fill_ratio_explanation": "Estimated fill ratio = delivered runoff ÷ canyon fill target. A value of 1.0 means the modeled delivered volume equals the provisional target; it is not a measured percentage of pool depth.",
+            "atlas_explanation": "Atlas context compares the watershed-average radar accumulation over the event duration with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is an Atlas-equivalent recurrence context, not a formal watershed areal return interval.",
             "scaling_basis": "The 0.4 drainage-area exponent is a provisional regional transfer based on the supplied USGS StreamStats comparisons; it is not a claim that every canyon behaves identically.",
             "sources": [
                 {"label": "IEM N0Q composite documentation", "url": "https://mesonet.agron.iastate.edu/docs/nexrad_composites/"},
                 {"label": "IEM N0Q raster and dBZ encoding", "url": "https://mesonet.agron.iastate.edu/GIS/rasters.php?rid=2"},
+                {"label": "NWS radar rainfall estimation and default Z–R relationship", "url": "https://www.weather.gov/mrx/radarrainfallestimates"},
                 {"label": "NOAA Atlas 14 precipitation frequency", "url": "https://hdsc.nws.noaa.gov/pfds/"},
                 {"label": "USGS StreamStats", "url": "https://streamstats.usgs.gov/ss/"},
             ],
             "classification": {
-                "minor": "Runoff ratio below 0.5 and no spatial intensity gate",
-                "moderate": "Runoff ratio at least 0.5 or a spatial intensity gate was reached",
+                "minor": "Runoff ratio below 1.0 and no heavy-rain footprint gate; little to no pool-depth change expected",
+                "moderate": "Runoff ratio at least 1.0 or a heavy-rain footprint gate was reached, but the complete likely-full test was not met",
                 "likely_full": "Runoff ratio at least 1.0, spatial gate reached, and at least two wet frames",
                 "full_flush": "Runoff ratio at least 2.0, spatial gate reached, and at least two wet frames",
             },
@@ -650,6 +705,7 @@ def main() -> int:
     canyons, global_grid = build_canyons(collection, atlas, config)
     palette = load_palette(arguments.palette)
     status = load_status(arguments.status, canyons)
+    refresh_status_events(status, canyons, config)
     save_json(arguments.model_output, model_metadata(canyons, config))
 
     if arguments.at:

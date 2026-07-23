@@ -57,6 +57,31 @@ class TrackerTests(unittest.TestCase):
         classification, _ = tracker.classify_event(event, canyon, self.config)
         self.assertEqual(classification, "likely_full")
 
+    def test_near_target_without_heavy_rain_is_little_change(self):
+        canyon = self.by_id["angel-cove"]
+        event = {"estimated_runoff_ft3": canyon.model["fill_target_ft3"] * .96, "wet_frames": 4, "spatial_gate_seen": False}
+        classification, label = tracker.classify_event(event, canyon, self.config)
+        self.assertEqual(classification, "minor")
+        self.assertIn("Little to no", label)
+
+    def test_atlas_context_uses_basin_average_not_wettest_pixel(self):
+        canyon = self.by_id["angel-cove"]
+        event = {"frames": 4, "basin_rain_inches": .107, "max_pixel_storm_inches": .484}
+        recurrence = tracker.atlas_return_period(event, canyon, 5)
+        self.assertLess(recurrence, 1)
+
+    def test_event_public_adds_cfs_and_exact_iem_archive_link(self):
+        canyon = self.by_id["zerog"]
+        event = {
+            "start_utc": "2024-06-21T22:10:00Z", "end_utc": "2024-06-21T22:20:00Z",
+            "peak_frame_utc": "2024-06-21T22:15:00Z", "frames": 3, "wet_frames": 3,
+            "estimated_runoff_ft3": 18000, "basin_rain_inches": .2, "spatial_gate_seen": True,
+        }
+        public = tracker.event_public(event, canyon, self.config)
+        self.assertEqual(public["delivered_runoff_one_hour_cfs"], 5)
+        self.assertIn("mode=archive", public["iem_archive_url"])
+        self.assertIn("prod=usrad", public["iem_archive_url"])
+
     def test_hail_values_are_capped_for_rain_volume(self):
         values = np.array([[55.0, 60.0, 70.0]], dtype=np.float32)
         depth = tracker.rain_depth_inches(values, self.config["model"])
