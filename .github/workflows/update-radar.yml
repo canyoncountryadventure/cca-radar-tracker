@@ -10,6 +10,11 @@ on:
         required: false
         default: false
         type: boolean
+      rebuild_from_utc:
+        description: Optional UTC replay start, e.g. 2026-07-24T22:00:00Z
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -110,7 +115,15 @@ jobs:
 
       - name: Analyze new radar frames
         working-directory: cca-radar-tracker
-        run: python tracker.py
+        env:
+          REBUILD_FROM_UTC: ${{ inputs.rebuild_from_utc }}
+        run: |
+          if [[ -n "$REBUILD_FROM_UTC" ]]; then
+            echo "Replaying exact radar frames from $REBUILD_FROM_UTC"
+            python tracker.py --rebuild-from "$REBUILD_FROM_UTC"
+          else
+            python tracker.py
+          fi
 
       - name: Verify revised refill model
         run: |
