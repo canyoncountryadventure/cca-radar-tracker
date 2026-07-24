@@ -286,18 +286,40 @@ def fetch_radar_image(
     config: dict[str, Any],
     latest_reference: datetime | None = None,
 ) -> Image.Image:
-    current_offset: int | None = None
-    if latest_reference is not None:
-        current_offset = int((latest_reference - timestamp).total_seconds() // 60)
-        if current_offset < 0 or current_offset > 55 or current_offset % 5:
-            current_offset = None
+    """Fetch one exact radar frame without silently accepting stale WMS imagery.
 
-    if current_offset is None:
-        endpoint, layer = config["iem_historical_wms_url"], "nexrad-n0q-wmst"
+    The former implementation requested time-relative ``m05m``/``m55m`` layers
+    using static URLs. Those URLs can be cached even though their underlying
+    valid time changes, causing an old clear-air image to be analyzed as a new
+    frame. It also requested a Web-Mercator (900913) layer in EPSG:4326, which
+    can alter indexed radar colors during reprojection.
+
+    Frames at least 10 minutes old now use the historical WMS-T service with an
+    explicit UTC TIME. The newest one or two frames use the native EPSG:4326
+    current layers and a valid-time cache key.
+    """
+    age_minutes: int | None = None
+    if latest_reference is not None:
+        age_minutes = int((latest_reference - timestamp).total_seconds() // 60)
+
+    historical_min_age = int(config.get("historical_wms_min_age_minutes", 10))
+    use_historical = (
+        latest_reference is None
+        or age_minutes is None
+        or age_minutes < 0
+        or age_minutes >= historical_min_age
+        or age_minutes > 55
+        or age_minutes % 5 != 0
+    )
+
+    if use_historical:
+        endpoint = config["iem_historical_wms_url"]
+        layer = "nexrad-n0q-wmst"
     else:
         endpoint = config["iem_current_wms_url"]
-        suffix = "" if current_offset == 0 else f"-m{current_offset:02d}m"
-        layer = f"nexrad-n0q-900913{suffix}-conus"
+        suffix = "" if age_minutes == 0 else f"-m{age_minutes:02d}m"
+        # Native lat/lon layer; do not request the 900913 layer in EPSG:4326.
+        layer = f"nexrad-n0q{suffix}-conus"
 
     query = {
         "SERVICE": "WMS",
@@ -311,8 +333,14 @@ def fetch_radar_image(
         "HEIGHT": str(grid.height),
         "FORMAT": "image/png",
         "TRANSPARENT": "TRUE",
+        # Time-relative WMS layer names otherwise reuse the same URL forever.
+        "_valid": (
+            latest_reference.strftime("%Y%m%d%H%M")
+            if latest_reference is not None
+            else timestamp.strftime("%Y%m%d%H%M")
+        ),
     }
-    if current_offset is None:
+    if use_historical:
         query["TIME"] = timestamp.strftime("%Y-%m-%dT%H:%M:00Z")
 
     url = f"{endpoint}?{urllib.parse.urlencode(query)}"
@@ -320,7 +348,12 @@ def fetch_radar_image(
     for attempt in range(int(config["request_retries"])):
         try:
             request = urllib.request.Request(
-                url, headers={"User-Agent": "CCA-PoolFill-Radar/3.0"}
+                url,
+                headers={
+                    "User-Agent": "CCA-PoolFill-Radar/3.1",
+                    "Cache-Control": "no-cache",
+                    "Pragma": "no-cache",
+                },
             )
             with urllib.request.urlopen(
                 request, timeout=int(config["request_timeout_seconds"])
@@ -1209,6 +1242,42 @@ def scheduled_timestamps(
 
 
 
+def rewind_status(
+    status: dict[str, Any],
+    canyons: list[Canyon],
+    rebuild_from: datetime,
+) -> None:
+    """Discard only results at/after a requested UTC time, preserving older history."""
+    cutoff = floor_five_minutes(rebuild_from)
+    for canyon in canyons:
+        canyon_status = status["canyons"][canyon.canyon_id]
+        retained = [
+            event
+            for event in canyon_status.get("events", [])
+            if event
+            and parse_utc(event.get("end_utc") or event["start_utc"]) < cutoff
+        ]
+        canyon_status["events"] = retained
+        canyon_status["open_event"] = None
+        canyon_status["latest_analysis"] = None
+        canyon_status["last_rain_event"] = retained[0] if retained else None
+        qualifying = [
+            event
+            for event in retained
+            if event.get("classification") in {"likely_full", "full_flush"}
+        ]
+        canyon_status["last_qualifying_event"] = (
+            qualifying[0] if qualifying else None
+        )
+
+    status["latest_frame_utc"] = utc_text(cutoff - timedelta(minutes=5))
+    status["last_checked_utc"] = None
+    status["health"] = {
+        "ok": True,
+        "message": f"Radar history rewound to {utc_text(cutoff)} for exact replay",
+    }
+
+
 def model_metadata(
     canyons: list[Canyon], config: dict[str, Any]
 ) -> dict[str, Any]:
@@ -1425,6 +1494,13 @@ def main() -> int:
     parser.add_argument(
         "--at", help="Analyze one UTC frame, for example 2024-06-21T22:25:00Z"
     )
+    parser.add_argument(
+        "--rebuild-from",
+        help=(
+            "Replay all five-minute frames from this UTC time while preserving "
+            "older event history, for example 2026-07-24T22:00:00Z"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     arguments = parser.parse_args()
 
@@ -1443,6 +1519,8 @@ def main() -> int:
     palette = load_palette(arguments.palette)
     status = load_status(arguments.status, canyons)
     refresh_status_events(status, canyons, config)
+    if arguments.rebuild_from:
+        rewind_status(status, canyons, parse_utc(arguments.rebuild_from))
     save_json(arguments.model_output, model_metadata(canyons, config))
 
     if arguments.at:
@@ -1467,6 +1545,9 @@ def main() -> int:
     now = datetime.now(UTC)
     latest_reference = latest_iem_timestamp(config)
     timestamps = scheduled_timestamps(status, config, latest_reference)
+    if arguments.rebuild_from:
+        start = floor_five_minutes(parse_utc(arguments.rebuild_from))
+        timestamps = list(iter_five_minutes(start, latest_reference))
     status["monitoring_started_utc"] = status[
         "monitoring_started_utc"
     ] or utc_text(timestamps[0] if timestamps else now)
@@ -1474,7 +1555,7 @@ def main() -> int:
 
     try:
         for timestamp in timestamps:
-            process_timestamp(
+            summary = process_timestamp(
                 timestamp,
                 status,
                 canyons,
@@ -1482,6 +1563,26 @@ def main() -> int:
                 palette,
                 config,
                 latest_reference,
+            )
+            wet_canyons = [
+                canyon_id
+                for canyon_id, values in summary.items()
+                if values.get("maximum_dbz") is not None
+                and float(values["maximum_dbz"])
+                >= float(config["model"]["storm_dbz_threshold"])
+            ]
+            strongest = max(
+                (
+                    (float(values["maximum_dbz"]), canyon_id)
+                    for canyon_id, values in summary.items()
+                    if values.get("maximum_dbz") is not None
+                ),
+                default=(float("nan"), "none"),
+            )
+            print(
+                f"{utc_text(timestamp)}: wet={','.join(wet_canyons) or 'none'}; "
+                f"strongest={strongest[1]} "
+                f"{strongest[0] if math.isfinite(strongest[0]) else 'NA'} dBZ"
             )
             processed += 1
         status["last_checked_utc"] = utc_text(datetime.now(UTC))
