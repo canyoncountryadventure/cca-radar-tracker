@@ -82,6 +82,52 @@ function dateOnly(value) {
   }).format(parsed);
 }
 
+function summaryDateTime(value) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(parsed);
+}
+
+function eventSortTime(event) {
+  if (!event) return Number.NEGATIVE_INFINITY;
+  const parsed = new Date(event.end_utc || event.start_utc || 0).getTime();
+  return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
+}
+
+function fillVisual(event) {
+  if (!event) {
+    return {
+      percent: 0,
+      text: "—",
+      css: "fill-none",
+      title: "No retained rain event",
+    };
+  }
+
+  const ratio = Math.max(0, Number(event.fill_ratio || 0));
+  const percent = Math.min(100, Math.round(ratio * 100));
+  let css = "fill-minor";
+  if (ratio >= 2) css = "fill-flush";
+  else if (ratio >= 1) css = "fill-full";
+  else if (ratio >= 0.75) css = "fill-large";
+  else if (ratio >= 0.50) css = "fill-substantial";
+  else if (ratio >= 0.25) css = "fill-some";
+
+  return {
+    percent,
+    text: ratio >= 1 ? "100%+" : `${percent}%`,
+    css,
+    title: `Estimated storage-fill ratio: ${number(ratio, 2)}×`,
+  };
+}
+
 function eventDuration(event) {
   if (!event) return 0;
   if (Number.isFinite(Number(event.storm_duration_minutes))) return Number(event.storm_duration_minutes);
@@ -184,18 +230,34 @@ function renderSummary() {
   const rows = Object.entries(app.model.canyons).map(([id, model]) => {
     const event = canyonStatus(id).last_rain_event;
     const meta = eventCondition(event);
-    return { id, model, event, meta };
+    return {
+      id,
+      model,
+      event,
+      meta,
+      fill: fillVisual(event),
+      sortTime: eventSortTime(event),
+    };
   });
-  rows.sort((a, b) => b.meta.rank - a.meta.rank || a.model.name.localeCompare(b.model.name));
 
-  container.innerHTML = rows.map(({ id, model, event, meta }) => `
+  // Most recently wet canyon first; canyons with no retained event stay last.
+  rows.sort((a, b) => b.sortTime - a.sortTime || a.model.name.localeCompare(b.model.name));
+
+  container.innerHTML = rows.map(({ id, model, event, meta, fill }) => `
     <button type="button" class="summary-row ${meta.css} ${id === app.selectedId ? "selected" : ""}" data-canyon-id="${escapeHtml(id)}">
-      <span class="summary-mark">${meta.mark}</span>
-      <span>
+      <span
+        class="summary-bubble ${fill.css}"
+        style="--bubble-fill: ${fill.percent}%"
+        title="${escapeHtml(fill.title)}"
+        aria-label="${escapeHtml(fill.title)}"
+      >
+        <span class="summary-bubble-text">${escapeHtml(fill.text)}</span>
+      </span>
+      <span class="summary-copy">
         <span class="summary-name">${escapeHtml(model.name)}</span>
         <span class="summary-condition">${escapeHtml(event?.classification_label || meta.short)}</span>
       </span>
-      <span class="summary-date">${event ? dateOnly(event.start_utc) : "—"}</span>
+      <span class="summary-date">${event ? summaryDateTime(event.end_utc || event.start_utc) : "—"}</span>
     </button>
   `).join("");
 
@@ -393,12 +455,19 @@ function renderCondition(model, event) {
     : "No completed radar rain event has been retained for this canyon yet.";
 }
 
-function metricCard(label, value, note) {
+function metricCard(label, value, note, help) {
+  const description = help || note;
   return `
-    <article class="metric-card">
+    <article
+      class="metric-card"
+      tabindex="0"
+      aria-label="${escapeHtml(`${label}: ${value}. ${description}`)}"
+    >
+      <span class="metric-help-icon" aria-hidden="true">?</span>
       <div class="metric-label">${escapeHtml(label)}</div>
       <div class="metric-value">${escapeHtml(value)}</div>
       <div class="metric-note">${escapeHtml(note)}</div>
+      <div class="metric-tooltip" role="tooltip">${escapeHtml(description)}</div>
     </article>
   `;
 }
@@ -406,6 +475,7 @@ function metricCard(label, value, note) {
 function renderMetrics(model, event) {
   const runoff = directRunoff(event);
   const runoffRange = directRunoffRange(event);
+  const peak = routedPeak(event);
   const peakRange = routedPeakRange(event);
   const normalIa = Number(model.hydrology?.initial_abstraction_inches?.normal);
   const rain = Number(event?.basin_rain_inches || 0);
@@ -417,16 +487,66 @@ function renderMetrics(model, event) {
   const modifierValue = modifier === 0 ? "0%" : `${modifier > 0 ? "+" : "−"}${number(Math.abs(modifier) * 100, 0)}%`;
 
   const cards = [
-    metricCard("Basin-average radar rain", event ? `${number(event.basin_rain_inches, 3)} in` : "—", "area-weighted event accumulation"),
-    metricCard("Estimated watershed runoff", event ? `${compactNumber(runoff, 1)} ft³` : "—", event ? `${rangeText(runoffRange, "ft³", 0)} dry–wet; ${zeroReason}` : "NRCS direct-runoff estimate; not measured canyon delivery"),
-    metricCard("Routed peak flow — context", event ? rangeText(peakRange, "cfs", 2) : "—", "dry–wet screening range; not a fill trigger by itself"),
-    metricCard("Estimated empty-pool storage", `${number(model.fill_target_ft3, 0)} ft³`, "estimated empty pool/pothole storage"),
-    metricCard("Storage-fill ratio", event ? `${number(event.fill_ratio || 0, 2)}×` : "—", "normal-condition watershed runoff ÷ empty-storage target"),
-    metricCard("Technical section", `${number(model.technical_length_miles, 2)} mi`, `${number(model.length_ratio_to_zerog, 2)}× Zero G length`),
-    metricCard("Pothole-storage adjustment", modifierValue, `${modifierText(model)} per technical mile`),
-    metricCard("Peak radar", event?.peak_dbz != null ? `${number(event.peak_dbz, 1)} dBZ` : "—", "maximum reflectivity inside watershed"),
-    metricCard("Storm duration", event ? `${number(eventDuration(event), 0)} min` : "—", `${number(event?.wet_frames || 0, 0)} wet five-minute frames`),
-    metricCard("Drainage area", `${number(model.area_sq_mi, 3)} mi²`, "used for runoff volume, not pool-storage scaling"),
+    metricCard(
+      "Basin-average radar rain",
+      event ? `${number(event.basin_rain_inches, 3)} in` : "—",
+      "area-weighted event accumulation",
+      "Radar-estimated rainfall averaged across every grid cell inside the watershed for the retained event. It is not a rain-gauge measurement or the maximum point rainfall.",
+    ),
+    metricCard(
+      "Estimated watershed runoff",
+      event ? `${compactNumber(runoff, 1)} ft³` : "—",
+      event ? `${rangeText(runoffRange, "ft³", 0)} dry–wet; ${zeroReason}` : "NRCS direct-runoff estimate; not measured canyon delivery",
+      "The normal-antecedent-condition estimate of total direct-runoff volume generated by the watershed. Cubic feet is a storm volume, not a flow rate. The note shows the dry-to-wet uncertainty range, and actual delivery to canyon pools may be lower.",
+    ),
+    metricCard(
+      "Routed peak flow — context",
+      event ? `${number(peak, 2)} cfs` : "—",
+      event ? `${rangeText(peakRange, "cfs", 2)} dry–wet range; normal estimate shown` : "screening flow-rate context",
+      "The normal-condition screening estimate of the event's maximum flow rate, calculated with a triangular hydrograph using runoff volume, storm duration, and watershed lag. It is shown for context and does not independently trigger a pool-fill classification.",
+    ),
+    metricCard(
+      "Estimated empty-pool storage",
+      `${number(model.fill_target_ft3, 0)} ft³`,
+      "estimated empty pool/pothole storage",
+      "The provisional volume required to fill all modeled canyon pool and pothole storage if it started empty. It is normalized from Zero G by technical-section length and the canyon-specific pothole-storage adjustment.",
+    ),
+    metricCard(
+      "Storage-fill ratio",
+      event ? `${number(event.fill_ratio || 0, 2)}×` : "—",
+      "normal-condition watershed runoff ÷ empty-storage target",
+      "Normal-condition estimated watershed runoff divided by provisional empty-pool storage. A 0.72× ratio means modeled runoff equals 72% of the empty-storage target; it does not mean observed pools are exactly 72% full.",
+    ),
+    metricCard(
+      "Technical section",
+      `${number(model.technical_length_miles, 2)} mi`,
+      `${number(model.length_ratio_to_zerog, 2)}× Zero G length`,
+      "The user-supplied length of the canyon's technical pool- and pothole-bearing section. It is compared with Zero G's 0.75-mile technical reference length.",
+    ),
+    metricCard(
+      "Pothole-storage adjustment",
+      modifierValue,
+      `${modifierText(model)} per technical mile`,
+      "A canyon-specific adjustment to the assumed pool-storage volume per technical mile relative to Zero G. Positive values mean more storage per mile; negative values mean less.",
+    ),
+    metricCard(
+      "Peak radar",
+      event?.peak_dbz != null ? `${number(event.peak_dbz, 1)} dBZ` : "—",
+      "maximum reflectivity inside watershed",
+      "The single highest radar reflectivity value detected inside the watershed during the event. It is an intensity indicator, not the basin-average rainfall depth.",
+    ),
+    metricCard(
+      "Storm duration",
+      event ? `${number(eventDuration(event), 0)} min` : "—",
+      `${number(event?.wet_frames || 0, 0)} wet five-minute frames`,
+      "The retained event span based on consecutive five-minute radar frames. Wet frames exceeded the lower event-detection threshold; they do not necessarily pass the separate 50/55/60 dBZ footprint tests.",
+    ),
+    metricCard(
+      "Drainage area",
+      `${number(model.area_sq_mi, 3)} mi²`,
+      "used for runoff volume, not pool-storage scaling",
+      "The watershed-polygon area. It converts modeled runoff depth to total runoff volume and converts radar coverage percentages to square miles. It is not used to scale pool-storage capacity.",
+    ),
   ];
   $("metrics-grid").innerHTML = cards.join("");
 }
@@ -487,7 +607,9 @@ function renderEvents(status) {
 function initialAbstraction(curveNumber) {
   const cn = Number(curveNumber);
   if (!Number.isFinite(cn) || cn <= 0) return null;
-  return 0.2 * (1000 / cn - 10);
+  const traditionalRetention = 1000 / cn - 10;
+  const adjustedRetention = 1.33 * (traditionalRetention ** 1.15);
+  return 0.05 * adjustedRetention;
 }
 
 function renderStorageCalculation(model) {
