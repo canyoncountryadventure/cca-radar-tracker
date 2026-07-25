@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Send Gmail alerts for newly qualifying canyon refill events."""
+"""Send Gmail alerts when canyon refill events reach configured severity tiers."""
 
 from __future__ import annotations
 
@@ -17,6 +17,10 @@ ROOT = Path(__file__).resolve().parent
 UTC = timezone.utc
 MOUNTAIN = ZoneInfo("America/Denver")
 LIVE_URL = "https://canyoncountryadventure.github.io/cca-radar-tracker/"
+ALERT_SUBSTANTIAL_RATIO = 0.50
+ALERT_TIER_SUBSTANTIAL = 1
+ALERT_TIER_LIKELY_FULL = 2
+ALERT_TIER_FULL_FLUSH = 3
 
 
 def parse_utc(value: str) -> datetime:
@@ -52,33 +56,75 @@ def direct_runoff(event: dict) -> float:
     )
 
 
-def pending_alerts(status: dict) -> list[tuple[dict, dict]]:
-    alerts = []
+def alert_tier(event: dict | None) -> int:
+    """Return the email severity tier for one modeled rain event."""
+    if not event:
+        return 0
+    classification = str(event.get("classification") or "")
+    if classification == "full_flush":
+        return ALERT_TIER_FULL_FLUSH
+    if classification == "likely_full":
+        return ALERT_TIER_LIKELY_FULL
+    if float(event.get("fill_ratio") or 0) >= ALERT_SUBSTANTIAL_RATIO:
+        return ALERT_TIER_SUBSTANTIAL
+    return 0
+
+
+def alert_tier_label(tier: int) -> str:
+    return {
+        ALERT_TIER_SUBSTANTIAL: "Substantial partial refill",
+        ALERT_TIER_LIKELY_FULL: "Major refill likely",
+        ALERT_TIER_FULL_FLUSH: "Strong flush likely",
+    }.get(tier, "Canyon refill")
+
+
+def pending_alerts(status: dict) -> list[tuple[dict, dict, int]]:
+    """Return new threshold crossings, including escalation within one storm."""
+    alerts: list[tuple[dict, dict, int]] = []
     for canyon in status.get("canyons", {}).values():
-        event = canyon.get("last_qualifying_event")
+        event = canyon.get("last_rain_event")
+        tier = alert_tier(event)
+        if not event or tier == 0:
+            continue
+
         notification = canyon.get("notification") or {}
-        if event and notification.get("last_emailed_event_start_utc") != event.get(
-            "start_utc"
-        ):
-            alerts.append((canyon, event))
+        same_event = (
+            notification.get("last_emailed_event_start_utc")
+            == event.get("start_utc")
+        )
+        # Older notifications predate tier tracking and were only sent for
+        # likely-full/flush events, so treat them as tier 2 to prevent repeats.
+        previous_tier = int(
+            notification.get(
+                "last_emailed_alert_tier",
+                ALERT_TIER_LIKELY_FULL if same_event else 0,
+            )
+            or 0
+        )
+        if not same_event or tier > previous_tier:
+            alerts.append((canyon, event, tier))
     return alerts
 
 
 def alert_message(
-    alerts: list[tuple[dict, dict]], sender: str, recipient: str
+    alerts: list[tuple[dict, dict, int]], sender: str, recipient: str
 ) -> EmailMessage:
-    names = ", ".join(canyon["name"] for canyon, _ in alerts)
+    names = ", ".join(canyon["name"] for canyon, _, _ in alerts)
+    highest_tier = max(tier for _, _, tier in alerts)
     message = EmailMessage()
     message["From"] = sender
     message["To"] = recipient
-    message["Subject"] = f"CCA RADAR — Major pool-refill trigger: {names}"
+    message["Subject"] = (
+        f"CCA RADAR — {alert_tier_label(highest_tier)}: {names}"
+    )
 
     lines = ["CCA CANYON POOL-REFILL MODEL ALERT", ""]
-    for canyon, event in alerts:
+    for canyon, event, tier in alerts:
         tests = event.get("decision_tests") or {}
         lines.extend(
             [
                 canyon["name"].upper(),
+                f"Alert threshold: {alert_tier_label(tier)}",
                 event.get("classification_label", "Major refill model trigger"),
                 event.get("classification_explanation", ""),
                 f"Storm began: {mountain_text(event['start_utc'])}",
@@ -120,7 +166,7 @@ def test_message(sender: str, recipient: str) -> EmailMessage:
                 "CCA MULTI-CANYON RADAR EMAIL TEST",
                 "",
                 "The automated email connection is working.",
-                "An alert is sent when a canyon reaches a likely-major-refill or strong-flush classification.",
+                "An alert is sent when a canyon reaches at least a substantial-partial-refill ratio, with additional alerts if the same storm escalates to likely-full or strong-flush.",
                 "The dashboard retains the last rain event and last major refill event for every canyon.",
                 "",
                 LIVE_URL,
@@ -173,20 +219,22 @@ def main() -> int:
     status = json.loads(arguments.status.read_text(encoding="utf-8"))
     alerts = pending_alerts(status)
     if not alerts:
-        print("No new major-refill canyon event; no email sent")
+        print("No new substantial-or-higher canyon threshold crossing; no email sent")
         return 0
 
     send_gmail(alert_message(alerts, username, recipient), username, app_password)
     sent = utc_text(datetime.now(UTC))
-    for canyon, event in alerts:
+    for canyon, event, tier in alerts:
         canyon["notification"] = {
             "last_emailed_event_start_utc": event["start_utc"],
             "last_email_sent_utc": sent,
+            "last_emailed_alert_tier": tier,
+            "last_emailed_alert_label": alert_tier_label(tier),
             "recipient": recipient,
         }
     save_status(arguments.status, status)
     print(
-        f"Pool-refill alert sent for {len(alerts)} "
+        f"Pool-refill threshold alert sent for {len(alerts)} "
         f"canyon{'s' if len(alerts) != 1 else ''}"
     )
     return 0
