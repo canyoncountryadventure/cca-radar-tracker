@@ -2,7 +2,7 @@ name: Update pool-fill radar
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       send_test_email:
@@ -23,7 +23,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update:
@@ -45,6 +45,69 @@ jobs:
 
       - name: Install tracker dependencies
         run: pip install -r cca-radar-tracker/requirements.txt
+
+      - name: Verify radar retrieval fix is installed
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          tracker = Path("cca-radar-tracker/tracker.py").read_text(encoding="utf-8")
+          workflow = Path(".github/workflows/update-radar.yml").read_text(encoding="utf-8")
+
+          required_tracker = [
+              "historical_wms_min_age_minutes",
+              "--rebuild-from",
+              'layer = f"nexrad-n0q{suffix}-conus"',
+              '"Cache-Control": "no-cache"',
+          ]
+          missing = [value for value in required_tracker if value not in tracker]
+          if missing:
+              raise SystemExit(
+                  "The corrected tracker.py is not installed at "
+                  "cca-radar-tracker/tracker.py. Missing markers: "
+                  + ", ".join(missing)
+              )
+
+          if "nexrad-n0q-900913" in tracker:
+              raise SystemExit(
+                  "Old 900913 radar-layer retrieval is still present in tracker.py"
+              )
+
+          if "rebuild_from_utc" not in workflow:
+              raise SystemExit(
+                  "The corrected workflow is not installed at "
+                  ".github/workflows/update-radar.yml"
+              )
+
+          print("Verified exact-time radar retrieval and replay support.")
+          PY
+
+      - name: Verify five-minute alert and UI update
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path(".github/workflows/update-radar.yml").read_text(encoding="utf-8")
+          alert = Path("cca-radar-tracker/send_alert.py").read_text(encoding="utf-8")
+          app = Path("cca-radar-tracker/docs/app.js").read_text(encoding="utf-8")
+          index = Path("cca-radar-tracker/docs/index.html").read_text(encoding="utf-8")
+
+          required = {
+              "five-minute cron": 'cron: "*/5 * * * *"' in workflow,
+              "substantial alert threshold": "ALERT_SUBSTANTIAL_RATIO = 0.50" in alert,
+              "alert escalation tiers": "last_emailed_alert_tier" in alert,
+              "recent-rain sorting": "eventSortTime" in app,
+              "fill bubbles": "summary-bubble" in app,
+              "metric hover help": "metric-tooltip" in app,
+              "event cards before metrics": (
+                  index.find('class="events-grid"') < index.find('id="metrics-grid"')
+              ),
+          }
+          failed = [name for name, passed in required.items() if not passed]
+          if failed:
+              raise SystemExit("Requested update is incomplete: " + ", ".join(failed))
+          print("Verified five-minute schedule, refill alerts, and revised UI.")
+          PY
 
       - name: Stage authoritative watershed polygons
         run: |
@@ -250,7 +313,7 @@ jobs:
             git push
           fi
 
-      - name: Send email when a new major refill event qualifies
+      - name: Send email when a canyon reaches substantial partial refill
         working-directory: cca-radar-tracker
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
