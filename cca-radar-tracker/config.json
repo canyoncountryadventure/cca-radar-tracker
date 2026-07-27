@@ -2,8 +2,13 @@
   "title": "Slot Canyon Pool Conditions",
   "timezone": "America/Denver",
   "recent_window_days": 14,
-  "schedule_lookback_minutes": 55,
-  "max_frames_per_run": 12,
+  "schedule_lookback_minutes": 180,
+  "reconciliation_window_minutes": 90,
+  "frame_ledger_retention_hours": 72,
+  "archive_confirmation_delay_minutes": 10,
+  "missing_frame_warning_minutes": 20,
+  "max_catchup_frames_per_run": 72,
+  "max_frames_per_run": 96,
   "request_timeout_seconds": 30,
   "request_retries": 3,
   "grid_padding_cells": 2,
@@ -19,6 +24,7 @@
     "minimum_wet_frames_for_likely": 2,
     "event_gap_minutes": 15
   },
+  "historical_wms_min_age_minutes": 10,
   "iem_historical_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi",
   "iem_current_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi",
   "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png"
