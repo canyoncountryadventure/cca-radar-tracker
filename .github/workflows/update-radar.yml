@@ -82,23 +82,38 @@ jobs:
           print("Verified exact-time radar retrieval and replay support.")
           PY
 
-      - name: Verify five-minute alert and UI update
+      - name: Verify five-minute alert, reconciliation, and UI update
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
 
           workflow = Path(".github/workflows/update-radar.yml").read_text(encoding="utf-8")
+          tracker = Path("cca-radar-tracker/tracker.py").read_text(encoding="utf-8")
           alert = Path("cca-radar-tracker/send_alert.py").read_text(encoding="utf-8")
           app = Path("cca-radar-tracker/docs/app.js").read_text(encoding="utf-8")
           index = Path("cca-radar-tracker/docs/index.html").read_text(encoding="utf-8")
 
+          cron_ok = bool(
+              re.search(
+                  r'^\s*-\s*cron:\s*["\']2/5 \* \* \* \*["\']\s*$',
+                  workflow,
+                  re.MULTILINE,
+              )
+          )
           required = {
-              "five-minute cron": 'cron: "*/5 * * * *"' in workflow,
+              "offset five-minute cron": cron_ok,
+              "timestamp frame ledger": '"frame_ledger"' in tracker,
+              "overlap reconciliation": "reconciliation_window_minutes" in tracker,
+              "archive confirmation": "latest_archive_confirmed_frame_utc" in tracker,
+              "lost snippet recovery": "restore_missing_event_grids" in tracker,
               "substantial alert threshold": "ALERT_SUBSTANTIAL_RATIO = 0.50" in alert,
               "alert escalation tiers": "last_emailed_alert_tier" in alert,
+              "frame-health alert": "pending_health_alert" in alert,
               "recent-rain sorting": "eventSortTime" in app,
               "fill bubbles": "summary-bubble" in app,
               "metric hover help": "metric-tooltip" in app,
+              "archive health display": "Archive confirmed through" in app,
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
               ),
@@ -106,7 +121,7 @@ jobs:
           failed = [name for name, passed in required.items() if not passed]
           if failed:
               raise SystemExit("Requested update is incomplete: " + ", ".join(failed))
-          print("Verified five-minute schedule, refill alerts, and revised UI.")
+          print("Verified five-minute schedule, frame reconciliation, alerts, and UI.")
           PY
 
       - name: Stage authoritative watershed polygons
@@ -168,24 +183,56 @@ jobs:
           fi
 
       - name: Restore previously published tracker state
-        continue-on-error: true
         env:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
         run: |
-          curl --fail --silent --show-error --location --max-time 20 \
-            "$STATUS_URL" \
-            --output cca-radar-tracker/docs/data/status.json
+          set -euo pipefail
+          mkdir -p cca-radar-tracker/docs/data
+          temporary="$(mktemp)"
+          cache_buster="run=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$(date +%s)"
+          if curl --fail --silent --show-error --location --max-time 30 \
+            --header "Cache-Control: no-cache" \
+            --header "Pragma: no-cache" \
+            "${STATUS_URL}?${cache_buster}" \
+            --output "$temporary"; then
+            python - "$temporary" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
 
-      - name: Analyze new radar frames
+          path = Path(sys.argv[1])
+          status = json.loads(path.read_text(encoding="utf-8"))
+          if not isinstance(status.get("canyons"), dict):
+              raise SystemExit("Published status.json does not contain canyon state")
+          print(
+              "Restored published tracker state with schema",
+              status.get("schema_version"),
+          )
+          PY
+            mv "$temporary" cca-radar-tracker/docs/data/status.json
+          else
+            rm -f "$temporary"
+            if [[ -s cca-radar-tracker/docs/data/status.json ]]; then
+              echo "Published status unavailable; retaining checked-out fallback state."
+            else
+              echo "No prior status is available; tracker will initialize a new ledger."
+            fi
+          fi
+
+      - name: Analyze and reconcile radar frames
         working-directory: cca-radar-tracker
         env:
           REBUILD_FROM_UTC: ${{ inputs.rebuild_from_utc }}
+          RUN_TRIGGER: ${{ github.event_name }}
         run: |
+          set -euo pipefail
           if [[ -n "$REBUILD_FROM_UTC" ]]; then
             echo "Replaying exact radar frames from $REBUILD_FROM_UTC"
-            python tracker.py --rebuild-from "$REBUILD_FROM_UTC"
+            python tracker.py \
+              --run-trigger "$RUN_TRIGGER" \
+              --rebuild-from "$REBUILD_FROM_UTC"
           else
-            python tracker.py
+            python tracker.py --run-trigger "$RUN_TRIGGER"
           fi
 
       - name: Verify revised refill model
@@ -313,7 +360,7 @@ jobs:
             git push
           fi
 
-      - name: Send email when a canyon reaches substantial partial refill
+      - name: Send canyon refill and missing-frame alerts
         working-directory: cca-radar-tracker
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
