@@ -10,6 +10,7 @@ modifier. Heavy-rain gates use fixed watershed percentages for every canyon:
 from __future__ import annotations
 
 import argparse
+import base64
 import io
 import json
 import math
@@ -17,6 +18,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+import zlib
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -142,6 +144,7 @@ FIXED_SPATIAL_RULES = (
 MINOR_REFILL_RATIO = 0.25
 SUBSTANTIAL_REFILL_RATIO = 0.50
 LARGE_REFILL_RATIO = 0.75
+STATUS_SCHEMA_VERSION = 3
 
 
 def utc_text(value: datetime) -> str:
@@ -280,6 +283,25 @@ def latest_iem_timestamp(config: dict[str, Any]) -> datetime:
     return floor_five_minutes(parsedate_to_datetime(modified).astimezone(UTC))
 
 
+def radar_frame_source(
+    timestamp: datetime,
+    latest_reference: datetime | None,
+    config: dict[str, Any],
+) -> str:
+    """Return ``historical`` once an exact WMS-T frame should be available."""
+    if latest_reference is None:
+        return "historical"
+    age_minutes = int((latest_reference - timestamp).total_seconds() // 60)
+    historical_min_age = int(config.get("historical_wms_min_age_minutes", 10))
+    use_historical = (
+        age_minutes < 0
+        or age_minutes >= historical_min_age
+        or age_minutes > 55
+        or age_minutes % 5 != 0
+    )
+    return "historical" if use_historical else "provisional"
+
+
 def fetch_radar_image(
     timestamp: datetime,
     grid: Grid,
@@ -298,18 +320,12 @@ def fetch_radar_image(
     explicit UTC TIME. The newest one or two frames use the native EPSG:4326
     current layers and a valid-time cache key.
     """
-    age_minutes: int | None = None
-    if latest_reference is not None:
-        age_minutes = int((latest_reference - timestamp).total_seconds() // 60)
-
-    historical_min_age = int(config.get("historical_wms_min_age_minutes", 10))
-    use_historical = (
-        latest_reference is None
-        or age_minutes is None
-        or age_minutes < 0
-        or age_minutes >= historical_min_age
-        or age_minutes > 55
-        or age_minutes % 5 != 0
+    source = radar_frame_source(timestamp, latest_reference, config)
+    use_historical = source == "historical"
+    age_minutes = (
+        None
+        if latest_reference is None
+        else int((latest_reference - timestamp).total_seconds() // 60)
     )
 
     if use_historical:
@@ -639,10 +655,22 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
 
 def empty_status(canyons: list[Canyon] | None = None) -> dict[str, Any]:
     return {
-        "schema_version": 2,
+        "schema_version": STATUS_SCHEMA_VERSION,
         "monitoring_started_utc": None,
         "last_checked_utc": None,
+        "last_scheduled_run_utc": None,
+        "last_run_trigger": None,
         "latest_frame_utc": None,
+        "latest_provisional_frame_utc": None,
+        "latest_archive_confirmed_frame_utc": None,
+        "ledger_started_utc": None,
+        "missing_archive_frames_utc": [],
+        "stale_missing_archive_frames_utc": [],
+        "frame_ledger": {},
+        "health_notification": {
+            "last_email_sent_utc": None,
+            "last_missing_signature": None,
+        },
         "canyons": {
             canyon.canyon_id: empty_canyon_status(canyon)
             for canyon in (canyons or [])
@@ -665,6 +693,40 @@ def legacy_event(event: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def ensure_status_defaults(status: dict[str, Any], canyons: list[Canyon]) -> dict[str, Any]:
+    """Migrate published state in place without discarding retained events."""
+    defaults = empty_status(canyons)
+    status["schema_version"] = STATUS_SCHEMA_VERSION
+    for key in (
+        "monitoring_started_utc",
+        "last_checked_utc",
+        "last_scheduled_run_utc",
+        "last_run_trigger",
+        "latest_frame_utc",
+        "latest_provisional_frame_utc",
+        "latest_archive_confirmed_frame_utc",
+        "ledger_started_utc",
+    ):
+        status.setdefault(key, defaults[key])
+    for key in (
+        "missing_archive_frames_utc",
+        "stale_missing_archive_frames_utc",
+    ):
+        status.setdefault(key, [])
+    status.setdefault("frame_ledger", {})
+    status.setdefault("health_notification", defaults["health_notification"])
+    status.setdefault("health", defaults["health"])
+    status.setdefault("canyons", {})
+    for canyon in canyons:
+        canyon_status = status["canyons"].setdefault(
+            canyon.canyon_id, empty_canyon_status(canyon)
+        )
+        canyon_status.setdefault("notification", {})
+        for key, value in empty_canyon_status(canyon).items():
+            canyon_status.setdefault(key, value)
+    return status
+
+
 def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
     fresh = empty_status(canyons)
     if not path.exists():
@@ -674,12 +736,8 @@ def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
     except (OSError, json.JSONDecodeError):
         return fresh
 
-    if existing.get("schema_version") == 2:
-        for canyon in canyons:
-            existing.setdefault("canyons", {}).setdefault(
-                canyon.canyon_id, empty_canyon_status(canyon)
-            )
-        return existing
+    if existing.get("schema_version") in {2, STATUS_SCHEMA_VERSION}:
+        return ensure_status_defaults(existing, canyons)
 
     if existing.get("schema_version") == 1:
         fresh["monitoring_started_utc"] = existing.get("monitoring_started_utc")
@@ -696,13 +754,13 @@ def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
             "ok": True,
             "message": "Earlier Zero G history preserved; multi-canyon monitoring active",
         }
-    return fresh
+    return ensure_status_defaults(fresh, canyons)
 
 
 def refresh_status_events(
     status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]
 ) -> None:
-    """Recalculate retained events when target or display definitions change."""
+    """Recalculate retained events while preserving every available radar snippet."""
     for canyon in canyons:
         canyon_status = status.get("canyons", {}).get(canyon.canyon_id, {})
         for key in ("last_rain_event", "last_qualifying_event"):
@@ -712,17 +770,83 @@ def refresh_status_events(
                 and event.get("estimated_runoff_ft3") is not None
                 and event.get("frames")
             ):
-                canyon_status[key] = event_public(event, canyon, config)
+                canyon_status[key] = event_public(event, canyon, config, include_grid=True)
 
         refreshed = []
         for event in canyon_status.get("events", []):
             if event.get("estimated_runoff_ft3") is not None and event.get("frames"):
-                refreshed.append(
-                    event_public(event, canyon, config, include_grid=False)
-                )
+                refreshed.append(event_public(event, canyon, config, include_grid=False))
             else:
                 refreshed.append(event)
         canyon_status["events"] = refreshed
+
+
+def restore_missing_event_grids(
+    status: dict[str, Any],
+    canyons: list[Canyon],
+    global_grid: Grid,
+    palette: dict[tuple[int, int, int], int],
+    config: dict[str, Any],
+    latest_reference: datetime,
+) -> int:
+    """Restore radar snippets lost by older gridless replay/history records.
+
+    Compact event history intentionally omits radar grids, but the dashboard's
+    full ``last_rain_event`` and ``last_qualifying_event`` records should retain
+    them. Earlier replay logic could promote a compact event into those fields.
+    Fetching only each affected event's exact peak timestamp repairs the map
+    without replaying days of five-minute frames.
+    """
+    pending: dict[str, list[tuple[Canyon, dict[str, Any]]]] = {}
+    for canyon in canyons:
+        canyon_status = status.get("canyons", {}).get(canyon.canyon_id, {})
+        for key in ("last_rain_event", "last_qualifying_event"):
+            event = canyon_status.get(key)
+            if (
+                not event
+                or event.get("peak_grid_dbz") is not None
+                or not event.get("peak_frame_utc")
+            ):
+                continue
+            timestamp = utc_text(floor_five_minutes(parse_utc(event["peak_frame_utc"])))
+            pending.setdefault(timestamp, []).append((canyon, event))
+
+    restored = 0
+    threshold = float(config["model"]["storm_dbz_threshold"])
+    for timestamp_text, targets in sorted(pending.items()):
+        timestamp = parse_utc(timestamp_text)
+        try:
+            global_image = fetch_radar_image(
+                timestamp, global_grid, config, latest_reference
+            )
+        except Exception as exc:  # pragma: no cover - network recovery path
+            print(
+                f"{timestamp_text}: unable to restore retained event radar "
+                f"snippet; will retry: {exc}",
+                file=sys.stderr,
+            )
+            continue
+
+        for canyon, event in targets:
+            image = crop_for_grid(global_image, global_grid, canyon.grid)
+            analysis, _ = analyze_canyon_image(image, canyon, palette, config)
+            maximum = analysis.get("maximum_dbz")
+            # A retained wet event should still contain threshold-level echo at
+            # its peak timestamp. Treat a blank/weak response as unavailable so
+            # the repair is retried instead of permanently saving a blank map.
+            if maximum is None or float(maximum) < threshold:
+                print(
+                    f"{timestamp_text}: {canyon.canyon_id} retained-event "
+                    f"snippet was not restored because the exact frame returned "
+                    f"{maximum if maximum is not None else 'no'} dBZ",
+                    file=sys.stderr,
+                )
+                continue
+            event["peak_grid_dbz"] = analysis["grid_dbz"]
+            event["grid_bbox"] = analysis["grid_bbox"]
+            restored += 1
+
+    return restored
 
 
 def event_duration_minutes(event: dict[str, Any], frame_minutes: int) -> int:
@@ -1193,6 +1317,395 @@ def update_canyon_event(
         finalize_event(canyon_status, canyon, config)
 
 
+def encode_grid(values: list[list[float | None]]) -> str:
+    """Compress a radar grid for compact storage in the rolling frame ledger."""
+    payload = json.dumps(values, separators=(",", ":")).encode("utf-8")
+    return base64.b64encode(zlib.compress(payload, level=9)).decode("ascii")
+
+
+def decode_grid(value: str) -> list[list[float | None]]:
+    payload = zlib.decompress(base64.b64decode(value.encode("ascii")))
+    return json.loads(payload.decode("utf-8"))
+
+
+def compact_event(event: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in event.items()
+        if key not in {"peak_grid_dbz", "grid_bbox"}
+    }
+
+
+def frame_summary(analysis: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "maximum_dbz": analysis.get("maximum_dbz"),
+        "frame_basin_rain_inches": analysis.get("frame_basin_rain_inches"),
+        "frame_rain_volume_ft3": analysis.get("frame_rain_volume_ft3"),
+        "spatial_gate": bool(analysis.get("spatial_gate")),
+        "unknown_watershed_percent": analysis.get("unknown_watershed_percent"),
+        "wet": bool(analysis.get("wet")),
+    }
+
+
+def analyze_timestamp_record(
+    timestamp: datetime,
+    canyons: list[Canyon],
+    global_grid: Grid,
+    palette: dict[tuple[int, int, int], int],
+    config: dict[str, Any],
+    latest_reference: datetime | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Analyze one frame without mutating event totals."""
+    global_image = fetch_radar_image(
+        timestamp, global_grid, config, latest_reference
+    )
+    source = radar_frame_source(timestamp, latest_reference, config)
+    record: dict[str, Any] = {
+        "frame_utc": utc_text(timestamp),
+        "source": source,
+        "confirmed": source == "historical",
+        "processed_utc": utc_text(datetime.now(UTC)),
+        "summary": {},
+        "wet_canyons": {},
+    }
+    summary: dict[str, Any] = {}
+    for canyon in canyons:
+        image = crop_for_grid(global_image, global_grid, canyon.grid)
+        analysis, rain = analyze_canyon_image(image, canyon, palette, config)
+        analysis["frame_utc"] = utc_text(timestamp)
+        compact = frame_summary(analysis)
+        record["summary"][canyon.canyon_id] = compact
+        summary[canyon.canyon_id] = compact
+        if analysis["wet"]:
+            stored_analysis = {
+                key: value for key, value in analysis.items() if key != "grid_dbz"
+            }
+            record["wet_canyons"][canyon.canyon_id] = {
+                "analysis": stored_analysis,
+                "grid_dbz_zlib": encode_grid(analysis["grid_dbz"]),
+                "max_pixel_frame_inches": round(float(np.nanmax(rain)), 4),
+            }
+    return record, summary
+
+
+def note_planned_ledger_start(status: dict[str, Any], timestamp: datetime) -> None:
+    """Remember the first timestamp that should exist, even if its fetch fails."""
+    planned = floor_five_minutes(timestamp)
+    existing = status.get("ledger_started_utc")
+    if not existing or planned < parse_utc(existing):
+        status["ledger_started_utc"] = utc_text(planned)
+
+
+def upsert_frame_record(status: dict[str, Any], record: dict[str, Any]) -> bool:
+    """Insert or replace one timestamp; confirmed archive data wins over provisional."""
+    ledger = status.setdefault("frame_ledger", {})
+    key = str(record["frame_utc"])
+    existing = ledger.get(key)
+    if existing and existing.get("confirmed") and not record.get("confirmed"):
+        return False
+    ledger[key] = record
+    note_planned_ledger_start(status, parse_utc(key))
+    timestamps = sorted(ledger)
+    status["latest_frame_utc"] = timestamps[-1] if timestamps else None
+    provisional = [
+        value["frame_utc"]
+        for value in ledger.values()
+        if not value.get("confirmed")
+    ]
+    status["latest_provisional_frame_utc"] = max(provisional) if provisional else None
+    return True
+
+
+def event_end_utc(event: dict[str, Any]) -> datetime:
+    return parse_utc(event.get("end_utc") or event["start_utc"])
+
+
+def dedupe_events(events: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    unique: dict[tuple[str, str], dict[str, Any]] = {}
+    for event in events:
+        if not event or not event.get("start_utc"):
+            continue
+        key = (event["start_utc"], event.get("end_utc") or event["start_utc"])
+        prior = unique.get(key)
+        # Prefer the copy that still has a retained radar grid.
+        if prior is None or (
+            event.get("peak_grid_dbz") is not None
+            and prior.get("peak_grid_dbz") is None
+        ):
+            unique[key] = event
+    return sorted(unique.values(), key=event_end_utc, reverse=True)
+
+
+def preserved_events_before(
+    canyon_status: dict[str, Any], cutoff: datetime
+) -> list[dict[str, Any]]:
+    candidates = list(canyon_status.get("events", []))
+    for key in ("last_rain_event", "last_qualifying_event"):
+        event = canyon_status.get(key)
+        if event:
+            candidates.append(event)
+    return [
+        event
+        for event in dedupe_events(candidates)
+        if event_end_utc(event) < cutoff
+    ][:12]
+
+
+def dry_analysis_from_summary(
+    timestamp: datetime, summary: dict[str, Any] | None
+) -> dict[str, Any]:
+    values = summary or {}
+    return {
+        "frame_utc": utc_text(timestamp),
+        "maximum_dbz": values.get("maximum_dbz"),
+        "coverage_percent": {},
+        "spatial_rules": [],
+        "spatial_gate": bool(values.get("spatial_gate")),
+        "frame_basin_rain_inches": float(
+            values.get("frame_basin_rain_inches") or 0.0
+        ),
+        "frame_rain_volume_ft3": int(values.get("frame_rain_volume_ft3") or 0),
+        "wet": False,
+        "unknown_watershed_percent": values.get("unknown_watershed_percent"),
+        "grid_dbz": None,
+        "grid_bbox": None,
+    }
+
+
+def rebuild_events_from_ledger(
+    status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]
+) -> None:
+    """Rebuild recent storms deterministically from timestamp-keyed frame records."""
+    ledger = status.get("frame_ledger", {})
+    if not ledger:
+        return
+    frame_keys = sorted(ledger)
+    cutoff = parse_utc(frame_keys[0])
+
+    for canyon in canyons:
+        current = status["canyons"][canyon.canyon_id]
+        notification = dict(current.get("notification") or {})
+        preserved = preserved_events_before(current, cutoff)
+        rebuilt = empty_canyon_status(canyon)
+        rebuilt["events"] = [compact_event(event) for event in preserved]
+        rebuilt["last_rain_event"] = preserved[0] if preserved else None
+        rebuilt["last_qualifying_event"] = next(
+            (
+                event
+                for event in preserved
+                if event.get("classification") in {"likely_full", "full_flush"}
+            ),
+            None,
+        )
+        rebuilt["notification"] = notification
+
+        for key in frame_keys:
+            timestamp = parse_utc(key)
+            record = ledger[key]
+            wet_record = record.get("wet_canyons", {}).get(canyon.canyon_id)
+            if wet_record:
+                analysis = dict(wet_record["analysis"])
+                analysis["grid_dbz"] = decode_grid(wet_record["grid_dbz_zlib"])
+                rain = np.asarray(
+                    [[float(wet_record.get("max_pixel_frame_inches") or 0.0)]],
+                    dtype=np.float32,
+                )
+            else:
+                analysis = dry_analysis_from_summary(
+                    timestamp, record.get("summary", {}).get(canyon.canyon_id)
+                )
+                rain = np.zeros((1, 1), dtype=np.float32)
+            rebuilt["latest_analysis"] = analysis
+            update_canyon_event(
+                rebuilt, canyon, timestamp, analysis, rain, config
+            )
+
+        open_event = rebuilt.get("open_event")
+        if open_event:
+            public = event_public(open_event, canyon, config, include_grid=True)
+            rebuilt["last_rain_event"] = public
+            if public.get("classification") in {"likely_full", "full_flush"}:
+                rebuilt["last_qualifying_event"] = public
+        elif rebuilt.get("events") and rebuilt.get("last_rain_event") is None:
+            rebuilt["last_rain_event"] = rebuilt["events"][0]
+
+        if rebuilt.get("last_qualifying_event") is None:
+            rebuilt["last_qualifying_event"] = next(
+                (
+                    event
+                    for event in rebuilt.get("events", [])
+                    if event.get("classification") in {"likely_full", "full_flush"}
+                ),
+                None,
+            )
+        rebuilt["events"] = [
+            compact_event(event)
+            for event in dedupe_events(rebuilt.get("events", []))[:12]
+        ]
+        status["canyons"][canyon.canyon_id] = rebuilt
+
+
+def protected_ledger_cutoff(
+    status: dict[str, Any], latest_reference: datetime, config: dict[str, Any]
+) -> datetime:
+    cutoff = latest_reference - timedelta(
+        hours=float(config.get("frame_ledger_retention_hours", 72))
+    )
+    gap = timedelta(minutes=int(config["model"]["event_gap_minutes"]))
+    for canyon_status in status.get("canyons", {}).values():
+        for key in ("open_event", "last_rain_event"):
+            event = canyon_status.get(key)
+            if not event or not event.get("start_utc"):
+                continue
+            start = parse_utc(event["start_utc"])
+            end = event_end_utc(event)
+            if start < cutoff <= end + gap:
+                cutoff = start
+    return floor_five_minutes(cutoff)
+
+
+def prune_frame_ledger(
+    status: dict[str, Any], latest_reference: datetime, config: dict[str, Any]
+) -> None:
+    ledger = status.setdefault("frame_ledger", {})
+    cutoff = protected_ledger_cutoff(status, latest_reference, config)
+    for key in list(ledger):
+        if parse_utc(key) < cutoff:
+            del ledger[key]
+    keys = sorted(ledger)
+    if keys:
+        existing_start = (
+            parse_utc(status["ledger_started_utc"])
+            if status.get("ledger_started_utc")
+            else parse_utc(keys[0])
+        )
+        status["ledger_started_utc"] = utc_text(max(existing_start, cutoff))
+        status["latest_frame_utc"] = keys[-1]
+    else:
+        status["ledger_started_utc"] = None
+        status["latest_frame_utc"] = None
+
+
+def update_frame_health(
+    status: dict[str, Any], latest_reference: datetime, config: dict[str, Any]
+) -> None:
+    ledger = status.get("frame_ledger", {})
+    delay = int(
+        config.get(
+            "archive_confirmation_delay_minutes",
+            config.get("historical_wms_min_age_minutes", 10),
+        )
+    )
+    warning_age = int(config.get("missing_frame_warning_minutes", 20))
+    confirmation_end = floor_five_minutes(
+        latest_reference - timedelta(minutes=delay)
+    )
+    started_text = status.get("ledger_started_utc")
+    if not started_text or parse_utc(started_text) > confirmation_end:
+        expected: list[datetime] = []
+    else:
+        expected = list(
+            iter_five_minutes(parse_utc(started_text), confirmation_end)
+        )
+
+    missing = [
+        timestamp
+        for timestamp in expected
+        if not ledger.get(utc_text(timestamp), {}).get("confirmed")
+    ]
+    stale = [
+        timestamp
+        for timestamp in missing
+        if latest_reference - timestamp >= timedelta(minutes=warning_age)
+    ]
+    status["missing_archive_frames_utc"] = [utc_text(value) for value in missing]
+    status["stale_missing_archive_frames_utc"] = [
+        utc_text(value) for value in stale
+    ]
+
+    confirmed_through: datetime | None = None
+    for timestamp in expected:
+        if not ledger.get(utc_text(timestamp), {}).get("confirmed"):
+            break
+        confirmed_through = timestamp
+    status["latest_archive_confirmed_frame_utc"] = (
+        utc_text(confirmed_through) if confirmed_through else None
+    )
+
+    provisional = [
+        parse_utc(key)
+        for key, value in ledger.items()
+        if not value.get("confirmed")
+    ]
+    status["latest_provisional_frame_utc"] = (
+        utc_text(max(provisional)) if provisional else None
+    )
+    status["latest_frame_utc"] = max(ledger) if ledger else None
+
+    confirmed_text = (
+        utc_text(confirmed_through) if confirmed_through else "not established"
+    )
+    status["health"] = {
+        "ok": not stale,
+        "message": (
+            f"Archive confirmed through {confirmed_text}; "
+            f"{len(missing)} missing archive frame"
+            f"{'s' if len(missing) != 1 else ''}; "
+            f"{len(provisional)} provisional frame"
+            f"{'s' if len(provisional) != 1 else ''} retained"
+        ),
+        "latest_iem_frame_utc": utc_text(latest_reference),
+        "archive_confirmation_delay_minutes": delay,
+        "missing_archive_frame_count": len(missing),
+        "stale_missing_archive_frame_count": len(stale),
+        "frame_ledger_count": len(ledger),
+    }
+
+
+def scheduled_timestamps(
+    status: dict[str, Any], config: dict[str, Any], latest_complete: datetime
+) -> list[datetime]:
+    """Return catch-up timestamps plus an overlapping live/archive reconciliation window."""
+    frame_minutes = int(config["model"]["frame_minutes"])
+    overlap_minutes = int(config.get("reconciliation_window_minutes", 90))
+    overlap_start = floor_five_minutes(
+        latest_complete - timedelta(minutes=overlap_minutes)
+    )
+    overlap = list(iter_five_minutes(overlap_start, latest_complete))
+
+    ledger = status.get("frame_ledger", {})
+    catchup_candidates: list[datetime] = []
+    for value in status.get("missing_archive_frames_utc", []):
+        timestamp = parse_utc(value)
+        if timestamp < overlap_start:
+            catchup_candidates.append(timestamp)
+
+    confirmed = status.get("latest_archive_confirmed_frame_utc")
+    if confirmed:
+        catchup_start = parse_utc(confirmed) + timedelta(minutes=frame_minutes)
+    elif status.get("ledger_started_utc"):
+        catchup_start = parse_utc(status["ledger_started_utc"])
+    else:
+        catchup_start = floor_five_minutes(
+            latest_complete
+            - timedelta(minutes=int(config.get("schedule_lookback_minutes", 180)))
+        )
+    catchup_end = overlap_start - timedelta(minutes=frame_minutes)
+    if catchup_start <= catchup_end:
+        for timestamp in iter_five_minutes(catchup_start, catchup_end):
+            record = ledger.get(utc_text(timestamp))
+            if not record or not record.get("confirmed"):
+                catchup_candidates.append(timestamp)
+
+    catchup = sorted(set(catchup_candidates))[
+        : int(config.get("max_catchup_frames_per_run", 72))
+    ]
+    maximum = int(config.get("max_frames_per_run", 96))
+    room = max(0, maximum - len(overlap))
+    selected = sorted(set(catchup[:room] + overlap))
+    return selected
+
+
 def process_timestamp(
     timestamp: datetime,
     status: dict[str, Any],
@@ -1202,44 +1715,15 @@ def process_timestamp(
     config: dict[str, Any],
     latest_reference: datetime | None = None,
 ) -> dict[str, Any]:
-    global_image = fetch_radar_image(
-        timestamp, global_grid, config, latest_reference
+    """Compatibility wrapper for one timestamp using the frame ledger."""
+    record, summary = analyze_timestamp_record(
+        timestamp, canyons, global_grid, palette, config, latest_reference
     )
-    summary = {}
-    for canyon in canyons:
-        image = crop_for_grid(global_image, global_grid, canyon.grid)
-        analysis, rain = analyze_canyon_image(image, canyon, palette, config)
-        analysis["frame_utc"] = utc_text(timestamp)
-        canyon_status = status["canyons"][canyon.canyon_id]
-        canyon_status["latest_analysis"] = analysis
-        update_canyon_event(
-            canyon_status, canyon, timestamp, analysis, rain, config
-        )
-        summary[canyon.canyon_id] = {
-            "maximum_dbz": analysis["maximum_dbz"],
-            "frame_basin_rain_inches": analysis[
-                "frame_basin_rain_inches"
-            ],
-            "spatial_gate": analysis["spatial_gate"],
-        }
-    status["latest_frame_utc"] = utc_text(timestamp)
+    upsert_frame_record(status, record)
+    rebuild_events_from_ledger(status, canyons, config)
+    if latest_reference is not None:
+        update_frame_health(status, latest_reference, config)
     return summary
-
-
-def scheduled_timestamps(
-    status: dict[str, Any], config: dict[str, Any], latest_complete: datetime
-) -> list[datetime]:
-    last_frame = status.get("latest_frame_utc")
-    start = (
-        parse_utc(last_frame) + timedelta(minutes=5)
-        if last_frame
-        else latest_complete
-        - timedelta(minutes=int(config["schedule_lookback_minutes"]))
-    )
-    return list(iter_five_minutes(start, latest_complete))[
-        : int(config["max_frames_per_run"])
-    ]
-
 
 
 def rewind_status(
@@ -1247,30 +1731,36 @@ def rewind_status(
     canyons: list[Canyon],
     rebuild_from: datetime,
 ) -> None:
-    """Discard only results at/after a requested UTC time, preserving older history."""
+    """Remove only frames/events at or after a replay cutoff; retain full old grids."""
     cutoff = floor_five_minutes(rebuild_from)
+    ledger = status.setdefault("frame_ledger", {})
+    for key in list(ledger):
+        if parse_utc(key) >= cutoff:
+            del ledger[key]
+
     for canyon in canyons:
         canyon_status = status["canyons"][canyon.canyon_id]
-        retained = [
-            event
-            for event in canyon_status.get("events", [])
-            if event
-            and parse_utc(event.get("end_utc") or event["start_utc"]) < cutoff
-        ]
-        canyon_status["events"] = retained
+        retained = preserved_events_before(canyon_status, cutoff)
+        canyon_status["events"] = [compact_event(event) for event in retained]
         canyon_status["open_event"] = None
         canyon_status["latest_analysis"] = None
         canyon_status["last_rain_event"] = retained[0] if retained else None
-        qualifying = [
-            event
-            for event in retained
-            if event.get("classification") in {"likely_full", "full_flush"}
-        ]
-        canyon_status["last_qualifying_event"] = (
-            qualifying[0] if qualifying else None
+        canyon_status["last_qualifying_event"] = next(
+            (
+                event
+                for event in retained
+                if event.get("classification") in {"likely_full", "full_flush"}
+            ),
+            None,
         )
 
-    status["latest_frame_utc"] = utc_text(cutoff - timedelta(minutes=5))
+    keys = sorted(ledger)
+    status["ledger_started_utc"] = keys[0] if keys else None
+    status["latest_frame_utc"] = keys[-1] if keys else None
+    status["latest_provisional_frame_utc"] = None
+    status["latest_archive_confirmed_frame_utc"] = None
+    status["missing_archive_frames_utc"] = []
+    status["stale_missing_archive_frames_utc"] = []
     status["last_checked_utc"] = None
     status["health"] = {
         "ok": True,
@@ -1294,6 +1784,12 @@ def model_metadata(
                 "The tracker converts each five-minute radar frame to rainfall, then "
                 "area-weights the pixels inside the watershed polygon. Radar rainfall "
                 "is an estimate and may be biased by hail, beam geometry, or evaporation."
+            ),
+            "frame_reconciliation_explanation": (
+                "Each run rechecks an overlapping 90-minute window. Newest frames are "
+                "provisional; once the exact timestamped IEM WMS-T frame is old enough, "
+                "it replaces the provisional record. Events are rebuilt from a "
+                "timestamp-keyed ledger so repeated frames cannot double-count rainfall."
             ),
             "runoff_formula": (
                 "Adjusted NRCS direct runoff: S0.20 = 1000/CN − 10; "
@@ -1501,6 +1997,11 @@ def main() -> int:
             "older event history, for example 2026-07-24T22:00:00Z"
         ),
     )
+    parser.add_argument(
+        "--run-trigger",
+        default="local",
+        help="Workflow trigger name, normally schedule or workflow_dispatch",
+    )
     parser.add_argument("--dry-run", action="store_true")
     arguments = parser.parse_args()
 
@@ -1512,7 +2013,6 @@ def main() -> int:
         if arguments.hydrology.exists()
         else {}
     )
-
     canyons, global_grid = build_canyons(
         collection, atlas, config, hydrology
     )
@@ -1525,51 +2025,67 @@ def main() -> int:
 
     if arguments.at:
         timestamp = floor_five_minutes(parse_utc(arguments.at))
-        working_status = empty_status(canyons) if arguments.dry_run else status
-        result = process_timestamp(
-            timestamp, working_status, canyons, global_grid, palette, config
+        latest_reference = latest_iem_timestamp(config)
+        note_planned_ledger_start(status, timestamp)
+        record, result = analyze_timestamp_record(
+            timestamp, canyons, global_grid, palette, config, latest_reference
         )
         print(json.dumps(result, indent=2))
         if not arguments.dry_run:
-            working_status["monitoring_started_utc"] = (
-                working_status["monitoring_started_utc"] or utc_text(timestamp)
+            upsert_frame_record(status, record)
+            rebuild_events_from_ledger(status, canyons, config)
+            prune_frame_ledger(status, latest_reference, config)
+            update_frame_health(status, latest_reference, config)
+            status["monitoring_started_utc"] = (
+                status["monitoring_started_utc"] or utc_text(timestamp)
             )
-            working_status["last_checked_utc"] = utc_text(datetime.now(UTC))
-            working_status["health"] = {
-                "ok": True,
-                "message": "Historical radar frame analyzed",
-            }
-            save_json(arguments.status, working_status)
+            now = datetime.now(UTC)
+            status["last_checked_utc"] = utc_text(now)
+            status["last_run_trigger"] = arguments.run_trigger
+            if arguments.run_trigger == "schedule":
+                status["last_scheduled_run_utc"] = utc_text(now)
+            save_json(arguments.status, status)
         return 0
 
-    now = datetime.now(UTC)
     latest_reference = latest_iem_timestamp(config)
-    timestamps = scheduled_timestamps(status, config, latest_reference)
+    restored_event_grids = restore_missing_event_grids(
+        status, canyons, global_grid, palette, config, latest_reference
+    )
+    if restored_event_grids:
+        print(
+            f"Restored {restored_event_grids} retained event radar "
+            f"snippet{'s' if restored_event_grids != 1 else ''}"
+        )
     if arguments.rebuild_from:
         start = floor_five_minutes(parse_utc(arguments.rebuild_from))
         timestamps = list(iter_five_minutes(start, latest_reference))
+    else:
+        timestamps = scheduled_timestamps(status, config, latest_reference)
+
     status["monitoring_started_utc"] = status[
         "monitoring_started_utc"
-    ] or utc_text(timestamps[0] if timestamps else now)
+    ] or utc_text(timestamps[0] if timestamps else datetime.now(UTC))
+    if timestamps:
+        note_planned_ledger_start(status, timestamps[0])
     processed = 0
-
-    try:
-        for timestamp in timestamps:
-            summary = process_timestamp(
+    replaced = 0
+    failures: list[tuple[datetime, str]] = []
+    for timestamp in timestamps:
+        try:
+            record, summary = analyze_timestamp_record(
                 timestamp,
-                status,
                 canyons,
                 global_grid,
                 palette,
                 config,
                 latest_reference,
             )
+            if upsert_frame_record(status, record):
+                replaced += 1
             wet_canyons = [
                 canyon_id
                 for canyon_id, values in summary.items()
-                if values.get("maximum_dbz") is not None
-                and float(values["maximum_dbz"])
-                >= float(config["model"]["storm_dbz_threshold"])
+                if values.get("wet")
             ]
             strongest = max(
                 (
@@ -1579,29 +2095,49 @@ def main() -> int:
                 ),
                 default=(float("nan"), "none"),
             )
+            source = record["source"]
             print(
-                f"{utc_text(timestamp)}: wet={','.join(wet_canyons) or 'none'}; "
+                f"{utc_text(timestamp)} [{source}]: "
+                f"wet={','.join(wet_canyons) or 'none'}; "
                 f"strongest={strongest[1]} "
                 f"{strongest[0] if math.isfinite(strongest[0]) else 'NA'} dBZ"
             )
             processed += 1
-        status["last_checked_utc"] = utc_text(datetime.now(UTC))
-        status["health"] = {
-            "ok": True,
-            "message": (
-                f"Radar check completed; {processed} frame"
-                f"{'s' if processed != 1 else ''} analyzed for {len(canyons)} canyons"
-            ),
-        }
-        save_json(arguments.status, status)
-        print(status["health"]["message"])
-        return 0
-    except Exception as exc:  # pragma: no cover - network/runtime failure path
-        status["last_checked_utc"] = utc_text(datetime.now(UTC))
-        status["health"] = {"ok": False, "message": str(exc)}
-        save_json(arguments.status, status)
-        print(str(exc), file=sys.stderr)
-        return 1
+        except Exception as exc:  # pragma: no cover - network/runtime failure path
+            failures.append((timestamp, str(exc)))
+            print(
+                f"{utc_text(timestamp)}: frame retrieval failed and will be retried: {exc}",
+                file=sys.stderr,
+            )
+
+    rebuild_events_from_ledger(status, canyons, config)
+    prune_frame_ledger(status, latest_reference, config)
+    update_frame_health(status, latest_reference, config)
+    now = datetime.now(UTC)
+    status["last_checked_utc"] = utc_text(now)
+    status["last_run_trigger"] = arguments.run_trigger
+    if arguments.run_trigger == "schedule":
+        status["last_scheduled_run_utc"] = utc_text(now)
+    status["health"]["frames_attempted"] = len(timestamps)
+    status["health"]["frames_processed"] = processed
+    status["health"]["frames_replaced"] = replaced
+    status["health"]["current_run_failures"] = [
+        {"frame_utc": utc_text(timestamp), "error": error}
+        for timestamp, error in failures
+    ]
+    if failures:
+        status["health"]["message"] += (
+            f"; {len(failures)} frame retrieval failure"
+            f"{'s' if len(failures) != 1 else ''} queued for retry"
+        )
+    save_json(arguments.status, status)
+    print(
+        f"Radar reconciliation completed; {processed}/{len(timestamps)} frames "
+        f"analyzed, {len(status.get('missing_archive_frames_utc', []))} archive "
+        "frames still missing"
+    )
+    # A missing frame is state to retry and publish, not a reason to discard the run.
+    return 0
 
 
 if __name__ == "__main__":

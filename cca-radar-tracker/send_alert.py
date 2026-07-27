@@ -21,6 +21,7 @@ ALERT_SUBSTANTIAL_RATIO = 0.50
 ALERT_TIER_SUBSTANTIAL = 1
 ALERT_TIER_LIKELY_FULL = 2
 ALERT_TIER_FULL_FLUSH = 3
+HEALTH_ALERT_COOLDOWN_MINUTES = 60
 
 
 def parse_utc(value: str) -> datetime:
@@ -104,6 +105,55 @@ def pending_alerts(status: dict) -> list[tuple[dict, dict, int]]:
         if not same_event or tier > previous_tier:
             alerts.append((canyon, event, tier))
     return alerts
+
+
+def pending_health_alert(
+    status: dict, now: datetime | None = None
+) -> list[str]:
+    """Return stale missing archive frames when an admin email is due."""
+    missing = list(status.get("stale_missing_archive_frames_utc") or [])
+    if not missing:
+        return []
+    now = now or datetime.now(UTC)
+    notification = status.get("health_notification") or {}
+    last_sent = notification.get("last_email_sent_utc")
+    if last_sent:
+        elapsed = now - parse_utc(last_sent)
+        if elapsed.total_seconds() < HEALTH_ALERT_COOLDOWN_MINUTES * 60:
+            return []
+    return missing
+
+
+def health_alert_message(
+    status: dict, missing: list[str], sender: str, recipient: str
+) -> EmailMessage:
+    message = EmailMessage()
+    message["From"] = sender
+    message["To"] = recipient
+    message["Subject"] = (
+        f"CCA RADAR HEALTH — {len(missing)} archive frame"
+        f"{'s' if len(missing) != 1 else ''} missing"
+    )
+    lines = [
+        "CCA RADAR FRAME-HEALTH ALERT",
+        "",
+        (
+            f"{len(missing)} exact timestamped archive frame"
+            f"{'s are' if len(missing) != 1 else ' is'} still missing after the warning period."
+        ),
+        "The tracker will retry these timestamps automatically on each run.",
+        "",
+        "Missing UTC timestamps:",
+        *[f"- {value}" for value in missing[:24]],
+    ]
+    if len(missing) > 24:
+        lines.append(f"- and {len(missing) - 24} more")
+    confirmed = status.get("latest_archive_confirmed_frame_utc")
+    if confirmed:
+        lines.extend(["", f"Archive confirmed through: {confirmed}"])
+    lines.extend(["", "Dashboard:", LIVE_URL])
+    message.set_content("\n".join(lines))
+    return message
 
 
 def alert_message(
@@ -218,25 +268,46 @@ def main() -> int:
 
     status = json.loads(arguments.status.read_text(encoding="utf-8"))
     alerts = pending_alerts(status)
-    if not alerts:
-        print("No new substantial-or-higher canyon threshold crossing; no email sent")
+    now = datetime.now(UTC)
+    missing = pending_health_alert(status, now)
+    if not alerts and not missing:
+        print("No new canyon threshold crossing or stale missing frame; no email sent")
         return 0
 
-    send_gmail(alert_message(alerts, username, recipient), username, app_password)
-    sent = utc_text(datetime.now(UTC))
-    for canyon, event, tier in alerts:
-        canyon["notification"] = {
-            "last_emailed_event_start_utc": event["start_utc"],
+    sent = utc_text(now)
+    if alerts:
+        send_gmail(alert_message(alerts, username, recipient), username, app_password)
+        for canyon, event, tier in alerts:
+            canyon["notification"] = {
+                "last_emailed_event_start_utc": event["start_utc"],
+                "last_email_sent_utc": sent,
+                "last_emailed_alert_tier": tier,
+                "last_emailed_alert_label": alert_tier_label(tier),
+                "recipient": recipient,
+            }
+        print(
+            f"Pool-refill threshold alert sent for {len(alerts)} "
+            f"canyon{'s' if len(alerts) != 1 else ''}"
+        )
+
+    if missing:
+        send_gmail(
+            health_alert_message(status, missing, username, recipient),
+            username,
+            app_password,
+        )
+        status["health_notification"] = {
             "last_email_sent_utc": sent,
-            "last_emailed_alert_tier": tier,
-            "last_emailed_alert_label": alert_tier_label(tier),
+            "last_missing_signature": "|".join(missing),
+            "missing_count": len(missing),
             "recipient": recipient,
         }
+        print(
+            f"Radar frame-health alert sent for {len(missing)} stale missing "
+            f"frame{'s' if len(missing) != 1 else ''}"
+        )
+
     save_status(arguments.status, status)
-    print(
-        f"Pool-refill threshold alert sent for {len(alerts)} "
-        f"canyon{'s' if len(alerts) != 1 else ''}"
-    )
     return 0
 
 
