@@ -192,6 +192,8 @@ class TrackerTests(unittest.TestCase):
         method = metadata["method"]
         self.assertIn("52,442 ft³", method["target_formula"])
         self.assertIn("No fixed runoff coefficient", method["direct_runoff_explanation"])
+        self.assertIn("timestamp-keyed ledger", method["frame_reconciliation_explanation"])
+        self.assertEqual(self.config["model"]["storm_dbz_threshold"], 35)
         self.assertIn("S0.05", method["runoff_formula"])
         self.assertIn("HSG D", method["direct_runoff_explanation"])
         self.assertNotIn("runoff_coefficient_explanation", method)
@@ -211,7 +213,7 @@ class TrackerTests(unittest.TestCase):
             path = Path(directory) / "status.json"
             path.write_text(json.dumps(legacy))
             migrated = tracker.load_status(path, self.canyons)
-        self.assertEqual(migrated["schema_version"], 2)
+        self.assertEqual(migrated["schema_version"], 3)
         self.assertEqual(
             migrated["canyons"]["zerog"]["last_qualifying_event"]["start_utc"],
             "2024-06-21T22:25:00Z",
