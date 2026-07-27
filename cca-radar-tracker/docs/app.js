@@ -203,12 +203,29 @@ function selectedStatus() {
 }
 
 function setHealth() {
-  const health = app.status?.health || {};
+  const status = app.status || {};
+  const health = status.health || {};
   const pill = $("health-pill");
   pill.textContent = health.message || "Radar status unavailable";
   pill.className = `health-pill ${health.ok === false ? "bad" : "ok"}`;
-  const checked = app.status?.last_checked_utc || app.status?.latest_frame_utc;
-  $("last-updated").textContent = checked ? `Last checked ${dateTime(checked)}` : "";
+
+  const parts = [];
+  if (status.latest_archive_confirmed_frame_utc) {
+    parts.push(`Archive confirmed through ${dateTime(status.latest_archive_confirmed_frame_utc)}`);
+  }
+  if (status.latest_provisional_frame_utc) {
+    parts.push(`Newest provisional frame ${dateTime(status.latest_provisional_frame_utc)}`);
+  }
+  const missing = Array.isArray(status.missing_archive_frames_utc)
+    ? status.missing_archive_frames_utc.length
+    : 0;
+  parts.push(`${missing} missing archive frame${missing === 1 ? "" : "s"}`);
+  if (status.last_scheduled_run_utc) {
+    parts.push(`Last scheduled run ${dateTime(status.last_scheduled_run_utc)}`);
+  } else if (status.last_checked_utc) {
+    parts.push(`Last checked ${dateTime(status.last_checked_utc)}`);
+  }
+  $("last-updated").textContent = parts.join(" • ");
 }
 
 function populateSelect() {
@@ -713,6 +730,7 @@ function renderMethods() {
     <h3>Equations and decision inputs</h3>
     <ul>
       <li><strong>Radar rainfall:</strong> ${escapeHtml(method.rainfall_formula || "Not available")}. ${escapeHtml(method.rainfall_explanation || "")}</li>
+      <li><strong>Frame reconciliation:</strong> ${escapeHtml(method.frame_reconciliation_explanation || "Recent timestamps are automatically revisited and replaced by exact archived radar frames.")}</li>
       <li><strong>Estimated watershed runoff:</strong> ${escapeHtml(method.runoff_formula || "Not available")}. ${escapeHtml(method.direct_runoff_explanation || "")}</li>
       <li><strong>Routed peak flow — context:</strong> ${escapeHtml(method.peak_flow_formula || "Not available")}. ${escapeHtml(method.peak_flow_explanation || "")}</li>
       <li><strong>Pool-storage target:</strong> ${escapeHtml(method.target_formula || "Not available")}. ${escapeHtml(method.target_explanation || "")}</li>
