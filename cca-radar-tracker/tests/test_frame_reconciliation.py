@@ -188,6 +188,14 @@ class FrameReconciliationTests(unittest.TestCase):
             status["latest_archive_confirmed_frame_utc"],
             "2026-07-26T23:00:00Z",
         )
+        self.assertEqual(
+            status["earliest_missing_archive_frame_utc"],
+            "2026-07-26T23:05:00Z",
+        )
+        self.assertEqual(
+            status["manual_replay_from_utc"],
+            "2026-07-26T23:05:00Z",
+        )
 
     def test_rebuild_is_idempotent_and_retains_radar_grids(self):
         status = tracker.empty_status([self.canyon])
@@ -204,7 +212,7 @@ class FrameReconciliationTests(unittest.TestCase):
         canyon_status["events"] = [old_event]
         canyon_status["last_rain_event"] = old_event
         tracker.upsert_frame_record(status, wet_record("2026-07-26T23:20:00Z"))
-        tracker.upsert_frame_record(status, dry_record("2026-07-26T23:35:00Z"))
+        tracker.upsert_frame_record(status, dry_record("2026-07-26T23:50:00Z"))
 
         tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
         canyon_status = status["canyons"]["zerog"]
