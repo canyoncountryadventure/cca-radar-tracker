@@ -1648,16 +1648,18 @@ def update_frame_health(
     status["health"] = {
         "ok": not stale,
         "message": (
-            f"Archive confirmed through {confirmed_text}; "
-            f"{len(missing)} missing archive frame"
-            f"{'s' if len(missing) != 1 else ''}; "
-            f"{len(provisional)} provisional frame"
-            f"{'s' if len(provisional) != 1 else ''} retained"
+            f"All expected five-minute radar frames are archive-confirmed through "
+            f"{confirmed_text}. "
+            f"{len(missing)} archive frame"
+            f"{'s are' if len(missing) != 1 else ' is'} missing. "
+            f"{len(provisional)} newer live frame"
+            f"{'s are' if len(provisional) != 1 else ' is'} awaiting archive confirmation."
         ),
         "latest_iem_frame_utc": utc_text(latest_reference),
         "archive_confirmation_delay_minutes": delay,
         "missing_archive_frame_count": len(missing),
         "stale_missing_archive_frame_count": len(stale),
+        "provisional_frame_count": len(provisional),
         "frame_ledger_count": len(ledger),
     }
 
