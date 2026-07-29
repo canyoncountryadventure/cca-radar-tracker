@@ -70,6 +70,18 @@ function dateTime(value) {
   }).format(parsed);
 }
 
+function zuluDateTime(value) {
+  if (!value) return "Not available";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Not available";
+  return `${parsed.toISOString().slice(0, 16).replace("T", " ")}Z`;
+}
+
+function moabAndZuluDateTime(value) {
+  if (!value) return "Not available";
+  return `Moab: ${dateTime(value)} | Zulu: ${zuluDateTime(value)}`;
+}
+
 function dateOnly(value) {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -206,24 +218,43 @@ function setHealth() {
   const status = app.status || {};
   const health = status.health || {};
   const pill = $("health-pill");
-  pill.textContent = health.message || "Radar status unavailable";
+
+  const confirmed = status.latest_archive_confirmed_frame_utc;
+  const newestLive = status.latest_provisional_frame_utc;
+  const missing = Array.isArray(status.missing_archive_frames_utc)
+    ? status.missing_archive_frames_utc.length
+    : Number(health.missing_archive_frame_count || 0);
+  const provisional = Number(health.provisional_frame_count || 0);
+
+  if (confirmed) {
+    const missingSentence = missing === 0
+      ? "No archive-confirmed frames are missing."
+      : `${missing} archive-confirmed frame${missing === 1 ? " is" : "s are"} missing.`;
+    const provisionalSentence = provisional > 0
+      ? `${provisional} newer live frame${provisional === 1 ? " is" : "s are"} awaiting archive confirmation.`
+      : "No newer live frames are awaiting archive confirmation.";
+
+    pill.textContent =
+      `All expected 5-minute radar frames are confirmed through ` +
+      `${moabAndZuluDateTime(confirmed)}. ${missingSentence} ${provisionalSentence}`;
+  } else {
+    pill.textContent = health.message || "Radar archive confirmation has not been established yet.";
+  }
   pill.className = `health-pill ${health.ok === false ? "bad" : "ok"}`;
 
   const parts = [];
-  if (status.latest_archive_confirmed_frame_utc) {
-    parts.push(`Archive confirmed through ${dateTime(status.latest_archive_confirmed_frame_utc)}`);
+  if (confirmed) {
+    parts.push(`Complete 5-minute coverage through ${moabAndZuluDateTime(confirmed)}`);
   }
-  if (status.latest_provisional_frame_utc) {
-    parts.push(`Newest provisional frame ${dateTime(status.latest_provisional_frame_utc)}`);
+  if (newestLive) {
+    parts.push(`Newest live frame awaiting archive confirmation: ${moabAndZuluDateTime(newestLive)}`);
   }
-  const missing = Array.isArray(status.missing_archive_frames_utc)
-    ? status.missing_archive_frames_utc.length
-    : 0;
-  parts.push(`${missing} missing archive frame${missing === 1 ? "" : "s"}`);
+  parts.push(`Missing archive-confirmed frames: ${missing}`);
+
   if (status.last_scheduled_run_utc) {
-    parts.push(`Last scheduled run ${dateTime(status.last_scheduled_run_utc)}`);
+    parts.push(`Last scheduled check: ${moabAndZuluDateTime(status.last_scheduled_run_utc)}`);
   } else if (status.last_checked_utc) {
-    parts.push(`Last checked ${dateTime(status.last_checked_utc)}`);
+    parts.push(`Last completed check: ${moabAndZuluDateTime(status.last_checked_utc)}`);
   }
   $("last-updated").textContent = parts.join(" • ");
 }
