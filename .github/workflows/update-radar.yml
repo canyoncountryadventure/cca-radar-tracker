@@ -90,6 +90,7 @@ jobs:
 
           workflow = Path(".github/workflows/update-radar.yml").read_text(encoding="utf-8")
           tracker = Path("cca-radar-tracker/tracker.py").read_text(encoding="utf-8")
+          config = Path("cca-radar-tracker/config.json").read_text(encoding="utf-8")
           alert = Path("cca-radar-tracker/send_alert.py").read_text(encoding="utf-8")
           app = Path("cca-radar-tracker/docs/app.js").read_text(encoding="utf-8")
           index = Path("cca-radar-tracker/docs/index.html").read_text(encoding="utf-8")
@@ -113,8 +114,22 @@ jobs:
               "recent-rain sorting": "eventSortTime" in app,
               "fill bubbles": "summary-bubble" in app,
               "metric hover help": "metric-tooltip" in app,
-              "clear archive health display": "All expected 5-minute radar frames" in app,
+              "clear archive health display": ("At the last completed check" in app and "0 missing" in app),
               "Moab and Zulu status times": "Zulu:" in app and "Moab:" in app,
+              "manual replay guidance": (
+                  "manual_replay_from_utc" in tracker
+                  and "Manual replay Zulu" in app
+              ),
+              "25 dBZ event start": '"storm_dbz_threshold": 25' in config,
+              "30-minute dry gap": '"event_gap_minutes": 30' in config,
+              "low-intensity rain accumulation": (
+                  "event_continue_minimum_basin_rain_inches" in config
+                  and "analysis_has_rain" in tracker
+              ),
+              "multi-storm accumulation": (
+                  "cumulative_refill_evidence" in tracker
+                  and "renderRefillHistory" in app
+              ),
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
               ),
