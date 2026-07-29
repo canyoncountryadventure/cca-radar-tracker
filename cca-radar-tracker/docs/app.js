@@ -218,43 +218,54 @@ function setHealth() {
   const status = app.status || {};
   const health = status.health || {};
   const pill = $("health-pill");
-
+  const checked = status.last_checked_utc || status.last_scheduled_run_utc;
   const confirmed = status.latest_archive_confirmed_frame_utc;
   const newestLive = status.latest_provisional_frame_utc;
-  const missing = Array.isArray(status.missing_archive_frames_utc)
-    ? status.missing_archive_frames_utc.length
-    : Number(health.missing_archive_frame_count || 0);
+  const missingFrames = Array.isArray(status.missing_archive_frames_utc)
+    ? status.missing_archive_frames_utc
+    : [];
+  const missing = missingFrames.length || Number(health.missing_archive_frame_count || 0);
   const provisional = Number(health.provisional_frame_count || 0);
+  const replay = status.manual_replay_from_utc
+    || status.earliest_missing_archive_frame_utc
+    || missingFrames[0]
+    || null;
 
-  if (confirmed) {
-    const missingSentence = missing === 0
-      ? "No archive-confirmed frames are missing."
-      : `${missing} archive-confirmed frame${missing === 1 ? " is" : "s are"} missing.`;
-    const provisionalSentence = provisional > 0
-      ? `${provisional} newer live frame${provisional === 1 ? " is" : "s are"} awaiting archive confirmation.`
-      : "No newer live frames are awaiting archive confirmation.";
-
+  if (checked && confirmed && missing === 0) {
     pill.textContent =
-      `All expected 5-minute radar frames are confirmed through ` +
-      `${moabAndZuluDateTime(confirmed)}. ${missingSentence} ${provisionalSentence}`;
+      `At the last completed check ${moabAndZuluDateTime(checked)}, all expected ` +
+      `5-minute archive frames through ${moabAndZuluDateTime(confirmed)} were present. ` +
+      `0 missing.`;
+    pill.className = "health-pill ok";
+  } else if (checked && missing > 0) {
+    pill.textContent =
+      `At the last completed check ${moabAndZuluDateTime(checked)}, ${missing} archive ` +
+      `frame${missing === 1 ? " was" : "s were"} missing. Automatic retry is pending.`;
+    pill.className = "health-pill bad";
   } else {
     pill.textContent = health.message || "Radar archive confirmation has not been established yet.";
+    pill.className = `health-pill ${health.ok === false ? "bad" : "ok"}`;
   }
-  pill.className = `health-pill ${health.ok === false ? "bad" : "ok"}`;
 
   const parts = [];
   if (confirmed) {
-    parts.push(`Complete 5-minute coverage through ${moabAndZuluDateTime(confirmed)}`);
+    parts.push(`Complete confirmed coverage through ${moabAndZuluDateTime(confirmed)}`);
   }
   if (newestLive) {
-    parts.push(`Newest live frame awaiting archive confirmation: ${moabAndZuluDateTime(newestLive)}`);
+    parts.push(`Newest live frame awaiting confirmation: ${moabAndZuluDateTime(newestLive)}`);
   }
-  parts.push(`Missing archive-confirmed frames: ${missing}`);
-
-  if (status.last_scheduled_run_utc) {
-    parts.push(`Last scheduled check: ${moabAndZuluDateTime(status.last_scheduled_run_utc)}`);
-  } else if (status.last_checked_utc) {
-    parts.push(`Last completed check: ${moabAndZuluDateTime(status.last_checked_utc)}`);
+  if (missing === 0) {
+    parts.push("Manual replay: not needed");
+  } else if (replay) {
+    parts.push(
+      `Earliest missing frame: ${moabAndZuluDateTime(replay)}`
+    );
+    parts.push(
+      `Manual replay Zulu, only if still missing after the next check: ${replay}`
+    );
+  }
+  if (provisional > 0) {
+    parts.push(`${provisional} newer live frame${provisional === 1 ? "" : "s"} awaiting archive confirmation`);
   }
   $("last-updated").textContent = parts.join(" • ");
 }
@@ -446,7 +457,7 @@ function drawSelectedRadar() {
   const bbox = event?.grid_bbox;
   const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
   $("radar-time").textContent = time
-    ? `Selected event radar: ${dateTime(time)}`
+    ? `Highest basin-rainfall frame retained for this event: ${dateTime(time)}`
     : "No retained radar grid for the selected canyon";
 
   if (!Array.isArray(grid) || !grid.length || !Array.isArray(grid[0]) || !bbox) return;
@@ -652,6 +663,76 @@ function renderEvents(status) {
   );
 }
 
+
+function ensureRefillHistoryPanel() {
+  let panel = $("refill-history");
+  if (panel) return panel;
+  panel = document.createElement("article");
+  panel.id = "refill-history";
+  panel.className = "event-card";
+  panel.style.margin = "12px";
+  panel.style.padding = "18px 20px";
+  const metrics = $("metrics-grid");
+  metrics.parentNode.insertBefore(panel, metrics);
+  return panel;
+}
+
+function milestoneValue(summary, percent) {
+  const value = summary?.milestones_utc?.[String(percent)];
+  return value ? dateTime(value) : "Not reached";
+}
+
+function renderRefillHistory(status, model) {
+  const panel = ensureRefillHistoryPanel();
+  const summary = status.cumulative_refill_evidence || {};
+  const history = Array.isArray(status.refill_history) ? status.refill_history : [];
+  const percent = Number(summary.percent || 0);
+  const balance = Number(summary.balance_ft3 || 0);
+  const overflow = Number(summary.overflow_ft3 || 0);
+
+  const rows = history.slice(0, 10).map((event) => `
+    <tr>
+      <td>${escapeHtml(dateTime(event.end_utc || event.start_utc))}</td>
+      <td>${number(event.basin_rain_inches, 3)} in</td>
+      <td>${number(event.direct_runoff_ft3, 0)} ft³</td>
+      <td>${number(event.event_fill_ratio, 2)}×</td>
+      <td>${number(event.cumulative_percent, 0)}%</td>
+      <td>${number(event.overflow_ft3, 0)} ft³</td>
+    </tr>
+  `).join("");
+
+  panel.innerHTML = `
+    <p class="event-kicker">MULTI-STORM ACCUMULATION</p>
+    <h3>Cumulative refill evidence — no pool loss modeled</h3>
+    <p class="event-summary">
+      Retained storms provide ${number(balance, 0)} ft³ of cumulative no-loss refill evidence,
+      capped at ${number(model.fill_target_ft3, 0)} ft³ (${number(percent, 0)}%).
+      ${overflow > 0 ? `${number(overflow, 0)} ft³ is recorded as potential overflow or flushing.` : ""}
+    </p>
+    <div class="event-meta-grid">
+      ${eventMeta("Retained events", number(summary.event_count || history.length, 0))}
+      ${eventMeta("Evidence period", summary.period_start_utc ? `${dateOnly(summary.period_start_utc)}–${dateOnly(summary.through_utc)}` : "No modeled events")}
+      ${eventMeta("Reached 25%", milestoneValue(summary, 25))}
+      ${eventMeta("Reached 50%", milestoneValue(summary, 50))}
+      ${eventMeta("Reached 75%", milestoneValue(summary, 75))}
+      ${eventMeta("Reached 100%", milestoneValue(summary, 100))}
+    </div>
+    <p class="event-coverage">
+      This starts at zero storage at the first retained event and adds modeled runoff from every
+      retained storm. Evaporation, seepage, drainage, and starting pool level are not modeled,
+      so this is not a current pool-depth percentage.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Storm end</th><th>Radar rain</th><th>Modeled runoff</th><th>Storm ratio</th><th>Cumulative</th><th>Potential overflow</th></tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="6">No retained modeled rain events.</td></tr>`}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 function initialAbstraction(curveNumber) {
   const cn = Number(curveNumber);
   if (!Number.isFinite(cn) || cn <= 0) return null;
@@ -761,12 +842,15 @@ function renderMethods() {
     <h3>Equations and decision inputs</h3>
     <ul>
       <li><strong>Radar rainfall:</strong> ${escapeHtml(method.rainfall_formula || "Not available")}. ${escapeHtml(method.rainfall_explanation || "")}</li>
+      <li><strong>Rain-event grouping:</strong> ${escapeHtml(method.rain_event_explanation || "Events use separate start, accumulation, and dry-gap rules.")}</li>
       <li><strong>Frame reconciliation:</strong> ${escapeHtml(method.frame_reconciliation_explanation || "Recent timestamps are automatically revisited and replaced by exact archived radar frames.")}</li>
       <li><strong>Estimated watershed runoff:</strong> ${escapeHtml(method.runoff_formula || "Not available")}. ${escapeHtml(method.direct_runoff_explanation || "")}</li>
       <li><strong>Routed peak flow — context:</strong> ${escapeHtml(method.peak_flow_formula || "Not available")}. ${escapeHtml(method.peak_flow_explanation || "")}</li>
       <li><strong>Pool-storage target:</strong> ${escapeHtml(method.target_formula || "Not available")}. ${escapeHtml(method.target_explanation || "")}</li>
       <li><strong>Intense-rain footprint:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. ${escapeHtml(method.spatial_explanation || "")}</li>
       <li><strong>Estimated fill ratio:</strong> ${escapeHtml(method.fill_ratio_explanation || "Not available")}</li>
+      <li><strong>Multi-storm accumulation:</strong> ${escapeHtml(method.cumulative_refill_explanation || "Not available")}</li>
+      <li><strong>Pool loss and decay:</strong> ${escapeHtml(method.pool_loss_explanation || "Not available")}</li>
       <li><strong>Atlas 14 context:</strong> ${escapeHtml(method.atlas_explanation || "Not available")}</li>
       <li><strong>Why drainage area is still present:</strong> ${escapeHtml(method.scaling_basis || "Not available")}</li>
     </ul>
@@ -799,6 +883,7 @@ function renderSelected() {
   renderCondition(model, event);
   renderMetrics(model, event);
   renderEvents(status);
+  renderRefillHistory(status, model);
   renderStorageCalculation(model);
   renderHydrologyCalculation(model, event);
   renderDecision(model, event);
