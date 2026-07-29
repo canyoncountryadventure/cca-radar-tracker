@@ -2,7 +2,7 @@ name: Update pool-fill radar
 
 on:
   schedule:
-    - cron: "2/5 * * * *"
+    - cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
   workflow_dispatch:
     inputs:
       send_test_email:
@@ -96,13 +96,13 @@ jobs:
 
           cron_ok = bool(
               re.search(
-                  r'^\s*-\s*cron:\s*["\']2/5 \* \* \* \*["\']\s*$',
+                  r'^\s*-\s*cron:\s*["\']2,7,12,17,22,27,32,37,42,47,52,57 \* \* \* \*["\']\s*$',
                   workflow,
                   re.MULTILINE,
               )
           )
           required = {
-              "offset five-minute cron": cron_ok,
+              "explicit five-minute cron": cron_ok,
               "timestamp frame ledger": '"frame_ledger"' in tracker,
               "overlap reconciliation": "reconciliation_window_minutes" in tracker,
               "archive confirmation": "latest_archive_confirmed_frame_utc" in tracker,
@@ -113,7 +113,8 @@ jobs:
               "recent-rain sorting": "eventSortTime" in app,
               "fill bubbles": "summary-bubble" in app,
               "metric hover help": "metric-tooltip" in app,
-              "archive health display": "Archive confirmed through" in app,
+              "clear archive health display": "All expected 5-minute radar frames" in app,
+              "Moab and Zulu status times": "Zulu:" in app and "Moab:" in app,
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
               ),
