@@ -4,6 +4,7 @@
     "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
     "rainfall_formula": "Z = 300 \u00d7 R^1.4; dBZ capped at 55 for rainfall-volume conversion",
     "rainfall_explanation": "The tracker converts each five-minute radar frame to rainfall, then area-weights the pixels inside the watershed polygon. Radar rainfall is an estimate and may be biased by hail, beam geometry, or evaporation.",
+    "rain_event_explanation": "A new event requires at least 25 dBZ somewhere in the watershed. Once triggered, every later frame with at least 0.0001 inch of basin-average radar-estimated rain is added, including echoes down to the 5 dBZ rainfall-conversion floor. The event closes after 30 consecutive minutes without measurable basin-average radar rain. Lower-intensity rain immediately before the trigger is also included when it falls within that dry-gap window.",
     "frame_reconciliation_explanation": "Each run rechecks an overlapping 90-minute window. Newest frames are provisional; once the exact timestamped IEM WMS-T frame is old enough, it replaces the provisional record. Events are rebuilt from a timestamp-keyed ledger so repeated frames cannot double-count rainfall.",
     "runoff_formula": "Adjusted NRCS direct runoff: S0.20 = 1000/CN \u2212 10; S0.05 = 1.33 \u00d7 S0.20^1.15; Ia = 0.05S0.05; Q = (P \u2212 Ia)\u00b2/(P + 0.95S0.05) when P > Ia",
     "direct_runoff_explanation": "No fixed runoff coefficient is used. Accumulated basin-average radar rainfall is converted to dry, normal, and wet direct-runoff estimates with canyon-specific composite curve numbers from SSURGO soils and 2021 NLCD land cover. Traditional table CNs are converted to the Ia/S = 0.05 retention basis before runoff is calculated. Pixels without a usable SSURGO group are conservatively assigned to HSG D. The central display uses the normal condition.",
@@ -14,6 +15,8 @@
     "spatial_formula": "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, or 60+ dBZ over 10%",
     "spatial_explanation": "The same watershed-percentage gate applies to every canyon. It is a storm-footprint confirmation test and does not replace the runoff-volume test.",
     "fill_ratio_explanation": "Estimated fill ratio = normal-condition NRCS watershed direct runoff \u00f7 provisional empty-pool storage target. It is not a measured pool-depth percentage and does not explicitly subtract channel transmission losses.",
+    "cumulative_refill_explanation": "Cumulative no-loss refill evidence adds the normal-condition modeled runoff from each retained rain event, caps modeled storage at the provisional pool target, and records additional water as potential overflow. It assumes zero starting storage at the first retained event and does not subtract evaporation, seepage, drainage, or other losses, so it is not a current pool-level estimate.",
+    "pool_loss_explanation": "Automatic pool decay is not yet modeled. Pool geometry, shade, wind, temperature, humidity, bedrock seepage, and drainage can produce very different hydroperiods, so the website reports milestone dates rather than an unsupported daily percentage loss.",
     "atlas_explanation": "Atlas 14 context compares event-duration watershed-average radar rainfall with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is context, not a watershed return interval.",
     "scaling_basis": "Technical-section length replaces drainage-area scaling for pool storage. Drainage area remains in the runoff calculation because it controls how much watershed runoff a given rain depth can generate.",
     "condition_language": "Condition statements describe modeled refill evidence, not observed pool depth. Below 25% of the empty-storage target is reported as no meaningful refill unless an intense-rain footprint is detected. 'Likely full' requires the storage-volume, intense-rain footprint, and minimum-duration tests to pass together.",
@@ -53,6 +56,14 @@
       {
         "label": "Hawkins et al. adjusted 0.05 initial-abstraction method",
         "url": "https://ponce.sdsu.edu/hawkins_initial_abstraction.pdf"
+      },
+      {
+        "label": "Rainfall minimum inter-event-time methodology",
+        "url": "https://www.tucson.ars.ag.gov/unit/publications/PDFfiles/2470.pdf"
+      },
+      {
+        "label": "National Park Service ephemeral-pool hydroperiod overview",
+        "url": "https://www.nps.gov/articles/ephemeral-pools.htm"
       }
     ],
     "classification": {
@@ -67,7 +78,7 @@
     "limitations": [
       "Only Zero G has a mapped depression-volume anchor. Other storage targets depend on technical-section lengths and user-assigned morphology modifiers.",
       "NRCS direct runoff is generated watershed runoff, not a measurement of water delivered to every pothole. Bedrock fractures, channel transmission losses, diversions, and disconnected subbasins can reduce delivery.",
-      "Existing pool level is unknown. A partly full canyon needs less new water than the provisional empty-storage target, while evaporation and leakage can reduce retained water after a storm.",
+      "Existing pool level is unknown. Cumulative no-loss evidence preserves multiple storm contributions, but evaporation, seepage, drainage, and starting pool level are not yet modeled.",
       "Radar reflectivity is an indirect rainfall estimate; hail and radar sampling can bias both rainfall volume and the intense-rain footprint.",
       "Peak CFS and NOAA Atlas 14 equivalent are context only and do not independently determine pool condition."
     ]
