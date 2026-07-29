@@ -19,13 +19,15 @@
     "zr_b": 1.4,
     "rain_dbz_cap": 55,
     "minimum_rain_dbz": 5,
-    "storm_dbz_threshold": 35,
+    "storm_dbz_threshold": 25,
     "flush_ratio": 2.0,
     "minimum_wet_frames_for_likely": 2,
-    "event_gap_minutes": 15
+    "event_gap_minutes": 30,
+    "event_continue_minimum_basin_rain_inches": 0.0001
   },
   "historical_wms_min_age_minutes": 10,
   "iem_historical_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi",
   "iem_current_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi",
-  "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png"
+  "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png",
+  "max_retained_events_per_canyon": 50
 }

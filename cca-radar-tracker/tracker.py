@@ -616,6 +616,9 @@ def analyze_canyon_image(
         maximum is not None
         and maximum >= float(config["model"]["storm_dbz_threshold"])
     )
+    rain_detected = basin_rain >= float(
+        config["model"].get("event_continue_minimum_basin_rain_inches", 0.0001)
+    )
 
     return (
         {
@@ -626,6 +629,7 @@ def analyze_canyon_image(
             "frame_basin_rain_inches": round(basin_rain, 4),
             "frame_rain_volume_ft3": round(rain_volume),
             "wet": wet,
+            "rain_detected": rain_detected,
             "unknown_watershed_percent": round(
                 100.0 * unknown_weight / total_weight, 1
             ),
@@ -646,6 +650,16 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
         "last_rain_event": None,
         "last_qualifying_event": None,
         "events": [],
+        "refill_history": [],
+        "cumulative_refill_evidence": {
+            "event_count": 0,
+            "balance_ft3": 0,
+            "ratio": 0.0,
+            "percent": 0,
+            "overflow_ft3": 0,
+            "milestones_utc": {"25": None, "50": None, "75": None, "100": None},
+            "loss_model": "not_modeled",
+        },
         "notification": {
             "last_emailed_event_start_utc": None,
             "last_email_sent_utc": None,
@@ -664,6 +678,8 @@ def empty_status(canyons: list[Canyon] | None = None) -> dict[str, Any]:
         "latest_provisional_frame_utc": None,
         "latest_archive_confirmed_frame_utc": None,
         "ledger_started_utc": None,
+        "earliest_missing_archive_frame_utc": None,
+        "manual_replay_from_utc": None,
         "missing_archive_frames_utc": [],
         "stale_missing_archive_frames_utc": [],
         "frame_ledger": {},
@@ -706,6 +722,8 @@ def ensure_status_defaults(status: dict[str, Any], canyons: list[Canyon]) -> dic
         "latest_provisional_frame_utc",
         "latest_archive_confirmed_frame_utc",
         "ledger_started_utc",
+        "earliest_missing_archive_frame_utc",
+        "manual_replay_from_utc",
     ):
         status.setdefault(key, defaults[key])
     for key in (
@@ -1179,13 +1197,27 @@ def event_public(
 
 
 
+def analysis_has_rain(analysis: dict[str, Any], config: dict[str, Any]) -> bool:
+    """Return whether a frame contains enough basin-average radar rain to retain."""
+    threshold = float(
+        config["model"].get("event_continue_minimum_basin_rain_inches", 0.0001)
+    )
+    return bool(
+        analysis.get("rain_detected")
+        or float(analysis.get("frame_basin_rain_inches") or 0.0) >= threshold
+    )
+
+
 def start_event(
     timestamp: datetime, analysis: dict[str, Any], rain: np.ndarray
 ) -> dict[str, Any]:
+    """Start an event on a 25+ dBZ trigger frame."""
     return {
         "start_utc": utc_text(timestamp),
         "end_utc": utc_text(timestamp),
+        "last_rain_utc": utc_text(timestamp),
         "frames": 1,
+        "rain_frames": 1,
         "wet_frames": 1,
         "peak_dbz": analysis["maximum_dbz"],
         "peak_coverage_percent": dict(analysis["coverage_percent"]),
@@ -1205,51 +1237,83 @@ def start_event(
     }
 
 
+def prepend_rain_frame(
+    event: dict[str, Any],
+    timestamp: datetime,
+    analysis: dict[str, Any],
+) -> None:
+    """Add lower-reflectivity rain that immediately preceded the trigger frame."""
+    event["start_utc"] = min(event["start_utc"], utc_text(timestamp))
+    event["frames"] = int(event.get("frames") or 0) + 1
+    event["rain_frames"] = int(event.get("rain_frames") or 0) + 1
+    event["basin_rain_inches"] = round(
+        float(event.get("basin_rain_inches") or 0.0)
+        + float(analysis.get("frame_basin_rain_inches") or 0.0),
+        4,
+    )
+    event["radar_rain_volume_ft3"] = round(
+        float(event.get("radar_rain_volume_ft3") or 0.0)
+        + float(analysis.get("frame_rain_volume_ft3") or 0.0)
+    )
+    event["peak_dbz"] = max(
+        float(event.get("peak_dbz") or -999.0),
+        float(analysis.get("maximum_dbz") or -999.0),
+    )
+
+
 def update_open_event(
     event: dict[str, Any],
     timestamp: datetime,
     analysis: dict[str, Any],
     rain: np.ndarray,
 ) -> None:
+    """Add one measurable-rain frame to an active event."""
     event["end_utc"] = utc_text(timestamp)
+    event["last_rain_utc"] = utc_text(timestamp)
     event["frames"] = int(event.get("frames") or 0) + 1
-    event["wet_frames"] = int(event.get("wet_frames") or 0) + 1
+    event["rain_frames"] = int(event.get("rain_frames") or 0) + 1
+    if analysis.get("wet"):
+        event["wet_frames"] = int(event.get("wet_frames") or 0) + 1
     event["basin_rain_inches"] = round(
         float(event.get("basin_rain_inches") or 0.0)
-        + analysis["frame_basin_rain_inches"],
+        + float(analysis.get("frame_basin_rain_inches") or 0.0),
         4,
     )
     event["radar_rain_volume_ft3"] = round(
         float(event.get("radar_rain_volume_ft3") or 0.0)
-        + analysis["frame_rain_volume_ft3"]
+        + float(analysis.get("frame_rain_volume_ft3") or 0.0)
     )
     event["spatial_gate_seen"] = bool(
-        event.get("spatial_gate_seen") or analysis["spatial_gate"]
+        event.get("spatial_gate_seen") or analysis.get("spatial_gate")
     )
     event["peak_dbz"] = max(
-        event.get("peak_dbz") or -999,
-        analysis.get("maximum_dbz") or -999,
+        float(event.get("peak_dbz") or -999.0),
+        float(analysis.get("maximum_dbz") or -999.0),
     )
 
     event.setdefault("peak_coverage_percent", {})
     event.setdefault("peak_covered_area_sq_mi", {})
-    for key, value in analysis["coverage_percent"].items():
+    for key, value in (analysis.get("coverage_percent") or {}).items():
         event["peak_coverage_percent"][key] = max(
             event["peak_coverage_percent"].get(key, 0), value
         )
-    for rule in analysis["spatial_rules"]:
+    for rule in analysis.get("spatial_rules") or []:
         key = str(int(rule["dbz"]))
         event["peak_covered_area_sq_mi"][key] = max(
             event["peak_covered_area_sq_mi"].get(key, 0),
             rule["covered_area_sq_mi"],
         )
 
-    accumulated = (
-        np.asarray(event["accumulated_rain_grid_inches"], dtype=np.float32)
-        + rain
-    )
-    event["accumulated_rain_grid_inches"] = grid_list(accumulated, 4)
-    event["max_pixel_storm_inches"] = round(float(np.nanmax(accumulated)), 3)
+    accumulated_values = event.get("accumulated_rain_grid_inches")
+    if accumulated_values is not None:
+        accumulated = np.asarray(accumulated_values, dtype=np.float32)
+        if accumulated.shape == rain.shape:
+            accumulated = accumulated + rain
+            event["accumulated_rain_grid_inches"] = grid_list(accumulated, 4)
+            event["max_pixel_storm_inches"] = round(
+                float(np.nanmax(accumulated)),
+                3,
+            )
 
     previous_peak = float(
         event.get(
@@ -1257,7 +1321,11 @@ def update_open_event(
             event.get("peak_frame_runoff_ft3", -1),
         )
     )
-    if analysis["frame_rain_volume_ft3"] >= previous_peak:
+    has_grid = analysis.get("grid_dbz") is not None
+    if has_grid and (
+        event.get("peak_grid_dbz") is None
+        or float(analysis.get("frame_rain_volume_ft3") or 0.0) >= previous_peak
+    ):
         event["peak_frame_rain_volume_ft3"] = analysis[
             "frame_rain_volume_ft3"
         ]
@@ -1277,8 +1345,23 @@ def finalize_event(
     events = canyon_status.setdefault("events", [])
     if not events or events[0].get("start_utc") != public["start_utc"]:
         events.insert(0, event_public(event, canyon, config, include_grid=False))
-    del events[12:]
+    del events[int(config.get("max_retained_events_per_canyon", 50)) :]
     canyon_status["open_event"] = None
+
+
+def prune_pending_rain(
+    canyon_status: dict[str, Any],
+    timestamp: datetime,
+    gap_minutes: int,
+) -> list[dict[str, Any]]:
+    pending = canyon_status.setdefault("_pending_rain_frames", [])
+    cutoff = timestamp - timedelta(minutes=gap_minutes)
+    pending[:] = [
+        item
+        for item in pending
+        if parse_utc(item["timestamp_utc"]) > cutoff
+    ]
+    return pending
 
 
 def update_canyon_event(
@@ -1289,32 +1372,61 @@ def update_canyon_event(
     rain: np.ndarray,
     config: dict[str, Any],
 ) -> None:
+    """Update one canyon using separate trigger, accumulation, and ending rules.
+
+    A new event requires the configured dBZ trigger. Once triggered, every
+    measurable basin-rain frame is accumulated. The event closes only after the
+    configured dry gap has elapsed since the last measurable rain frame.
+    """
     event = canyon_status.get("open_event")
     gap = int(config["model"]["event_gap_minutes"])
+    rainy = analysis_has_rain(analysis, config)
+    triggered = bool(analysis.get("wet"))
 
-    if analysis["wet"]:
-        if event and timestamp - parse_utc(event["end_utc"]) > timedelta(
-            minutes=gap
-        ):
+    if event:
+        last_rain = parse_utc(
+            event.get("last_rain_utc") or event.get("end_utc") or event["start_utc"]
+        )
+        if timestamp - last_rain >= timedelta(minutes=gap):
             finalize_event(canyon_status, canyon, config)
             event = None
 
-        if event is None:
-            event = start_event(timestamp, analysis, rain)
-            canyon_status["open_event"] = event
-        else:
-            update_open_event(event, timestamp, analysis, rain)
+    pending = prune_pending_rain(canyon_status, timestamp, gap)
 
-        public = event_public(event, canyon, config)
-        canyon_status["last_rain_event"] = public
-        if public["classification"] in {"likely_full", "full_flush"}:
-            canyon_status["last_qualifying_event"] = public
+    if event is None:
+        if rainy and not triggered:
+            pending.append(
+                {
+                    "timestamp_utc": utc_text(timestamp),
+                    "analysis": {
+                        key: value
+                        for key, value in analysis.items()
+                        if key not in {"grid_dbz", "grid_bbox"}
+                    },
+                }
+            )
+            return
+        if not triggered:
+            return
+
+        event = start_event(timestamp, analysis, rain)
+        for item in sorted(pending, key=lambda value: value["timestamp_utc"]):
+            prepend_rain_frame(
+                event,
+                parse_utc(item["timestamp_utc"]),
+                item["analysis"],
+            )
+        pending.clear()
+        canyon_status["open_event"] = event
+    elif rainy:
+        update_open_event(event, timestamp, analysis, rain)
+    else:
         return
 
-    if event and timestamp - parse_utc(event["end_utc"]) >= timedelta(
-        minutes=gap
-    ):
-        finalize_event(canyon_status, canyon, config)
+    public = event_public(event, canyon, config)
+    canyon_status["last_rain_event"] = public
+    if public["classification"] in {"likely_full", "full_flush"}:
+        canyon_status["last_qualifying_event"] = public
 
 
 def encode_grid(values: list[list[float | None]]) -> str:
@@ -1344,6 +1456,7 @@ def frame_summary(analysis: dict[str, Any]) -> dict[str, Any]:
         "spatial_gate": bool(analysis.get("spatial_gate")),
         "unknown_watershed_percent": analysis.get("unknown_watershed_percent"),
         "wet": bool(analysis.get("wet")),
+        "rain_detected": bool(analysis.get("rain_detected")),
     }
 
 
@@ -1448,13 +1561,30 @@ def preserved_events_before(
         event
         for event in dedupe_events(candidates)
         if event_end_utc(event) < cutoff
-    ][:12]
+    ]
 
 
 def dry_analysis_from_summary(
-    timestamp: datetime, summary: dict[str, Any] | None
+    timestamp: datetime,
+    summary: dict[str, Any] | None,
+    config: dict[str, Any],
 ) -> dict[str, Any]:
     values = summary or {}
+    maximum = values.get("maximum_dbz")
+    wet = bool(
+        maximum is not None
+        and float(maximum) >= float(config["model"]["storm_dbz_threshold"])
+    )
+    rain_detected = bool(
+        values.get("rain_detected")
+        or float(values.get("frame_basin_rain_inches") or 0.0)
+        >= float(
+            config["model"].get(
+                "event_continue_minimum_basin_rain_inches",
+                0.0001,
+            )
+        )
+    )
     return {
         "frame_utc": utc_text(timestamp),
         "maximum_dbz": values.get("maximum_dbz"),
@@ -1465,10 +1595,105 @@ def dry_analysis_from_summary(
             values.get("frame_basin_rain_inches") or 0.0
         ),
         "frame_rain_volume_ft3": int(values.get("frame_rain_volume_ft3") or 0),
-        "wet": False,
+        "wet": wet,
+        "rain_detected": rain_detected,
         "unknown_watershed_percent": values.get("unknown_watershed_percent"),
         "grid_dbz": None,
         "grid_bbox": None,
+    }
+
+
+
+def cumulative_refill_evidence(
+    canyon_status: dict[str, Any],
+    canyon: Canyon,
+    config: dict[str, Any],
+) -> None:
+    """Summarize retained storm contributions without assuming any water loss.
+
+    This is deliberately not a current pool-level estimate. It starts from zero
+    at the first retained modeled event, adds each event's normal-condition
+    watershed runoff, caps stored evidence at the provisional pool-storage
+    target, and records excess as potential overflow/flush.
+    """
+    candidates = list(canyon_status.get("events", []))
+    latest = canyon_status.get("last_rain_event")
+    if latest:
+        candidates.append(latest)
+
+    events = [
+        event
+        for event in dedupe_events(candidates)
+        if event.get("direct_runoff_ft3") is not None
+        or event.get("estimated_runoff_ft3") is not None
+    ]
+    events.sort(
+        key=lambda event: parse_utc(
+            event.get("end_utc") or event.get("start_utc")
+        )
+    )
+
+    target = float(canyon.model["fill_target_ft3"])
+    balance = 0.0
+    overflow_total = 0.0
+    milestones: dict[str, str | None] = {
+        "25": None,
+        "50": None,
+        "75": None,
+        "100": None,
+    }
+    history: list[dict[str, Any]] = []
+
+    for event in events:
+        runoff = float(
+            event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))
+            or 0.0
+        )
+        before = balance
+        raw_after = before + max(0.0, runoff)
+        balance = min(target, raw_after)
+        overflow = max(0.0, raw_after - target)
+        overflow_total += overflow
+        ratio = balance / target if target > 0 else 0.0
+        timestamp = event.get("end_utc") or event.get("start_utc")
+
+        for percent in (25, 50, 75, 100):
+            key = str(percent)
+            if milestones[key] is None and ratio + 1e-9 >= percent / 100.0:
+                milestones[key] = timestamp
+
+        history.append(
+            {
+                "start_utc": event.get("start_utc"),
+                "end_utc": event.get("end_utc"),
+                "classification": event.get("classification"),
+                "classification_label": event.get("classification_label"),
+                "basin_rain_inches": event.get("basin_rain_inches"),
+                "direct_runoff_ft3": round(runoff),
+                "event_fill_ratio": event.get("fill_ratio"),
+                "balance_before_ft3": round(before),
+                "cumulative_balance_ft3": round(balance),
+                "cumulative_ratio": round(ratio, 2),
+                "cumulative_percent": min(100, round(ratio * 100)),
+                "overflow_ft3": round(overflow),
+            }
+        )
+
+    canyon_status["refill_history"] = list(reversed(history))
+    canyon_status["cumulative_refill_evidence"] = {
+        "event_count": len(history),
+        "period_start_utc": history[0]["start_utc"] if history else None,
+        "through_utc": history[-1]["end_utc"] if history else None,
+        "balance_ft3": round(balance),
+        "ratio": round(balance / target, 2) if target > 0 else 0.0,
+        "percent": min(100, round(balance / target * 100)) if target > 0 else 0,
+        "overflow_ft3": round(overflow_total),
+        "milestones_utc": milestones,
+        "loss_model": "not_modeled",
+        "assumption": (
+            "Starts at zero storage at the first retained modeled event and "
+            "subtracts no evaporation, seepage, drainage, or other losses."
+        ),
     }
 
 
@@ -1512,7 +1737,9 @@ def rebuild_events_from_ledger(
                 )
             else:
                 analysis = dry_analysis_from_summary(
-                    timestamp, record.get("summary", {}).get(canyon.canyon_id)
+                    timestamp,
+                    record.get("summary", {}).get(canyon.canyon_id),
+                    config,
                 )
                 rain = np.zeros((1, 1), dtype=np.float32)
             rebuilt["latest_analysis"] = analysis
@@ -1538,10 +1765,13 @@ def rebuild_events_from_ledger(
                 ),
                 None,
             )
+        maximum_events = int(config.get("max_retained_events_per_canyon", 50))
         rebuilt["events"] = [
             compact_event(event)
-            for event in dedupe_events(rebuilt.get("events", []))[:12]
+            for event in dedupe_events(rebuilt.get("events", []))[:maximum_events]
         ]
+        rebuilt.pop("_pending_rain_frames", None)
+        cumulative_refill_evidence(rebuilt, canyon, config)
         status["canyons"][canyon.canyon_id] = rebuilt
 
 
@@ -1622,6 +1852,13 @@ def update_frame_health(
     status["stale_missing_archive_frames_utc"] = [
         utc_text(value) for value in stale
     ]
+    earliest_missing = missing[0] if missing else None
+    status["earliest_missing_archive_frame_utc"] = (
+        utc_text(earliest_missing) if earliest_missing else None
+    )
+    status["manual_replay_from_utc"] = (
+        utc_text(earliest_missing) if earliest_missing else None
+    )
 
     confirmed_through: datetime | None = None
     for timestamp in expected:
@@ -1660,6 +1897,12 @@ def update_frame_health(
         "missing_archive_frame_count": len(missing),
         "stale_missing_archive_frame_count": len(stale),
         "provisional_frame_count": len(provisional),
+        "earliest_missing_archive_frame_utc": (
+            utc_text(earliest_missing) if earliest_missing else None
+        ),
+        "manual_replay_from_utc": (
+            utc_text(earliest_missing) if earliest_missing else None
+        ),
         "frame_ledger_count": len(ledger),
     }
 
@@ -1742,7 +1985,9 @@ def rewind_status(
 
     for canyon in canyons:
         canyon_status = status["canyons"][canyon.canyon_id]
-        retained = preserved_events_before(canyon_status, cutoff)
+        retained = preserved_events_before(canyon_status, cutoff)[
+            : int(50)
+        ]
         canyon_status["events"] = [compact_event(event) for event in retained]
         canyon_status["open_event"] = None
         canyon_status["latest_analysis"] = None
@@ -1763,6 +2008,8 @@ def rewind_status(
     status["latest_archive_confirmed_frame_utc"] = None
     status["missing_archive_frames_utc"] = []
     status["stale_missing_archive_frames_utc"] = []
+    status["earliest_missing_archive_frame_utc"] = None
+    status["manual_replay_from_utc"] = None
     status["last_checked_utc"] = None
     status["health"] = {
         "ok": True,
@@ -1786,6 +2033,15 @@ def model_metadata(
                 "The tracker converts each five-minute radar frame to rainfall, then "
                 "area-weights the pixels inside the watershed polygon. Radar rainfall "
                 "is an estimate and may be biased by hail, beam geometry, or evaporation."
+            ),
+            "rain_event_explanation": (
+                f"A new event requires at least {model['storm_dbz_threshold']} dBZ "
+                "somewhere in the watershed. Once triggered, every later frame with at "
+                "least 0.0001 inch of basin-average radar-estimated rain is added, including "
+                f"echoes down to the {model['minimum_rain_dbz']} dBZ rainfall-conversion floor. "
+                f"The event closes after {model['event_gap_minutes']} consecutive minutes "
+                "without measurable basin-average radar rain. Lower-intensity rain immediately "
+                "before the trigger is also included when it falls within that dry-gap window."
             ),
             "frame_reconciliation_explanation": (
                 "Each run rechecks an overlapping 90-minute window. Newest frames are "
@@ -1838,6 +2094,18 @@ def model_metadata(
                 "Estimated fill ratio = normal-condition NRCS watershed direct runoff ÷ provisional "
                 "empty-pool storage target. It is not a measured pool-depth percentage and does "
                 "not explicitly subtract channel transmission losses."
+            ),
+            "cumulative_refill_explanation": (
+                "Cumulative no-loss refill evidence adds the normal-condition modeled runoff from "
+                "each retained rain event, caps modeled storage at the provisional pool target, "
+                "and records additional water as potential overflow. It assumes zero starting "
+                "storage at the first retained event and does not subtract evaporation, seepage, "
+                "drainage, or other losses, so it is not a current pool-level estimate."
+            ),
+            "pool_loss_explanation": (
+                "Automatic pool decay is not yet modeled. Pool geometry, shade, wind, temperature, "
+                "humidity, bedrock seepage, and drainage can produce very different hydroperiods, "
+                "so the website reports milestone dates rather than an unsupported daily percentage loss."
             ),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
@@ -1893,6 +2161,14 @@ def model_metadata(
                     "label": "Hawkins et al. adjusted 0.05 initial-abstraction method",
                     "url": "https://ponce.sdsu.edu/hawkins_initial_abstraction.pdf",
                 },
+                {
+                    "label": "Rainfall minimum inter-event-time methodology",
+                    "url": "https://www.tucson.ars.ag.gov/unit/publications/PDFfiles/2470.pdf",
+                },
+                {
+                    "label": "National Park Service ephemeral-pool hydroperiod overview",
+                    "url": "https://www.nps.gov/articles/ephemeral-pools.htm",
+                },
             ],
             "classification": {
                 "minor": (
@@ -1934,9 +2210,9 @@ def model_metadata(
                     "transmission losses, diversions, and disconnected subbasins can reduce delivery."
                 ),
                 (
-                    "Existing pool level is unknown. A partly full canyon needs less new "
-                    "water than the provisional empty-storage target, while evaporation "
-                    "and leakage can reduce retained water after a storm."
+                    "Existing pool level is unknown. Cumulative no-loss evidence preserves "
+                    "multiple storm contributions, but evaporation, seepage, drainage, and "
+                    "starting pool level are not yet modeled."
                 ),
                 (
                     "Radar reflectivity is an indirect rainfall estimate; hail and radar "
