@@ -18,7 +18,18 @@ from typing import Any
 EARTH_RADIUS_M = 6_371_008.8
 SQUARE_METERS_PER_SQUARE_MILE = 2_589_988.110336
 ATLAS_URL = "https://hdsc.nws.noaa.gov/cgi-bin/new/fe_text.csv"
-ATLAS_DURATIONS = {"5-min", "10-min", "15-min", "30-min", "60-min"}
+ATLAS_DURATION_KEYS = {
+    "5-min": "5-min",
+    "10-min": "10-min",
+    "15-min": "15-min",
+    "30-min": "30-min",
+    "60-min": "60-min",
+    "2-hr": "120-min",
+    "3-hr": "180-min",
+    "6-hr": "360-min",
+    "12-hr": "720-min",
+    "24-hr": "1440-min",
+}
 
 
 SOURCES = [
@@ -176,12 +187,19 @@ def parse_atlas(text: str) -> dict[str, Any]:
         if in_estimates and line.startswith("by duration for ARI"):
             periods = [item.strip() for item in line.split(":,", 1)[1].split(",")]
             continue
-        match = re.match(r"^(\d+-min):,\s*(.*)$", line)
-        if not (in_estimates and periods and match and match.group(1) in ATLAS_DURATIONS):
+        match = re.match(r"^(\d+-(?:min|hr)):,\s*(.*)$", line)
+        if not (
+            in_estimates
+            and periods
+            and match
+            and match.group(1) in ATLAS_DURATION_KEYS
+        ):
             continue
         values = [float(item.strip()) for item in match.group(2).split(",")]
-        rows[match.group(1)] = {period: value for period, value in zip(periods, values)}
-    if rows.keys() != ATLAS_DURATIONS:
+        rows[ATLAS_DURATION_KEYS[match.group(1)]] = {
+            period: value for period, value in zip(periods, values)
+        }
+    if rows.keys() != set(ATLAS_DURATION_KEYS.values()):
         raise ValueError(f"Incomplete Atlas 14 response: {sorted(rows)}")
     return rows
 
