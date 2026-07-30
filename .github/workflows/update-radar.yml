@@ -162,11 +162,11 @@ jobs:
 
           if collection.get("type") != "FeatureCollection":
               raise SystemExit("watersheds.geojson is not a GeoJSON FeatureCollection")
-          if len(features) != 21:
+          if len(features) != 22:
               raise SystemExit(
-                  f"Expected 21 watershed polygons, found {len(features)}"
+                  f"Expected 22 watershed polygons, found {len(features)}"
               )
-          if "" in ids or len(ids) != 21:
+          if "" in ids or len(ids) != 22:
               raise SystemExit(
                   "Every watershed must have one unique nonblank properties.id value"
               )
@@ -291,6 +291,7 @@ jobs:
               "the-squeeze": 152956,
               "upper-greasewood": 83907,
               "woody": 17481,
+              "yankee-doodle": 27969,
           }
           for canyon_id, expected in expected_targets.items():
               actual = model["canyons"][canyon_id]["fill_target_ft3"]
@@ -358,9 +359,9 @@ jobs:
                   f"extra polygons: {sorted(watershed_ids - model_ids)}"
               )
 
-          if len(model_ids) != 21:
+          if len(model_ids) != 22:
               raise SystemExit(
-                  f"Expected 21 modeled canyons, found {len(model_ids)}"
+                  f"Expected 22 modeled canyons, found {len(model_ids)}"
               )
 
           required_atlas_durations = {
@@ -377,7 +378,7 @@ jobs:
                   )
 
           print(
-              "Verified revised pool-refill model, all 21 watershed polygons, "
+              "Verified revised pool-refill model, all 22 watershed polygons, "
               "all Atlas 14 durations, and the front-end data contract."
           )
           PY
