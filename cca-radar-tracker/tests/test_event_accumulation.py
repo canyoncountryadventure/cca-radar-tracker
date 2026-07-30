@@ -54,6 +54,20 @@ def canyon_fixture(fill_target=52_442):
     )
 
 
+def spatial_canyon_fixture():
+    canyon = canyon_fixture()
+    canyon.grid = tracker.Grid(
+        left=-110.0,
+        bottom=38.0,
+        right=-109.99,
+        top=38.01,
+        width=2,
+        height=2,
+    )
+    canyon.weights = np.ones((2, 2), dtype=np.float32)
+    return canyon
+
+
 def summary(maximum_dbz, rain_inches, wet):
     return {
         "maximum_dbz": maximum_dbz,
@@ -189,6 +203,86 @@ class EventAccumulationTests(unittest.TestCase):
             "2026-07-28T18:10:00Z",
         )
         self.assertEqual(len(status["refill_history"]), 2)
+
+    def test_moving_storm_core_accumulates_at_its_actual_pixels(self):
+        canyon = spatial_canyon_fixture()
+        status = tracker.empty_status([canyon])
+        rain_grids = (
+            np.array([[0.20, 0.0], [0.0, 0.0]], dtype=np.float32),
+            np.array([[0.0, 0.20], [0.0, 0.0]], dtype=np.float32),
+        )
+        for minute, rain_grid in zip((0, 5), rain_grids):
+            timestamp = f"2026-07-26T23:{minute:02d}:00Z"
+            analysis = {
+                "frame_utc": timestamp,
+                "maximum_dbz": 50.0,
+                "coverage_percent": {"50": 25.0, "55": 0.0, "60": 0.0},
+                "spatial_rules": [],
+                "spatial_gate": False,
+                "frame_basin_rain_inches": 0.05,
+                "frame_rain_volume_ft3": 116_160,
+                "wet": True,
+                "rain_detected": True,
+                "unknown_watershed_percent": 0.0,
+                "radar_data_quality": "valid",
+                "radar_data_sufficient": True,
+                "grid_bbox": canyon.grid.bbox,
+            }
+            item = {
+                "frame_utc": timestamp,
+                "source": "historical",
+                "confirmed": True,
+                "processed_utc": timestamp,
+                "summary": {"zerog": tracker.frame_summary(analysis)},
+                "wet_canyons": {
+                    "zerog": {
+                        "analysis": analysis,
+                        "grid_dbz_zlib": tracker.encode_grid(
+                            [[50.0, 0.0], [0.0, 0.0]]
+                        ),
+                        "rain_grid_zlib": tracker.encode_grid(
+                            tracker.grid_list(rain_grid, 4)
+                        ),
+                    }
+                },
+            }
+            tracker.upsert_frame_record(status, item)
+        tracker.rebuild_events_from_ledger(status, [canyon], self.config)
+        event = status["canyons"]["zerog"]["last_rain_event"]
+        self.assertAlmostEqual(event["basin_rain_inches"], 0.10, places=3)
+        self.assertAlmostEqual(event["max_pixel_storm_inches"], 0.20, places=3)
+
+    def test_pretrigger_spatial_rain_is_included_in_accumulated_grid(self):
+        canyon = spatial_canyon_fixture()
+        event = tracker.start_event(
+            tracker.parse_utc("2026-07-26T23:05:00Z"),
+            {
+                "maximum_dbz": 30.0,
+                "coverage_percent": {},
+                "spatial_rules": [],
+                "spatial_gate": False,
+                "frame_basin_rain_inches": 0.025,
+                "frame_rain_volume_ft3": 58_080,
+                "grid_dbz": [[0.0, 30.0], [0.0, 0.0]],
+                "grid_bbox": canyon.grid.bbox,
+            },
+            np.array([[0.0, 0.10], [0.0, 0.0]], dtype=np.float32),
+        )
+        tracker.prepend_rain_frame(
+            event,
+            tracker.parse_utc("2026-07-26T23:00:00Z"),
+            {
+                "maximum_dbz": 20.0,
+                "frame_basin_rain_inches": 0.025,
+                "frame_rain_volume_ft3": 58_080,
+            },
+            np.array([[0.10, 0.0], [0.0, 0.0]], dtype=np.float32),
+        )
+        self.assertAlmostEqual(event["max_pixel_storm_inches"], 0.10, places=3)
+        self.assertEqual(
+            event["accumulated_rain_grid_inches"],
+            [[0.1, 0.1], [0.0, 0.0]],
+        )
 
 
 if __name__ == "__main__":

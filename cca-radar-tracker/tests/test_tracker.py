@@ -220,11 +220,34 @@ class TrackerTests(unittest.TestCase):
             path = Path(directory) / "status.json"
             path.write_text(json.dumps(legacy))
             migrated = tracker.load_status(path, self.canyons)
-        self.assertEqual(migrated["schema_version"], 3)
+        self.assertEqual(migrated["schema_version"], 4)
         self.assertEqual(
             migrated["canyons"]["zerog"]["last_qualifying_event"]["start_utc"],
             "2024-06-21T22:25:00Z",
         )
+
+    def test_long_event_atlas_comparison_is_suppressed_without_duration_data(self):
+        canyon = self.by_id["zerog"]
+        event = {
+            "start_utc": "2026-07-01T00:00:00Z",
+            "end_utc": "2026-07-01T02:00:00Z",
+            "frames": 25,
+            "basin_rain_inches": 1.0,
+        }
+        self.assertIsNone(tracker.atlas_return_period(event, canyon, 5))
+
+    def test_insufficient_radar_data_is_not_classified_as_zero_rain(self):
+        canyon = self.by_id["zerog"]
+        event = {"radar_data_sufficient": False}
+        code, label = tracker.classify_event(event, canyon, self.config)
+        self.assertEqual(code, "insufficient_data")
+        self.assertEqual(label, "Insufficient radar data")
+
+    def test_required_state_fails_closed_when_missing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing.json"
+            with self.assertRaises(ValueError):
+                tracker.load_status(missing, self.canyons, require_existing=True)
 
 
 if __name__ == "__main__":
