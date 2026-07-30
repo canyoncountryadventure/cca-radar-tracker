@@ -35,6 +35,16 @@ CN = {
     90: (100, 100, 100, 100), 95: (100, 100, 100, 100),
 }
 HSG_INDEX = {"A": 0, "B": 1, "C": 2, "D": 3}
+NLCD_RGB_TO_CLASS = {
+    (70, 107, 159): 11, (209, 222, 248): 12,
+    (222, 197, 197): 21, (217, 146, 130): 22,
+    (235, 0, 0): 23, (171, 0, 0): 24,
+    (179, 172, 159): 31, (104, 171, 95): 41,
+    (28, 95, 44): 42, (181, 197, 143): 43,
+    (204, 184, 121): 52, (223, 223, 194): 71,
+    (220, 217, 57): 81, (171, 108, 40): 82,
+    (184, 217, 235): 90, (108, 159, 184): 95,
+}
 
 
 def request(url, data=None, headers=None, timeout=120):
@@ -72,18 +82,56 @@ def nlcd(geometry):
     west, south, east, north = bounds(geometry)
     pad = 0.0003
     bbox = west-pad, south-pad, east+pad, north+pad
+    latitude = (south + north) / 2
+    width = max(1, round((bbox[2] - bbox[0]) * 111_320 * math.cos(math.radians(latitude)) / 30))
+    height = max(1, round((bbox[3] - bbox[1]) * 110_540 / 30))
     query = {
         "service": "WCS", "version": "2.0.1", "request": "GetCoverage",
-        "coverageId": "mrlc_download__NLCD_2021_Land_Cover_L48",
+        "coverageId": "mrlc_Land-Cover-Native_conus_year_data__Land-Cover-Native_conus_year_data",
         "format": "image/tiff",
-        "subset": [f"Long({bbox[0]},{bbox[2]})", f"Lat({bbox[1]},{bbox[3]})"],
+        "subset": [
+            f"Long({bbox[0]},{bbox[2]})",
+            f"Lat({bbox[1]},{bbox[3]})",
+            'time("2021-01-01T00:00:00.000Z")',
+        ],
         "subsettingCrs": "http://www.opengis.net/def/crs/EPSG/0/4326",
         "outputCrs": "http://www.opengis.net/def/crs/EPSG/0/4326",
+        "scaleSize": [f"Long({width})", f"Lat({height})"],
     }
     # doseq preserves both subset parameters.
-    url = "https://www.mrlc.gov/geoserver/mrlc_download/wcs?" + urllib.parse.urlencode(query, doseq=True)
-    image = Image.open(io.BytesIO(request(url)))
-    values = np.asarray(image)
+    url = (
+        "https://dmsdata.cr.usgs.gov/geoserver/"
+        "mrlc_Land-Cover-Native_conus_year_data/wcs?"
+        + urllib.parse.urlencode(query, doseq=True)
+    )
+    try:
+        image = Image.open(io.BytesIO(request(url)))
+        values = np.asarray(image)
+    except Exception:
+        # The USGS WCS has intermittently returned a server-side
+        # ClassCastException. Its WMS exposes the same categorical coverage
+        # using the published NLCD palette, so decode those colors back to
+        # class values rather than substituting another canyon's parameters.
+        wms_query = {
+            "service": "WMS", "version": "1.1.1", "request": "GetMap",
+            "layers": "Land-Cover-Native_conus_year_data", "styles": "",
+            "srs": "EPSG:4326", "bbox": ",".join(map(str, bbox)),
+            "width": width, "height": height, "format": "image/geotiff",
+            "time": "2021-01-01T00:00:00.000Z",
+        }
+        wms_url = (
+            "https://dmsdata.cr.usgs.gov/geoserver/"
+            "mrlc_Land-Cover-Native_conus_year_data/wms?"
+            + urllib.parse.urlencode(wms_query)
+        )
+        image = Image.open(io.BytesIO(request(wms_url))).convert("RGB")
+        rgb = np.asarray(image)
+        values = np.zeros(rgb.shape[:2], dtype=np.uint8)
+        for color, class_id in NLCD_RGB_TO_CLASS.items():
+            values[np.all(rgb == color, axis=2)] = class_id
+        unknown = np.all(values == 0)
+        if unknown:
+            raise RuntimeError("USGS WMS returned no recognized NLCD classes")
     mask = mask_geometry(geometry, bbox, image.width, image.height)
     counts = Counter(int(v) for v in values[mask])
     return bbox, values, mask, counts

@@ -54,6 +54,7 @@ SOURCES = [
     ("hogwarts", "Hogwarts", "data (17).geojson", None),
     ("neon", "Neon", "data (18).geojson", None),
     ("quandary", "Quandary", "data (19).geojson", None),
+    ("yankee-doodle", "Yankee Doodle", "data (21).geojson", None),
 ]
 
 
