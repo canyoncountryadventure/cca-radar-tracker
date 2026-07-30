@@ -58,7 +58,7 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | Alcatraz | 0.65 | +0.20 | 54,540 | 109,080 |
 | Cable Canyon | 2.50 | +0.50 | 262,210 | 524,420 |
 | Constrychnine | 0.60 | -0.50 | 20,977 | 41,954 |
-| Eardley | 1.00 | +0.25 | 87,403 | 174,806 |
+| Eardley | 1.00 | +0.90 | 132,853 | 265,706 |
 | North Fork of Iron Wash | 0.75 | +0.00 | 52,442 | 104,884 |
 | Poe | 0.65 | +1.00 | 90,899 | 181,798 |
 | The Squeeze | 1.25 | +0.75 | 152,956 | 305,912 |
@@ -106,6 +106,9 @@ Weak-echo persistence, connected-core area, watershed-size scaling, MRMS QPE, sp
 The dashboard includes:
 
 - Blue watershed polygons and retained peak-event radar pixels
+- Clickable 90-day storm dates that redraw the map with the selected event
+- Current seven-day, age-weighted refill evidence that is not reset by a dry storm
+- Permanent largest-event and record seven-day evidence dates
 - Last rain event with Atlas 14 equivalent
 - Retained last major-refill event
 - Estimated watershed runoff and routed peak-flow range

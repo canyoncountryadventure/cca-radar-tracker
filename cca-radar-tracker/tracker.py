@@ -120,7 +120,7 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
     },
     "eardley": {
         "technical_length_miles": 1.00,
-        "pothole_modifier": 0.25,
+        "pothole_modifier": 0.90,
         "basis": "User technical-section length and higher pool-storage adjustment",
     },
     "north-fork-iron-wash": {
@@ -688,6 +688,18 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
         "last_qualifying_event": None,
         "events": [],
         "refill_history": [],
+        "historical_records": {
+            "peak_individual_event": None,
+            "peak_seven_day_evidence": None,
+        },
+        "recent_refill_evidence": {
+            "window_days": 7,
+            "percent": 0,
+            "ratio": 0.0,
+            "through_utc": None,
+            "last_meaningful_event_utc": None,
+            "trend": "no recent evidence",
+        },
         "cumulative_refill_evidence": {
             "event_count": 0,
             "balance_ft3": 0,
@@ -851,7 +863,7 @@ def refresh_status_events(
         refreshed = []
         for event in canyon_status.get("events", []):
             if event.get("estimated_runoff_ft3") is not None and event.get("frames"):
-                refreshed.append(event_public(event, canyon, config, include_grid=False))
+                refreshed.append(event_public(event, canyon, config, include_grid=True))
             else:
                 refreshed.append(event)
         canyon_status["events"] = refreshed
@@ -1457,7 +1469,7 @@ def finalize_event(
     canyon_status["last_rain_event"] = public
     events = canyon_status.setdefault("events", [])
     if not events or events[0].get("start_utc") != public["start_utc"]:
-        events.insert(0, event_public(event, canyon, config, include_grid=False))
+        events.insert(0, event_public(event, canyon, config, include_grid=True))
     del events[int(config.get("max_retained_events_per_canyon", 50)) :]
     canyon_status["open_event"] = None
 
@@ -1556,11 +1568,8 @@ def decode_grid(value: str) -> list[list[float | None]]:
 
 
 def compact_event(event: dict[str, Any]) -> dict[str, Any]:
-    return {
-        key: value
-        for key, value in event.items()
-        if key not in {"peak_grid_dbz", "grid_bbox"}
-    }
+    """Retain the event's peak radar grid for clickable 90-day history."""
+    return dict(event)
 
 
 def frame_summary(analysis: dict[str, Any]) -> dict[str, Any]:
@@ -1728,13 +1737,7 @@ def cumulative_refill_evidence(
     canyon: Canyon,
     config: dict[str, Any],
 ) -> None:
-    """Summarize retained storm contributions without assuming any water loss.
-
-    This is deliberately not a current pool-level estimate. It starts from zero
-    at the first retained modeled event, adds each event's normal-condition
-    watershed runoff, caps stored evidence at the provisional pool-storage
-    target, and records excess as potential overflow/flush.
-    """
+    """Build seven-day evidence, 90-day details, and permanent peak records."""
     candidates = list(canyon_status.get("events", []))
     latest = canyon_status.get("last_rain_event")
     if latest:
@@ -1753,6 +1756,121 @@ def cumulative_refill_evidence(
     )
 
     target = float(canyon.model["fill_target_ft3"])
+    window_days = int(config.get("recent_refill_window_days", 7))
+    retention_days = int(config.get("event_detail_retention_days", 90))
+    now = datetime.now(timezone.utc)
+    if events and now < event_end_utc(events[-1]):
+        now = event_end_utc(events[-1])
+
+    records = canyon_status.get("historical_records") or {}
+    peak_individual = records.get("peak_individual_event")
+    peak_seven_day = records.get("peak_seven_day_evidence")
+
+    def event_record(event: dict[str, Any], ratio: float) -> dict[str, Any]:
+        return {
+            "start_utc": event.get("start_utc"),
+            "end_utc": event.get("end_utc"),
+            "peak_frame_utc": event.get("peak_frame_utc"),
+            "fill_ratio": round(ratio, 3),
+            "percent": min(100, round(ratio * 100)),
+            "classification_label": event.get("classification_label"),
+            "basin_rain_inches": event.get("basin_rain_inches"),
+            "direct_runoff_ft3": event.get(
+                "direct_runoff_ft3", event.get("estimated_runoff_ft3")
+            ),
+            "peak_dbz": event.get("peak_dbz"),
+            "peak_grid_dbz": event.get("peak_grid_dbz"),
+            "grid_bbox": event.get("grid_bbox"),
+        }
+
+    for index, event in enumerate(events):
+        ratio = max(0.0, float(event.get("fill_ratio") or 0.0))
+        prior_ratio = float((peak_individual or {}).get("fill_ratio") or -1.0)
+        prior_time = (
+            parse_utc(peak_individual.get("end_utc") or peak_individual["start_utc"])
+            if peak_individual
+            else datetime.min.replace(tzinfo=timezone.utc)
+        )
+        if ratio > prior_ratio or (
+            ratio == prior_ratio and event_end_utc(event) > prior_time
+        ):
+            peak_individual = event_record(event, ratio)
+
+        event_time = event_end_utc(event)
+        rolling_ratio = 0.0
+        for candidate in events[: index + 1]:
+            age_days = (event_time - event_end_utc(candidate)).total_seconds() / 86400
+            if 0 <= age_days < window_days:
+                rolling_ratio += max(
+                    0.0, float(candidate.get("fill_ratio") or 0.0)
+                ) * (1.0 - age_days / window_days)
+        prior_rolling = float((peak_seven_day or {}).get("ratio") or -1.0)
+        prior_rolling_time = (
+            parse_utc(peak_seven_day["through_utc"])
+            if peak_seven_day
+            else datetime.min.replace(tzinfo=timezone.utc)
+        )
+        if rolling_ratio > prior_rolling or (
+            rolling_ratio == prior_rolling and event_time > prior_rolling_time
+        ):
+            peak_seven_day = {
+                "through_utc": event.get("end_utc") or event.get("start_utc"),
+                "ratio": round(rolling_ratio, 3),
+                "percent": min(100, round(rolling_ratio * 100)),
+                "peak_frame_utc": event.get("peak_frame_utc"),
+                "peak_grid_dbz": event.get("peak_grid_dbz"),
+                "grid_bbox": event.get("grid_bbox"),
+            }
+
+    def evidence_at(reference: datetime) -> float:
+        total = 0.0
+        for event in events:
+            age_days = (reference - event_end_utc(event)).total_seconds() / 86400
+            if 0 <= age_days < window_days:
+                total += max(0.0, float(event.get("fill_ratio") or 0.0)) * (
+                    1.0 - age_days / window_days
+                )
+        return total
+
+    recent_ratio = evidence_at(now)
+    prior_day_ratio = evidence_at(now - timedelta(days=1))
+    if recent_ratio > prior_day_ratio + 0.02:
+        trend = "increasing"
+    elif recent_ratio < prior_day_ratio - 0.02:
+        trend = "fading"
+    elif recent_ratio > 0:
+        trend = "holding"
+    else:
+        trend = "no recent evidence"
+
+    meaningful = [
+        event for event in events if float(event.get("fill_ratio") or 0.0) >= 0.25
+    ]
+    canyon_status["recent_refill_evidence"] = {
+        "window_days": window_days,
+        "percent": min(100, round(recent_ratio * 100)),
+        "ratio": round(recent_ratio, 3),
+        "through_utc": utc_text(now),
+        "last_meaningful_event_utc": (
+            meaningful[-1].get("end_utc") or meaningful[-1].get("start_utc")
+            if meaningful
+            else None
+        ),
+        "trend": trend,
+        "description": "Age-weighted modeled refill evidence; not observed pool level.",
+    }
+    canyon_status["historical_records"] = {
+        "peak_individual_event": peak_individual,
+        "peak_seven_day_evidence": peak_seven_day,
+    }
+
+    detail_cutoff = now - timedelta(days=retention_days)
+    canyon_status["events"] = [
+        event
+        for event in canyon_status.get("events", [])
+        if event_end_utc(event) >= detail_cutoff
+    ]
+
     balance = 0.0
     overflow_total = 0.0
     milestones: dict[str, str | None] = {
@@ -1798,7 +1916,11 @@ def cumulative_refill_evidence(
             }
         )
 
-    canyon_status["refill_history"] = list(reversed(history))
+    canyon_status["refill_history"] = [
+        item
+        for item in reversed(history)
+        if parse_utc(item.get("end_utc") or item["start_utc"]) >= detail_cutoff
+    ]
     canyon_status["cumulative_refill_evidence"] = {
         "event_count": len(history),
         "period_start_utc": history[0]["start_utc"] if history else None,
@@ -1829,8 +1951,10 @@ def rebuild_events_from_ledger(
     for canyon in canyons:
         current = status["canyons"][canyon.canyon_id]
         notification = dict(current.get("notification") or {})
+        historical_records = dict(current.get("historical_records") or {})
         preserved = preserved_events_before(current, cutoff)
         rebuilt = empty_canyon_status(canyon)
+        rebuilt["historical_records"] = historical_records
         rebuilt["events"] = [compact_event(event) for event in preserved]
         rebuilt["last_rain_event"] = preserved[0] if preserved else None
         rebuilt["last_qualifying_event"] = next(
@@ -2235,16 +2359,15 @@ def model_metadata(
                 "not explicitly subtract channel transmission losses."
             ),
             "cumulative_refill_explanation": (
-                "Cumulative no-loss refill evidence adds the normal-condition modeled runoff from "
-                "each retained rain event, caps modeled storage at the provisional pool target, "
-                "and records additional water as potential overflow. It assumes zero starting "
-                "storage at the first retained event and does not subtract evaporation, seepage, "
-                "drainage, or other losses, so it is not a current pool-level estimate."
+                "Current refill evidence combines modeled event fill ratios from the previous "
+                "seven days with a linear age weight. New zero-runoff events do not erase prior "
+                "evidence. Detailed events and their peak radar maps are retained for 90 days; "
+                "all-time individual-event and seven-day records are retained separately."
             ),
             "pool_loss_explanation": (
-                "Automatic pool decay is not yet modeled. Pool geometry, shade, wind, temperature, "
-                "humidity, bedrock seepage, and drainage can produce very different hydroperiods, "
-                "so the website reports milestone dates rather than an unsupported daily percentage loss."
+                "The seven-day weighting represents evidence freshness, not physical pool-water "
+                "loss. Pool geometry, shade, wind, temperature, humidity, seepage, and drainage "
+                "remain uncalibrated and can produce very different hydroperiods."
             ),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
