@@ -97,7 +97,7 @@ Current pool level, channel transmission loss, bedrock fractures, disconnected d
 
 Atlas 14 equivalent and routed peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag.
 
-Generated NRCS watershed runoff is reported separately from delivered runoff. Delivered runoff remains uncalibrated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon. The existing Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
+The NRCS estimate represents watershed-generated runoff only. No canyon-delivery volume is calculated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon and remain uncalibrated. The existing Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
 
 Weak-echo persistence, connected-core area, watershed-size scaling, MRMS QPE, spatial curve-number response units, and delivery factors are configured as disabled comparison work. They do not replace the fixed baseline until known events and field observations show a measurable improvement.
 
