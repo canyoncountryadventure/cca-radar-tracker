@@ -27,6 +27,10 @@ EXPECTED_POOL_TARGETS = {
     "the-squeeze": 152_956,
     "upper-greasewood": 83_907,
     "woody": 17_481,
+    "wonderland-canyon": 19_404,
+    "hogwarts": 3_846,
+    "neon": 111_876,
+    "quandary": 111_177,
 }
 
 
@@ -42,8 +46,8 @@ class TrackerTests(unittest.TestCase):
         )
         cls.by_id = {c.canyon_id: c for c in cls.canyons}
 
-    def test_all_seventeen_canyons_are_loaded(self):
-        self.assertEqual(len(self.canyons), 17)
+    def test_all_twenty_one_canyons_are_loaded(self):
+        self.assertEqual(len(self.canyons), 21)
 
     def test_all_pool_targets_match_approved_table(self):
         actual = {
