@@ -133,6 +133,26 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
         "pothole_modifier": 0.00,
         "basis": "User technical-section length and Zero G-equivalent storage rate",
     },
+    "wonderland-canyon": {
+        "technical_length_miles": 0.37,
+        "pothole_modifier": -0.25,
+        "basis": "User technical-section length and lower pothole-storage adjustment",
+    },
+    "hogwarts": {
+        "technical_length_miles": 0.22,
+        "pothole_modifier": -0.75,
+        "basis": "User technical-section length and low-storage adjustment",
+    },
+    "neon": {
+        "technical_length_miles": 1.60,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
+    "quandary": {
+        "technical_length_miles": 1.59,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
 }
 
 FIXED_SPATIAL_RULES = (

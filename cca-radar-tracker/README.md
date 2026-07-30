@@ -1,6 +1,6 @@
 # Slot Canyon Pool Conditions
 
-Automated five-minute radar analysis for 17 Canyon Country Adventures watersheds. The GitHub Pages dashboard compares radar-estimated storm rainfall and NRCS watershed runoff with provisional canyon pool-storage targets. The output is a screening estimate, not a field observation or flash-flood forecast.
+Automated five-minute radar analysis for 21 Canyon Country Adventures watersheds. The GitHub Pages dashboard compares radar-estimated storm rainfall and NRCS watershed runoff with provisional canyon pool-storage targets. The output is a screening estimate, not a field observation or flash-flood forecast.
 
 ## Current model
 
@@ -62,6 +62,10 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | The Squeeze | 1.25 | +0.75 | 152,956 | 305,912 |
 | Upper Greasewood | 1.20 | +0.00 | 83,907 | 167,814 |
 | Woody | 0.25 | +0.00 | 17,481 | 34,962 |
+| Wonderland Canyon | 0.37 | -0.25 | 19,404 | 38,808 |
+| Hogwarts | 0.22 | -0.75 | 3,846 | 7,692 |
+| Neon | 1.60 | +0.00 | 111,876 | 223,752 |
+| Quandary | 1.59 | +0.00 | 111,177 | 222,354 |
 
 ### 4. Intense-rain confirmation
 
@@ -124,7 +128,7 @@ python tracker.py --at 2024-06-21T22:25:00Z --dry-run
 - `tracker.py` — radar, rainfall, runoff, event, classification, and generated model data
 - `config.json` — active scheduling and radar constants; obsolete area-scaling fields removed
 - `hydrology.json` — curve numbers, terrain, lag, and federal basin inventory
-- `watersheds.geojson` — 17 watershed polygons and outlets
+- `watersheds.geojson` — 21 watershed polygons and outlets
 - `atlas14.json` — precipitation-frequency depths at canyon outlets
 - `send_alert.py` — duplicate-suppressed Gmail alerts for newly retained major-refill events
 - `docs/` — GitHub Pages dashboard

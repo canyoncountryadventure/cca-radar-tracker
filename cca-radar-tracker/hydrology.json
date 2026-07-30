@@ -828,6 +828,198 @@
         "ELEV": 6339.51
       },
       "parameter_quality": "screening; unmapped SSURGO area assigned to HSG D; field calibration required"
+    },
+    "wonderland-canyon": {
+      "name": "Wonderland Canyon",
+      "area_sq_mi": 0.581,
+      "curve_number": {
+        "dry": 76.0,
+        "normal": 87.8,
+        "wet": 94.4
+      },
+      "retention_s05_inches": {
+        "dry": 5.002,
+        "normal": 1.938,
+        "wet": 0.728
+      },
+      "initial_abstraction_inches": {
+        "dry": 0.25,
+        "normal": 0.097,
+        "wet": 0.036
+      },
+      "hydrologic_soil_group_percent": {
+        "D": 100.0
+      },
+      "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
+      "soil_group_inferred_percent": 100.0,
+      "land_cover_percent": {
+        "0": 12.7,
+        "22": 0.3,
+        "23": 0.1,
+        "24": 0.1,
+        "31": 5.2,
+        "42": 4.7,
+        "52": 76.9,
+        "95": 0.1
+      },
+      "elevation_min_ft": 5202,
+      "elevation_mean_ft": 6003,
+      "elevation_max_ft": 6815,
+      "mean_slope_percent": 52.0,
+      "hydraulic_length_miles": 1.71,
+      "lag_hours": 0.2,
+      "time_of_concentration_hours": 0.33,
+      "streamstats": {
+        "BSLDEM10M": 55.626,
+        "DRNAREA": 0.58,
+        "ELEV": 6007.304
+      },
+      "parameter_quality": "screening; field calibration required"
+    },
+    "hogwarts": {
+      "name": "Hogwarts",
+      "area_sq_mi": 0.188,
+      "curve_number": {
+        "dry": 70.1,
+        "normal": 84.2,
+        "wet": 92.6
+      },
+      "retention_s05_inches": {
+        "dry": 7.058,
+        "normal": 2.734,
+        "wet": 1.028
+      },
+      "initial_abstraction_inches": {
+        "dry": 0.353,
+        "normal": 0.137,
+        "wet": 0.051
+      },
+      "hydrologic_soil_group_percent": {
+        "A": 16.4,
+        "D": 83.6
+      },
+      "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
+      "soil_group_inferred_percent": 100.0,
+      "land_cover_percent": {
+        "0": 11.9,
+        "21": 4.0,
+        "22": 0.2,
+        "31": 12.7,
+        "42": 0.9,
+        "52": 66.7,
+        "71": 3.0,
+        "90": 0.2,
+        "95": 0.3
+      },
+      "elevation_min_ft": 4111,
+      "elevation_mean_ft": 4973,
+      "elevation_max_ft": 5476,
+      "mean_slope_percent": 27.2,
+      "hydraulic_length_miles": 1.46,
+      "lag_hours": 0.27,
+      "time_of_concentration_hours": 0.45,
+      "streamstats": {
+        "BSLDEM10M": 27.687,
+        "DRNAREA": 0.19,
+        "ELEV": 4969.853
+      },
+      "parameter_quality": "screening; field calibration required"
+    },
+    "neon": {
+      "name": "Neon",
+      "area_sq_mi": 6.265,
+      "curve_number": {
+        "dry": 75.6,
+        "normal": 87.6,
+        "wet": 94.3
+      },
+      "retention_s05_inches": {
+        "dry": 5.103,
+        "normal": 1.977,
+        "wet": 0.743
+      },
+      "initial_abstraction_inches": {
+        "dry": 0.255,
+        "normal": 0.099,
+        "wet": 0.037
+      },
+      "hydrologic_soil_group_percent": {
+        "A": 2.4,
+        "B": 0.2,
+        "D": 97.3
+      },
+      "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
+      "soil_group_inferred_percent": 100.0,
+      "land_cover_percent": {
+        "0": 7.9,
+        "21": 0.0,
+        "31": 7.0,
+        "42": 0.1,
+        "52": 81.4,
+        "71": 3.7
+      },
+      "elevation_min_ft": 4588,
+      "elevation_mean_ft": 5394,
+      "elevation_max_ft": 6117,
+      "mean_slope_percent": 32.6,
+      "hydraulic_length_miles": 6.39,
+      "lag_hours": 0.72,
+      "time_of_concentration_hours": 1.19,
+      "streamstats": {
+        "BSLDEM10M": 28.209,
+        "DRNAREA": 6.26,
+        "ELEV": 5393.235
+      },
+      "parameter_quality": "screening; field calibration required"
+    },
+    "quandary": {
+      "name": "Quandary",
+      "area_sq_mi": 0.822,
+      "curve_number": {
+        "dry": 77.4,
+        "normal": 88.6,
+        "wet": 94.8
+      },
+      "retention_s05_inches": {
+        "dry": 4.57,
+        "normal": 1.77,
+        "wet": 0.665
+      },
+      "initial_abstraction_inches": {
+        "dry": 0.229,
+        "normal": 0.089,
+        "wet": 0.033
+      },
+      "hydrologic_soil_group_percent": {
+        "C": 4.0,
+        "D": 96.0
+      },
+      "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
+      "soil_group_inferred_percent": 100.0,
+      "land_cover_percent": {
+        "0": 10.8,
+        "31": 14.8,
+        "42": 1.2,
+        "52": 73.1,
+        "71": 0.1
+      },
+      "elevation_min_ft": 4849,
+      "elevation_mean_ft": 5761,
+      "elevation_max_ft": 6312,
+      "mean_slope_percent": 51.4,
+      "hydraulic_length_miles": 1.84,
+      "lag_hours": 0.2,
+      "time_of_concentration_hours": 0.34,
+      "streamstats": {
+        "BSLDEM10M": 50.921,
+        "DRNAREA": 0.82,
+        "ELEV": 5785.602
+      },
+      "parameter_quality": "screening; field calibration required"
     }
   }
 }
