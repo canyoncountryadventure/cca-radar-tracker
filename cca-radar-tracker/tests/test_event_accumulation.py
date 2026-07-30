@@ -1,6 +1,7 @@
 import json
 import sys
 import unittest
+from datetime import datetime, timedelta, timezone
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -203,6 +204,56 @@ class EventAccumulationTests(unittest.TestCase):
             "2026-07-28T18:10:00Z",
         )
         self.assertEqual(len(status["refill_history"]), 2)
+
+    def test_recent_evidence_does_not_reset_when_new_event_has_zero_runoff(self):
+        canyon = canyon_fixture(fill_target=100)
+        status = tracker.empty_canyon_status(canyon)
+        now = datetime.now(timezone.utc)
+        strong_time = now - timedelta(days=1)
+        zero_time = now - timedelta(hours=1)
+        status["events"] = [
+            {
+                "start_utc": tracker.utc_text(strong_time),
+                "end_utc": tracker.utc_text(strong_time),
+                "direct_runoff_ft3": 80,
+                "fill_ratio": 0.8,
+            },
+            {
+                "start_utc": tracker.utc_text(zero_time),
+                "end_utc": tracker.utc_text(zero_time),
+                "direct_runoff_ft3": 0,
+                "fill_ratio": 0.0,
+            },
+        ]
+        tracker.cumulative_refill_evidence(status, canyon, self.config)
+        evidence = status["recent_refill_evidence"]
+        self.assertGreaterEqual(evidence["percent"], 68)
+        self.assertEqual(
+            status["historical_records"]["peak_individual_event"]["percent"],
+            80,
+        )
+
+    def test_historical_event_keeps_peak_grid_for_clickable_map(self):
+        canyon = canyon_fixture(fill_target=100)
+        status = tracker.empty_canyon_status(canyon)
+        event_time = datetime.now(timezone.utc) - timedelta(days=10)
+        status["events"] = [
+            {
+                "start_utc": tracker.utc_text(event_time),
+                "end_utc": tracker.utc_text(event_time),
+                "peak_frame_utc": tracker.utc_text(event_time),
+                "direct_runoff_ft3": 50,
+                "fill_ratio": 0.5,
+                "peak_grid_dbz": [[50.0, 40.0]],
+                "grid_bbox": [-110.0, 38.0, -109.9, 38.1],
+            }
+        ]
+        tracker.cumulative_refill_evidence(status, canyon, self.config)
+        self.assertEqual(status["events"][0]["peak_grid_dbz"], [[50.0, 40.0]])
+        self.assertEqual(
+            status["historical_records"]["peak_individual_event"]["percent"],
+            50,
+        )
 
     def test_moving_storm_core_accumulates_at_its_actual_pixels(self):
         canyon = spatial_canyon_fixture()

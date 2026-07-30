@@ -219,7 +219,7 @@ class FrameReconciliationTests(unittest.TestCase):
         first = canyon_status["last_rain_event"]
         first_rain = first["basin_rain_inches"]
         self.assertEqual(first["peak_grid_dbz"], [[45.0]])
-        self.assertNotIn("peak_grid_dbz", canyon_status["events"][0])
+        self.assertIn("peak_grid_dbz", canyon_status["events"][0])
 
         tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
         canyon_status = status["canyons"]["zerog"]

@@ -21,7 +21,7 @@ EXPECTED_POOL_TARGETS = {
     "alcatraz": 54_540,
     "cable-canyon": 262_210,
     "constrychnine": 20_977,
-    "eardley": 87_403,
+    "eardley": 132_853,
     "north-fork-iron-wash": 52_442,
     "poe": 90_899,
     "the-squeeze": 152_956,
@@ -199,7 +199,8 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("timestamp-keyed ledger", method["frame_reconciliation_explanation"])
         self.assertIn("25 dBZ", method["rain_event_explanation"])
         self.assertIn("30 consecutive minutes", method["rain_event_explanation"])
-        self.assertIn("does not subtract evaporation", method["cumulative_refill_explanation"])
+        self.assertIn("previous seven days", method["cumulative_refill_explanation"])
+        self.assertIn("evidence freshness", method["pool_loss_explanation"])
         self.assertEqual(self.config["model"]["storm_dbz_threshold"], 25)
         self.assertIn("S0.05", method["runoff_formula"])
         self.assertIn("HSG D", method["direct_runoff_explanation"])
