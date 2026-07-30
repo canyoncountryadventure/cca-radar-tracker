@@ -39,6 +39,10 @@ SOURCES = [
     ("eardley", "Eardley", "data (13).geojson", None),
     ("north-fork-iron-wash", "North Fork of Iron Wash", "data (14).geojson", None),
     ("upper-greasewood", "Upper Greasewood", "data (15).geojson", None),
+    ("wonderland-canyon", "Wonderland Canyon", "data (16).geojson", None),
+    ("hogwarts", "Hogwarts", "data (17).geojson", None),
+    ("neon", "Neon", "data (18).geojson", None),
+    ("quandary", "Quandary", "data (19).geojson", None),
 ]
 
 
@@ -103,6 +107,15 @@ def normalize_source(
     fallback_outlet: tuple[float, float] | None,
 ) -> dict[str, Any]:
     path = project_root / filename if slug == "zerog" else source_dir / filename
+    if not path.exists():
+        current = json.loads((project_root / "watersheds.geojson").read_text(encoding="utf-8"))
+        existing = next(
+            (feature for feature in current["features"] if feature["properties"]["id"] == slug),
+            None,
+        )
+        if existing is None:
+            raise FileNotFoundError(path)
+        return existing
     source = json.loads(path.read_text(encoding="utf-8"))
     features = source.get("features", [])
     point = next((feature for feature in features if (feature.get("geometry") or {}).get("type") == "Point"), None)

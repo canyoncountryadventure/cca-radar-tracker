@@ -266,17 +266,15 @@ def hydraulic_length_miles(geometry, outlet):
 
 def main():
     collection = json.loads((ROOT/"watersheds.geojson").read_text())
-    output = {"schema_version": 1, "method": {
-        "curve_number": "NRCS runoff curve number, composite of SSURGO hydrologic soil group and 2021 NLCD land cover",
-        "initial_abstraction": "Ia = 0.20S; S = 1000/CN - 10 inches",
-        "terrain": "USGS 3DEP elevation and slope sampled within supplied watershed polygon",
-        "lag": "NRCS watershed lag equation; hydraulic length approximated from supplied pour point and basin extent",
-        "warning": "Parameters are screening estimates and require field calibration; they are not measured streamflow."
-    }, "canyons": {}}
-    for number, feature in enumerate(collection["features"], 1):
+    output = json.loads((ROOT/"hydrology.json").read_text())
+    pending = [
+        feature for feature in collection["features"]
+        if feature["properties"]["id"] not in output["canyons"]
+    ]
+    for number, feature in enumerate(pending, 1):
         p = feature["properties"]
         geometry = feature["geometry"]
-        print(f"[{number}/{len(collection['features'])}] {p['name']}", flush=True)
+        print(f"[{number}/{len(pending)}] {p['name']}", flush=True)
         bbox, lc, mask, land_counts = nlcd(geometry)
         polys = ssurgo_polygons(bbox)
         soils = ssurgo_hsg([key for key, _ in polys])
@@ -298,12 +296,18 @@ def main():
         output["canyons"][p["id"]] = {
             "name": p["name"], "area_sq_mi": p["area_sq_mi"],
             "curve_number": {"dry": round(cn1, 1), "normal": round(cn2, 1), "wet": round(cn3, 1)},
+            "retention_s05_inches": {
+                state: round(1.33 * (1000/cn-10) ** 1.15, 3)
+                for state, cn in (("dry", cn1), ("normal", cn2), ("wet", cn3))
+            },
             "initial_abstraction_inches": {
-                state: round(0.2*(1000/cn-10), 3)
+                state: round(0.05 * 1.33 * (1000/cn-10) ** 1.15, 3)
                 for state, cn in (("dry", cn1), ("normal", cn2), ("wet", cn3))
             },
             "hydrologic_soil_group_percent": hsg,
-            "soil_unmapped_percent": unknown, "soil_group_inferred_percent": inferred,
+            "soil_unmapped_percent": unknown,
+            "unmapped_soil_assigned_to_hsg": "D",
+            "soil_group_inferred_percent": inferred,
             "land_cover_percent": {str(k): round(100*v/land_total, 1) for k, v in sorted(land_counts.items())},
             **terr,
             "hydraulic_length_miles": round(length_mi, 2),
