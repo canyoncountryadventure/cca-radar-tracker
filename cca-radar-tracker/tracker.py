@@ -3,8 +3,9 @@
 
 Pool-fill targets are normalized to the mapped Zero G depression storage and each
 canyon's technical-section length, then adjusted by the user-defined pothole
-modifier. Heavy-rain gates use fixed watershed percentages for every canyon:
-50+ dBZ over 50%, 55+ dBZ over 25%, or 60+ dBZ over 10%. Runoff uses the adjusted curve-number initial-abstraction relation with Ia/S = 0.05.
+modifier. Historical 50/55/60 dBZ watershed-footprint measurements are retained
+for event context but do not gate the condition classification. Runoff uses the
+adjusted curve-number initial-abstraction relation with Ia/S = 0.05.
 """
 
 from __future__ import annotations
@@ -483,7 +484,7 @@ def canyon_model(
     config: dict[str, Any],
     hydrology: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Build the canyon-specific storage target and fixed radar-footprint gates."""
+    """Build the storage target and historical radar-footprint comparisons."""
     model = config["model"]
     storage = pool_storage_target(canyon_id)
 
@@ -1118,7 +1119,7 @@ def classify_event(
             "radar_data_sufficient": False,
             "storage_target_met": None,
             "flush_target_met": None,
-            "heavy_rain_footprint_met": None,
+            "heavy_rain_footprint_observed": None,
             "minimum_wet_duration_met": None,
         }
         label = "Insufficient radar data"
@@ -1150,38 +1151,36 @@ def classify_event(
 
     required_frames = int(config["model"]["minimum_wet_frames_for_likely"])
     enough_frames = int(event.get("wet_frames") or 0) >= required_frames
-    gate = bool(event.get("spatial_gate_seen"))
+    footprint_observed = bool(event.get("spatial_gate_seen"))
     storage_met = ratio >= 1.0
     flush_met = ratio >= float(config["model"]["flush_ratio"])
 
     event["decision_tests"] = {
         "storage_target_met": storage_met,
         "flush_target_met": flush_met,
-        "heavy_rain_footprint_met": gate,
+        "heavy_rain_footprint_observed": footprint_observed,
         "minimum_wet_duration_met": enough_frames,
         "minimum_wet_frames_required": required_frames,
     }
 
-    if flush_met and gate and enough_frames:
+    if flush_met and enough_frames:
         label = "Strong refill/flush potential — full pools possible"
         reason = (
             "Estimated watershed runoff was at least twice the provisional empty-storage "
-            "target, and both the intense-rain footprint and duration checks passed. "
+            "target and the minimum wet-duration check passed. "
             "This indicates a strong refill/flush event, not a direct field observation."
         )
         code = "full_flush"
-    elif storage_met and gate and enough_frames:
+    elif storage_met and enough_frames:
         label = "Major refill likely — pools may be full"
         reason = (
             "Estimated watershed runoff met the provisional empty-storage target, and both "
-            "the intense-rain footprint and duration checks passed. Existing pool "
+            "the minimum wet-duration check passed. Existing pool "
             "levels and channel losses remain unknown."
         )
         code = "likely_full"
     elif storage_met:
         missing = []
-        if not gate:
-            missing.append("intense-rain footprint")
         if not enough_frames:
             missing.append("minimum wet duration")
         label = "Potential major refill — confirmation tests incomplete"
@@ -1215,18 +1214,11 @@ def classify_event(
             "target. Some pools may have gained water, but the modeled volume is limited."
         )
         code = "moderate"
-    elif gate:
-        label = "Localized intense rain detected — refill uncertain"
-        reason = (
-            "An intense-rain footprint threshold was reached, but estimated watershed "
-            "runoff remained below 25% of the provisional empty-storage target."
-        )
-        code = "moderate"
     else:
         label = "No meaningful pool refill indicated"
         reason = (
             "Estimated watershed runoff was below 25% of the provisional empty-storage "
-            "target and no intense-rain footprint threshold was reached."
+            "target."
         )
         code = "minor"
 
@@ -2350,8 +2342,8 @@ def model_metadata(
                 "or 60+ dBZ over 10%"
             ),
             "spatial_explanation": (
-                "The same watershed-percentage gate applies to every canyon. It is a "
-                "storm-footprint confirmation test and does not replace the runoff-volume test."
+                "These historical watershed-percentage comparisons are retained only as "
+                "storm context. They do not control the canyon-condition classification."
             ),
             "fill_ratio_explanation": (
                 "Estimated fill ratio = normal-condition NRCS watershed direct runoff ÷ provisional "
