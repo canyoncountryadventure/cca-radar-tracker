@@ -31,6 +31,7 @@ EXPECTED_POOL_TARGETS = {
     "hogwarts": 3_846,
     "neon": 111_876,
     "quandary": 111_177,
+    "yankee-doodle": 27_969,
 }
 
 
@@ -46,8 +47,8 @@ class TrackerTests(unittest.TestCase):
         )
         cls.by_id = {c.canyon_id: c for c in cls.canyons}
 
-    def test_all_twenty_one_canyons_are_loaded(self):
-        self.assertEqual(len(self.canyons), 21)
+    def test_all_twenty_two_canyons_are_loaded(self):
+        self.assertEqual(len(self.canyons), 22)
 
     def test_all_pool_targets_match_approved_table(self):
         actual = {
@@ -195,7 +196,7 @@ class TrackerTests(unittest.TestCase):
     def test_metadata_describes_new_method_and_honest_condition_language(self):
         metadata = tracker.model_metadata(self.canyons, self.config)
         method = metadata["method"]
-        self.assertIn("52,442 ft³", method["target_formula"])
+        self.assertIn("52,442 ftÂ³", method["target_formula"])
         self.assertIn("No fixed runoff coefficient", method["direct_runoff_explanation"])
         self.assertIn("timestamp-keyed ledger", method["frame_reconciliation_explanation"])
         self.assertIn("25 dBZ", method["rain_event_explanation"])
