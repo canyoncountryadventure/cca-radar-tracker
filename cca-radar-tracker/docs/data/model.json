@@ -2585,6 +2585,594 @@
           "1000": 2.59
         }
       }
+    },
+    "wonderland-canyon": {
+      "name": "Wonderland Canyon",
+      "area_sq_mi": 0.581,
+      "outlet": [
+        -111.190642,
+        38.275723
+      ],
+      "technical_length_miles": 0.37,
+      "pothole_modifier": -0.25,
+      "length_ratio_to_zerog": 0.4933,
+      "storage_rate_multiplier": 0.75,
+      "fill_target_ft3": 19404,
+      "storage_basis": "User technical-section length and lower pothole-storage adjustment",
+      "storage_target_ft3": 19404,
+      "flush_target_ft3": 38808,
+      "modifier_percent": -25.0,
+      "storage_rate_percent_of_zerog": 75.0,
+      "calibration": "Technical-length normalized and morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
+      "spatial_rules": [
+        {
+          "dbz": 50.0,
+          "minimum_area_sq_mi": 0.29,
+          "minimum_coverage_percent": 50.0
+        },
+        {
+          "dbz": 55.0,
+          "minimum_area_sq_mi": 0.145,
+          "minimum_coverage_percent": 25.0
+        },
+        {
+          "dbz": 60.0,
+          "minimum_area_sq_mi": 0.058,
+          "minimum_coverage_percent": 10.0
+        }
+      ],
+      "hydrology": {
+        "name": "Wonderland Canyon",
+        "area_sq_mi": 0.581,
+        "curve_number": {
+          "dry": 76.0,
+          "normal": 87.8,
+          "wet": 94.4
+        },
+        "retention_s05_inches": {
+          "dry": 5.002,
+          "normal": 1.938,
+          "wet": 0.728
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.25,
+          "normal": 0.097,
+          "wet": 0.036
+        },
+        "hydrologic_soil_group_percent": {
+          "D": 100.0
+        },
+        "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 12.7,
+          "22": 0.3,
+          "23": 0.1,
+          "24": 0.1,
+          "31": 5.2,
+          "42": 4.7,
+          "52": 76.9,
+          "95": 0.1
+        },
+        "elevation_min_ft": 5202,
+        "elevation_mean_ft": 6003,
+        "elevation_max_ft": 6815,
+        "mean_slope_percent": 52.0,
+        "hydraulic_length_miles": 1.71,
+        "lag_hours": 0.2,
+        "time_of_concentration_hours": 0.33,
+        "streamstats": {
+          "BSLDEM10M": 55.626,
+          "DRNAREA": 0.58,
+          "ELEV": 6007.304
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
+      "atlas14_inches": {
+        "5-min": {
+          "1": 0.105,
+          "2": 0.134,
+          "5": 0.188,
+          "10": 0.236,
+          "25": 0.315,
+          "50": 0.386,
+          "100": 0.471,
+          "200": 0.571,
+          "500": 0.731,
+          "1000": 0.876
+        },
+        "10-min": {
+          "1": 0.159,
+          "2": 0.204,
+          "5": 0.286,
+          "10": 0.359,
+          "25": 0.479,
+          "50": 0.588,
+          "100": 0.717,
+          "200": 0.869,
+          "500": 1.11,
+          "1000": 1.33
+        },
+        "15-min": {
+          "1": 0.197,
+          "2": 0.253,
+          "5": 0.354,
+          "10": 0.446,
+          "25": 0.594,
+          "50": 0.729,
+          "100": 0.889,
+          "200": 1.08,
+          "500": 1.38,
+          "1000": 1.65
+        },
+        "30-min": {
+          "1": 0.265,
+          "2": 0.341,
+          "5": 0.477,
+          "10": 0.6,
+          "25": 0.8,
+          "50": 0.982,
+          "100": 1.2,
+          "200": 1.45,
+          "500": 1.86,
+          "1000": 2.23
+        },
+        "60-min": {
+          "1": 0.328,
+          "2": 0.422,
+          "5": 0.59,
+          "10": 0.743,
+          "25": 0.99,
+          "50": 1.22,
+          "100": 1.48,
+          "200": 1.8,
+          "500": 2.3,
+          "1000": 2.75
+        }
+      }
+    },
+    "hogwarts": {
+      "name": "Hogwarts",
+      "area_sq_mi": 0.188,
+      "outlet": [
+        -110.486314,
+        37.959852
+      ],
+      "technical_length_miles": 0.22,
+      "pothole_modifier": -0.75,
+      "length_ratio_to_zerog": 0.2933,
+      "storage_rate_multiplier": 0.25,
+      "fill_target_ft3": 3846,
+      "storage_basis": "User technical-section length and low-storage adjustment",
+      "storage_target_ft3": 3846,
+      "flush_target_ft3": 7692,
+      "modifier_percent": -75.0,
+      "storage_rate_percent_of_zerog": 25.0,
+      "calibration": "Technical-length normalized and morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
+      "spatial_rules": [
+        {
+          "dbz": 50.0,
+          "minimum_area_sq_mi": 0.094,
+          "minimum_coverage_percent": 50.0
+        },
+        {
+          "dbz": 55.0,
+          "minimum_area_sq_mi": 0.047,
+          "minimum_coverage_percent": 25.0
+        },
+        {
+          "dbz": 60.0,
+          "minimum_area_sq_mi": 0.019,
+          "minimum_coverage_percent": 10.0
+        }
+      ],
+      "hydrology": {
+        "name": "Hogwarts",
+        "area_sq_mi": 0.188,
+        "curve_number": {
+          "dry": 70.1,
+          "normal": 84.2,
+          "wet": 92.6
+        },
+        "retention_s05_inches": {
+          "dry": 7.058,
+          "normal": 2.734,
+          "wet": 1.028
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.353,
+          "normal": 0.137,
+          "wet": 0.051
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 16.4,
+          "D": 83.6
+        },
+        "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 11.9,
+          "21": 4.0,
+          "22": 0.2,
+          "31": 12.7,
+          "42": 0.9,
+          "52": 66.7,
+          "71": 3.0,
+          "90": 0.2,
+          "95": 0.3
+        },
+        "elevation_min_ft": 4111,
+        "elevation_mean_ft": 4973,
+        "elevation_max_ft": 5476,
+        "mean_slope_percent": 27.2,
+        "hydraulic_length_miles": 1.46,
+        "lag_hours": 0.27,
+        "time_of_concentration_hours": 0.45,
+        "streamstats": {
+          "BSLDEM10M": 27.687,
+          "DRNAREA": 0.19,
+          "ELEV": 4969.853
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
+      "atlas14_inches": {
+        "5-min": {
+          "1": 0.102,
+          "2": 0.132,
+          "5": 0.183,
+          "10": 0.23,
+          "25": 0.305,
+          "50": 0.372,
+          "100": 0.452,
+          "200": 0.544,
+          "500": 0.691,
+          "1000": 0.822
+        },
+        "10-min": {
+          "1": 0.156,
+          "2": 0.201,
+          "5": 0.278,
+          "10": 0.35,
+          "25": 0.464,
+          "50": 0.567,
+          "100": 0.687,
+          "200": 0.828,
+          "500": 1.05,
+          "1000": 1.25
+        },
+        "15-min": {
+          "1": 0.193,
+          "2": 0.249,
+          "5": 0.345,
+          "10": 0.434,
+          "25": 0.575,
+          "50": 0.703,
+          "100": 0.852,
+          "200": 1.03,
+          "500": 1.3,
+          "1000": 1.55
+        },
+        "30-min": {
+          "1": 0.26,
+          "2": 0.335,
+          "5": 0.465,
+          "10": 0.584,
+          "25": 0.774,
+          "50": 0.946,
+          "100": 1.15,
+          "200": 1.38,
+          "500": 1.75,
+          "1000": 2.09
+        },
+        "60-min": {
+          "1": 0.322,
+          "2": 0.415,
+          "5": 0.575,
+          "10": 0.723,
+          "25": 0.958,
+          "50": 1.17,
+          "100": 1.42,
+          "200": 1.71,
+          "500": 2.17,
+          "1000": 2.58
+        }
+      }
+    },
+    "neon": {
+      "name": "Neon",
+      "area_sq_mi": 6.265,
+      "outlet": [
+        -111.163672,
+        37.613671
+      ],
+      "technical_length_miles": 1.6,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 2.1333,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 111876,
+      "storage_basis": "User technical-section length and Zero G-equivalent storage rate",
+      "storage_target_ft3": 111876,
+      "flush_target_ft3": 223752,
+      "modifier_percent": 0.0,
+      "storage_rate_percent_of_zerog": 100.0,
+      "calibration": "Technical-length normalized and morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
+      "spatial_rules": [
+        {
+          "dbz": 50.0,
+          "minimum_area_sq_mi": 3.132,
+          "minimum_coverage_percent": 50.0
+        },
+        {
+          "dbz": 55.0,
+          "minimum_area_sq_mi": 1.566,
+          "minimum_coverage_percent": 25.0
+        },
+        {
+          "dbz": 60.0,
+          "minimum_area_sq_mi": 0.626,
+          "minimum_coverage_percent": 10.0
+        }
+      ],
+      "hydrology": {
+        "name": "Neon",
+        "area_sq_mi": 6.265,
+        "curve_number": {
+          "dry": 75.6,
+          "normal": 87.6,
+          "wet": 94.3
+        },
+        "retention_s05_inches": {
+          "dry": 5.103,
+          "normal": 1.977,
+          "wet": 0.743
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.255,
+          "normal": 0.099,
+          "wet": 0.037
+        },
+        "hydrologic_soil_group_percent": {
+          "A": 2.4,
+          "B": 0.2,
+          "D": 97.3
+        },
+        "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 7.9,
+          "21": 0.0,
+          "31": 7.0,
+          "42": 0.1,
+          "52": 81.4,
+          "71": 3.7
+        },
+        "elevation_min_ft": 4588,
+        "elevation_mean_ft": 5394,
+        "elevation_max_ft": 6117,
+        "mean_slope_percent": 32.6,
+        "hydraulic_length_miles": 6.39,
+        "lag_hours": 0.72,
+        "time_of_concentration_hours": 1.19,
+        "streamstats": {
+          "BSLDEM10M": 28.209,
+          "DRNAREA": 6.26,
+          "ELEV": 5393.235
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
+      "atlas14_inches": {
+        "5-min": {
+          "1": 0.113,
+          "2": 0.145,
+          "5": 0.202,
+          "10": 0.254,
+          "25": 0.337,
+          "50": 0.413,
+          "100": 0.502,
+          "200": 0.607,
+          "500": 0.774,
+          "1000": 0.926
+        },
+        "10-min": {
+          "1": 0.171,
+          "2": 0.22,
+          "5": 0.307,
+          "10": 0.387,
+          "25": 0.514,
+          "50": 0.628,
+          "100": 0.764,
+          "200": 0.924,
+          "500": 1.18,
+          "1000": 1.41
+        },
+        "15-min": {
+          "1": 0.212,
+          "2": 0.273,
+          "5": 0.38,
+          "10": 0.479,
+          "25": 0.636,
+          "50": 0.779,
+          "100": 0.947,
+          "200": 1.14,
+          "500": 1.46,
+          "1000": 1.75
+        },
+        "30-min": {
+          "1": 0.286,
+          "2": 0.367,
+          "5": 0.512,
+          "10": 0.645,
+          "25": 0.857,
+          "50": 1.05,
+          "100": 1.28,
+          "200": 1.54,
+          "500": 1.97,
+          "1000": 2.35
+        },
+        "60-min": {
+          "1": 0.354,
+          "2": 0.454,
+          "5": 0.634,
+          "10": 0.798,
+          "25": 1.06,
+          "50": 1.3,
+          "100": 1.58,
+          "200": 1.91,
+          "500": 2.44,
+          "1000": 2.91
+        }
+      }
+    },
+    "quandary": {
+      "name": "Quandary",
+      "area_sq_mi": 0.822,
+      "outlet": [
+        -110.921673,
+        38.552528
+      ],
+      "technical_length_miles": 1.59,
+      "pothole_modifier": 0.0,
+      "length_ratio_to_zerog": 2.12,
+      "storage_rate_multiplier": 1.0,
+      "fill_target_ft3": 111177,
+      "storage_basis": "User technical-section length and Zero G-equivalent storage rate",
+      "storage_target_ft3": 111177,
+      "flush_target_ft3": 222354,
+      "modifier_percent": 0.0,
+      "storage_rate_percent_of_zerog": 100.0,
+      "calibration": "Technical-length normalized and morphology-adjusted; field calibration needed",
+      "target_method": "52,442 ft3 \u00d7 (technical length / 0.75 mi) \u00d7 (1 + pothole modifier)",
+      "spatial_rules": [
+        {
+          "dbz": 50.0,
+          "minimum_area_sq_mi": 0.411,
+          "minimum_coverage_percent": 50.0
+        },
+        {
+          "dbz": 55.0,
+          "minimum_area_sq_mi": 0.205,
+          "minimum_coverage_percent": 25.0
+        },
+        {
+          "dbz": 60.0,
+          "minimum_area_sq_mi": 0.082,
+          "minimum_coverage_percent": 10.0
+        }
+      ],
+      "hydrology": {
+        "name": "Quandary",
+        "area_sq_mi": 0.822,
+        "curve_number": {
+          "dry": 77.4,
+          "normal": 88.6,
+          "wet": 94.8
+        },
+        "retention_s05_inches": {
+          "dry": 4.57,
+          "normal": 1.77,
+          "wet": 0.665
+        },
+        "initial_abstraction_inches": {
+          "dry": 0.229,
+          "normal": 0.089,
+          "wet": 0.033
+        },
+        "hydrologic_soil_group_percent": {
+          "C": 4.0,
+          "D": 96.0
+        },
+        "soil_unmapped_percent": 0.0,
+        "unmapped_soil_assigned_to_hsg": "D",
+        "soil_group_inferred_percent": 100.0,
+        "land_cover_percent": {
+          "0": 10.8,
+          "31": 14.8,
+          "42": 1.2,
+          "52": 73.1,
+          "71": 0.1
+        },
+        "elevation_min_ft": 4849,
+        "elevation_mean_ft": 5761,
+        "elevation_max_ft": 6312,
+        "mean_slope_percent": 51.4,
+        "hydraulic_length_miles": 1.84,
+        "lag_hours": 0.2,
+        "time_of_concentration_hours": 0.34,
+        "streamstats": {
+          "BSLDEM10M": 50.921,
+          "DRNAREA": 0.82,
+          "ELEV": 5785.602
+        },
+        "parameter_quality": "screening; field calibration required"
+      },
+      "atlas14_inches": {
+        "5-min": {
+          "1": 0.104,
+          "2": 0.134,
+          "5": 0.186,
+          "10": 0.233,
+          "25": 0.311,
+          "50": 0.381,
+          "100": 0.463,
+          "200": 0.561,
+          "500": 0.717,
+          "1000": 0.858
+        },
+        "10-min": {
+          "1": 0.158,
+          "2": 0.203,
+          "5": 0.282,
+          "10": 0.355,
+          "25": 0.473,
+          "50": 0.58,
+          "100": 0.706,
+          "200": 0.854,
+          "500": 1.09,
+          "1000": 1.31
+        },
+        "15-min": {
+          "1": 0.196,
+          "2": 0.251,
+          "5": 0.35,
+          "10": 0.441,
+          "25": 0.586,
+          "50": 0.719,
+          "100": 0.875,
+          "200": 1.06,
+          "500": 1.35,
+          "1000": 1.62
+        },
+        "30-min": {
+          "1": 0.264,
+          "2": 0.338,
+          "5": 0.471,
+          "10": 0.593,
+          "25": 0.79,
+          "50": 0.968,
+          "100": 1.18,
+          "200": 1.43,
+          "500": 1.82,
+          "1000": 2.18
+        },
+        "60-min": {
+          "1": 0.326,
+          "2": 0.419,
+          "5": 0.583,
+          "10": 0.734,
+          "25": 0.977,
+          "50": 1.2,
+          "100": 1.46,
+          "200": 1.76,
+          "500": 2.25,
+          "1000": 2.7
+        }
+      }
     }
   }
 }
