@@ -1,11 +1,13 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "method": {
     "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
     "rainfall_formula": "Z = 300 \u00d7 R^1.4; dBZ capped at 55 for rainfall-volume conversion",
-    "rainfall_explanation": "The tracker converts each five-minute radar frame to rainfall, then area-weights the pixels inside the watershed polygon. Radar rainfall is an estimate and may be biased by hail, beam geometry, or evaporation.",
+    "rainfall_explanation": "The tracker converts each five-minute radar frame to rainfall, then area-weights the pixels inside the watershed polygon. Radar rainfall is an estimate and may be biased by hail, beam geometry, or evaporation. Base reflectivity remains the storm-core evidence source. MRMS QPE can be evaluated beside it later without replacing the existing gates.",
     "rain_event_explanation": "A new event requires at least 25 dBZ somewhere in the watershed. Once triggered, every later frame with at least 0.0001 inch of basin-average radar-estimated rain is added, including echoes down to the 5 dBZ rainfall-conversion floor. The event closes after 30 consecutive minutes without measurable basin-average radar rain. Lower-intensity rain immediately before the trigger is also included when it falls within that dry-gap window.",
-    "frame_reconciliation_explanation": "Each run rechecks an overlapping 90-minute window. Newest frames are provisional; once the exact timestamped IEM WMS-T frame is old enough, it replaces the provisional record. Events are rebuilt from a timestamp-keyed ledger so repeated frames cannot double-count rainfall.",
+    "frame_reconciliation_explanation": "Each run rechecks an overlapping 90-minute window. Newest frames are provisional; once the exact timestamped IEM WMS-T frame is old enough, it replaces the provisional record. Events are rebuilt from a timestamp-keyed ledger so repeated frames cannot double-count rainfall. Every retained rain frame includes its complete compressed spatial rain grid, so moving cores and pre-trigger rainfall accumulate cell by cell.",
+    "radar_quality_explanation": "Coverage and rainfall use only decoded radar cells. A frame with more than 20% unknown watershed area is reported as insufficient radar data, not zero rain.",
+    "experimental_comparison_explanation": "Weak-echo persistence, connected-core area, watershed-size scaling, MRMS QPE, and spatial curve-number runoff are reserved as disabled comparison modes until historical and field calibration show that they outperform the fixed baseline.",
     "runoff_formula": "Adjusted NRCS direct runoff: S0.20 = 1000/CN \u2212 10; S0.05 = 1.33 \u00d7 S0.20^1.15; Ia = 0.05S0.05; Q = (P \u2212 Ia)\u00b2/(P + 0.95S0.05) when P > Ia",
     "direct_runoff_explanation": "No fixed runoff coefficient is used. Accumulated basin-average radar rainfall is converted to dry, normal, and wet direct-runoff estimates with canyon-specific composite curve numbers from SSURGO soils and 2021 NLCD land cover. Traditional table CNs are converted to the Ia/S = 0.05 retention basis before runoff is calculated. Pixels without a usable SSURGO group are conservatively assigned to HSG D. The central display uses the normal condition.",
     "peak_flow_formula": "Screening peak CFS = 2 \u00d7 direct-runoff volume \u00f7 triangular hydrograph base time; base time = rain duration + 2 \u00d7 NRCS watershed lag",
@@ -17,7 +19,7 @@
     "fill_ratio_explanation": "Estimated fill ratio = normal-condition NRCS watershed direct runoff \u00f7 provisional empty-pool storage target. It is not a measured pool-depth percentage and does not explicitly subtract channel transmission losses.",
     "cumulative_refill_explanation": "Cumulative no-loss refill evidence adds the normal-condition modeled runoff from each retained rain event, caps modeled storage at the provisional pool target, and records additional water as potential overflow. It assumes zero starting storage at the first retained event and does not subtract evaporation, seepage, drainage, or other losses, so it is not a current pool-level estimate.",
     "pool_loss_explanation": "Automatic pool decay is not yet modeled. Pool geometry, shade, wind, temperature, humidity, bedrock seepage, and drainage can produce very different hydroperiods, so the website reports milestone dates rather than an unsupported daily percentage loss.",
-    "atlas_explanation": "Atlas 14 context compares event-duration watershed-average radar rainfall with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is context, not a watershed return interval.",
+    "atlas_explanation": "Atlas 14 context compares event-duration watershed-average radar rainfall with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is context, not a watershed return interval. The comparison is suppressed when the event exceeds the longest available duration instead of being clamped to a shorter storm.",
     "scaling_basis": "Technical-section length replaces drainage-area scaling for pool storage. Drainage area remains in the runoff calculation because it controls how much watershed runoff a given rain depth can generate.",
     "condition_language": "Condition statements describe modeled refill evidence, not observed pool depth. Below 25% of the empty-storage target is reported as no meaningful refill unless an intense-rain footprint is detected. 'Likely full' requires the storage-volume, intense-rain footprint, and minimum-duration tests to pass together.",
     "sources": [
@@ -73,7 +75,7 @@
       "large_partial": "Runoff ratio from 0.75 through 0.99: large partial refill possible; full pools remain uncertain",
       "confirmation_incomplete": "Runoff ratio at least 1.0 without both confirmation tests: the empty-storage volume threshold was met, but a likely-full statement is withheld",
       "likely_full": "Runoff ratio at least 1.0, intense-rain footprint reached, and at least two wet five-minute frames: major refill likely; pools may be full",
-      "full_flush": "Runoff ratio at least 2.0, intense-rain footprint reached, and at least two wet five-minute frames: strong refill/flush likely; pools likely full"
+      "full_flush": "Runoff ratio at least 2.0, intense-rain footprint reached, and at least two wet five-minute frames: strong refill/flush potential; full pools possible"
     },
     "limitations": [
       "Only Zero G has a mapped depression-volume anchor. Other storage targets depend on technical-section lengths and user-assigned morphology modifiers.",
