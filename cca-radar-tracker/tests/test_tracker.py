@@ -228,7 +228,7 @@ class TrackerTests(unittest.TestCase):
             "2024-06-21T22:25:00Z",
         )
 
-    def test_long_event_atlas_comparison_is_suppressed_without_duration_data(self):
+    def test_long_event_atlas_comparison_uses_multi_hour_duration_data(self):
         canyon = self.by_id["zerog"]
         event = {
             "start_utc": "2026-07-01T00:00:00Z",
@@ -236,7 +236,45 @@ class TrackerTests(unittest.TestCase):
             "frames": 25,
             "basin_rain_inches": 1.0,
         }
+        self.assertIsNotNone(tracker.atlas_return_period(event, canyon, 5))
+
+    def test_atlas_comparison_is_suppressed_beyond_24_hours(self):
+        canyon = self.by_id["zerog"]
+        event = {
+            "start_utc": "2026-07-01T00:00:00Z",
+            "end_utc": "2026-07-02T01:00:00Z",
+            "frames": 301,
+            "basin_rain_inches": 2.0,
+        }
         self.assertIsNone(tracker.atlas_return_period(event, canyon, 5))
+
+    def test_current_direct_runoff_event_is_refreshed_with_atlas_context(self):
+        canyon = self.by_id["zerog"]
+        event = {
+            "start_utc": "2026-07-01T00:00:00Z",
+            "end_utc": "2026-07-01T01:59:00Z",
+            "peak_frame_utc": "2026-07-01T01:00:00Z",
+            "frames": 24,
+            "wet_frames": 24,
+            "basin_rain_inches": 1.0,
+            "direct_runoff_ft3": 1,
+            "atlas14_return_period_years": None,
+        }
+        status = {
+            "canyons": {
+                canyon.canyon_id: {
+                    "last_rain_event": dict(event),
+                    "last_qualifying_event": None,
+                    "events": [dict(event)],
+                }
+            }
+        }
+        tracker.refresh_status_events(status, [canyon], self.config)
+        refreshed = status["canyons"][canyon.canyon_id]
+        self.assertIsNotNone(
+            refreshed["last_rain_event"]["atlas14_return_period_years"]
+        )
+        self.assertIsNotNone(refreshed["events"][0]["atlas14_return_period_years"])
 
     def test_insufficient_radar_data_is_not_classified_as_zero_rain(self):
         canyon = self.by_id["zerog"]
