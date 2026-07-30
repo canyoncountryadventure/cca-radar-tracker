@@ -7,6 +7,7 @@
   "frame_ledger_retention_hours": 72,
   "archive_confirmation_delay_minutes": 10,
   "missing_frame_warning_minutes": 20,
+  "maximum_unknown_watershed_percent": 20,
   "max_catchup_frames_per_run": 72,
   "max_frames_per_run": 96,
   "request_timeout_seconds": 30,
@@ -24,6 +25,16 @@
     "minimum_wet_frames_for_likely": 2,
     "event_gap_minutes": 30,
     "event_continue_minimum_basin_rain_inches": 0.0001
+  },
+  "experimental": {
+    "enabled": false,
+    "weak_echo_persistence_frames": 2,
+    "minimum_connected_echo_area_sq_mi": null,
+    "minimum_watershed_coverage_percent": null,
+    "size_aware_gates": false,
+    "qpe_source": null,
+    "spatial_curve_number_runoff": false,
+    "delivery_calibration": false
   },
   "historical_wms_min_age_minutes": 10,
   "iem_historical_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi",

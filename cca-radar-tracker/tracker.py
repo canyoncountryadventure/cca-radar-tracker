@@ -164,7 +164,7 @@ FIXED_SPATIAL_RULES = (
 MINOR_REFILL_RATIO = 0.25
 SUBSTANTIAL_REFILL_RATIO = 0.50
 LARGE_REFILL_RATIO = 0.75
-STATUS_SCHEMA_VERSION = 3
+STATUS_SCHEMA_VERSION = 4
 
 
 def utc_text(value: datetime) -> str:
@@ -599,7 +599,20 @@ def analyze_canyon_image(
     total_weight = float(canyon.weights.sum())
     unknown_weight = float(canyon.weights[indices < 0].sum())
     rain = rain_depth_inches(dbz, config["model"])
-    basin_rain = float((rain * canyon.weights).sum() / total_weight)
+    known_weights = np.where(indices >= 0, canyon.weights, 0.0)
+    known_weight = float(known_weights.sum())
+    unknown_percent = 100.0 * unknown_weight / total_weight
+    quality_limit = float(config.get("maximum_unknown_watershed_percent", 20))
+    quality_status = (
+        "insufficient_radar_data"
+        if known_weight <= 0 or unknown_percent > quality_limit
+        else ("degraded" if unknown_percent > 0 else "valid")
+    )
+    basin_rain = (
+        float((rain * known_weights).sum() / known_weight)
+        if known_weight > 0
+        else 0.0
+    )
     rain_volume = (
         basin_rain / 12.0 * canyon.area_sq_mi * SQUARE_FEET_PER_SQUARE_MILE
     )
@@ -612,7 +625,9 @@ def analyze_canyon_image(
         coverage = (
             100.0
             * float(canyon.weights[comparison_dbz >= threshold].sum())
-            / total_weight
+            / known_weight
+            if known_weight > 0
+            else 0.0
         )
         covered_area = coverage / 100.0 * canyon.area_sq_mi
         coverages[str(int(threshold))] = round(coverage, 1)
@@ -633,10 +648,12 @@ def analyze_canyon_image(
         else None
     )
     wet = bool(
+        quality_status != "insufficient_radar_data"
+        and
         maximum is not None
         and maximum >= float(config["model"]["storm_dbz_threshold"])
     )
-    rain_detected = basin_rain >= float(
+    rain_detected = quality_status != "insufficient_radar_data" and basin_rain >= float(
         config["model"].get("event_continue_minimum_basin_rain_inches", 0.0001)
     )
 
@@ -650,9 +667,9 @@ def analyze_canyon_image(
             "frame_rain_volume_ft3": round(rain_volume),
             "wet": wet,
             "rain_detected": rain_detected,
-            "unknown_watershed_percent": round(
-                100.0 * unknown_weight / total_weight, 1
-            ),
+            "unknown_watershed_percent": round(unknown_percent, 1),
+            "radar_data_quality": quality_status,
+            "radar_data_sufficient": quality_status != "insufficient_radar_data",
             "grid_dbz": grid_list(dbz, 1),
             "grid_bbox": canyon.grid.bbox,
         },
@@ -712,6 +729,7 @@ def empty_status(canyons: list[Canyon] | None = None) -> dict[str, Any]:
             for canyon in (canyons or [])
         },
         "health": {"ok": True, "message": "Waiting for first radar check"},
+        "state_restoration": {"validated": False, "source": None},
     }
 
 
@@ -754,6 +772,7 @@ def ensure_status_defaults(status: dict[str, Any], canyons: list[Canyon]) -> dic
     status.setdefault("frame_ledger", {})
     status.setdefault("health_notification", defaults["health_notification"])
     status.setdefault("health", defaults["health"])
+    status.setdefault("state_restoration", defaults["state_restoration"])
     status.setdefault("canyons", {})
     for canyon in canyons:
         canyon_status = status["canyons"].setdefault(
@@ -765,17 +784,30 @@ def ensure_status_defaults(status: dict[str, Any], canyons: list[Canyon]) -> dic
     return status
 
 
-def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
+def load_status(
+    path: Path, canyons: list[Canyon], require_existing: bool = False
+) -> dict[str, Any]:
     fresh = empty_status(canyons)
     if not path.exists():
+        if require_existing:
+            raise ValueError(f"Required operational state is missing: {path}")
         return fresh
     try:
         existing = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError) as exc:
+        if require_existing:
+            raise ValueError(f"Operational state is unreadable: {path}") from exc
         return fresh
 
-    if existing.get("schema_version") in {2, STATUS_SCHEMA_VERSION}:
-        return ensure_status_defaults(existing, canyons)
+    if not isinstance(existing, dict):
+        if require_existing:
+            raise ValueError("Operational state root must be a JSON object")
+        return fresh
+
+    if existing.get("schema_version") in {2, 3, STATUS_SCHEMA_VERSION}:
+        restored = ensure_status_defaults(existing, canyons)
+        restored["state_restoration"] = {"validated": True, "source": str(path)}
+        return restored
 
     if existing.get("schema_version") == 1:
         fresh["monitoring_started_utc"] = existing.get("monitoring_started_utc")
@@ -792,7 +824,13 @@ def load_status(path: Path, canyons: list[Canyon]) -> dict[str, Any]:
             "ok": True,
             "message": "Earlier Zero G history preserved; multi-canyon monitoring active",
         }
-    return ensure_status_defaults(fresh, canyons)
+    if existing.get("schema_version") != 1 and require_existing:
+        raise ValueError(
+            f"Unsupported operational-state schema: {existing.get('schema_version')}"
+        )
+    restored = ensure_status_defaults(fresh, canyons)
+    restored["state_restoration"] = {"validated": True, "source": str(path)}
+    return restored
 
 
 def refresh_status_events(
@@ -903,7 +941,13 @@ def atlas_return_period(
     event: dict[str, Any], canyon: Canyon, frame_minutes: int
 ) -> float | None:
     duration = event_duration_minutes(event, frame_minutes)
-    supported = [5, 10, 15, 30, 60]
+    supported = sorted(
+        int(key.removesuffix("-min"))
+        for key in canyon.atlas14
+        if key.endswith("-min") and key.removesuffix("-min").isdigit()
+    )
+    if not supported or duration > supported[-1]:
+        return None
     lower = max(
         (value for value in supported if value <= duration), default=supported[0]
     )
@@ -1029,6 +1073,15 @@ def apply_hydrologic_model(
     event["direct_runoff_ft3"] = volumes["normal"]
     event["routed_peak_cfs_range"] = peaks
     event["routed_peak_cfs"] = peaks["normal"]
+    event["generated_runoff_ft3"] = volumes["normal"]
+    event["generated_runoff_ft3_range"] = volumes
+    event["delivered_runoff_ft3"] = None
+    event["delivery_status"] = "not_calibrated"
+    event["delivery_explanation"] = (
+        "Generated watershed runoff is reported separately because channel "
+        "infiltration, seepage, upstream storage, routing, and attenuation have "
+        "not been calibrated for this canyon."
+    )
 
     event["antecedent_condition"] = "normal (central estimate)"
     event["storm_duration_minutes"] = duration_minutes
@@ -1046,6 +1099,24 @@ def classify_event(
     event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
 ) -> tuple[str, str]:
     """Classify estimated pool response with transparent decision tests."""
+    if event.get("radar_data_sufficient") is False:
+        event["fill_ratio"] = None
+        event["fill_ratio_range"] = {}
+        event["decision_tests"] = {
+            "radar_data_sufficient": False,
+            "storage_target_met": None,
+            "flush_target_met": None,
+            "heavy_rain_footprint_met": None,
+            "minimum_wet_duration_met": None,
+        }
+        label = "Insufficient radar data"
+        event["classification_explanation"] = (
+            "Too much of the watershed radar image was unknown to make a "
+            "rainfall or pool-refill classification."
+        )
+        event["condition_statement"] = label
+        return "insufficient_data", label
+
     target = float(canyon.model["fill_target_ft3"])
     if target <= 0:
         raise ValueError(f"Invalid fill target for {canyon.canyon_id}: {target}")
@@ -1080,7 +1151,7 @@ def classify_event(
     }
 
     if flush_met and gate and enough_frames:
-        label = "Strong flush likely — pools likely full"
+        label = "Strong refill/flush potential — full pools possible"
         reason = (
             "Estimated watershed runoff was at least twice the provisional empty-storage "
             "target, and both the intense-rain footprint and duration checks passed. "
@@ -1182,7 +1253,21 @@ def event_public(
         public, int(config["model"]["frame_minutes"])
     )
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
+    public["rainfall_depth_source"] = "base_reflectivity_zr_screening"
+    public["storm_core_evidence_source"] = "base_reflectivity"
+    public["experimental_model_applied"] = False
     public["storage_target_ft3"] = int(canyon.model["fill_target_ft3"])
+    public["visible_storage_ft3"] = (
+        ZERO_G_STORAGE_FT3 if canyon.canyon_id == "zerog" else None
+    )
+    public["estimated_hidden_storage_ft3"] = (
+        0 if canyon.canyon_id == "zerog" else None
+    )
+    public["storage_uncertainty"] = (
+        "measured visible depression benchmark"
+        if canyon.canyon_id == "zerog"
+        else "normalized total; visible and hidden components not yet surveyed"
+    )
     public["flush_target_ft3"] = int(canyon.model["flush_target_ft3"])
     public["storage_deficit_ft3"] = max(
         0, int(canyon.model["fill_target_ft3"]) - int(public["direct_runoff_ft3"])
@@ -1261,6 +1346,7 @@ def prepend_rain_frame(
     event: dict[str, Any],
     timestamp: datetime,
     analysis: dict[str, Any],
+    rain: np.ndarray,
 ) -> None:
     """Add lower-reflectivity rain that immediately preceded the trigger frame."""
     event["start_utc"] = min(event["start_utc"], utc_text(timestamp))
@@ -1279,6 +1365,13 @@ def prepend_rain_frame(
         float(event.get("peak_dbz") or -999.0),
         float(analysis.get("maximum_dbz") or -999.0),
     )
+    accumulated_values = event.get("accumulated_rain_grid_inches")
+    if accumulated_values is not None:
+        accumulated = np.asarray(accumulated_values, dtype=np.float32)
+        if accumulated.shape == rain.shape:
+            accumulated += rain
+            event["accumulated_rain_grid_inches"] = grid_list(accumulated, 4)
+            event["max_pixel_storm_inches"] = round(float(np.nanmax(accumulated)), 3)
 
 
 def update_open_event(
@@ -1423,6 +1516,7 @@ def update_canyon_event(
                         for key, value in analysis.items()
                         if key not in {"grid_dbz", "grid_bbox"}
                     },
+                    "rain_grid_zlib": encode_grid(grid_list(rain, 4)),
                 }
             )
             return
@@ -1435,6 +1529,7 @@ def update_canyon_event(
                 event,
                 parse_utc(item["timestamp_utc"]),
                 item["analysis"],
+                np.asarray(decode_grid(item["rain_grid_zlib"]), dtype=np.float32),
             )
         pending.clear()
         canyon_status["open_event"] = event
@@ -1477,6 +1572,8 @@ def frame_summary(analysis: dict[str, Any]) -> dict[str, Any]:
         "unknown_watershed_percent": analysis.get("unknown_watershed_percent"),
         "wet": bool(analysis.get("wet")),
         "rain_detected": bool(analysis.get("rain_detected")),
+        "radar_data_quality": analysis.get("radar_data_quality"),
+        "radar_data_sufficient": analysis.get("radar_data_sufficient"),
     }
 
 
@@ -1509,14 +1606,14 @@ def analyze_timestamp_record(
         compact = frame_summary(analysis)
         record["summary"][canyon.canyon_id] = compact
         summary[canyon.canyon_id] = compact
-        if analysis["wet"]:
+        if analysis_has_rain(analysis, config) or analysis["wet"]:
             stored_analysis = {
                 key: value for key, value in analysis.items() if key != "grid_dbz"
             }
             record["wet_canyons"][canyon.canyon_id] = {
                 "analysis": stored_analysis,
                 "grid_dbz_zlib": encode_grid(analysis["grid_dbz"]),
-                "max_pixel_frame_inches": round(float(np.nanmax(rain)), 4),
+                "rain_grid_zlib": encode_grid(grid_list(rain, 4)),
             }
     return record, summary
 
@@ -1618,6 +1715,8 @@ def dry_analysis_from_summary(
         "wet": wet,
         "rain_detected": rain_detected,
         "unknown_watershed_percent": values.get("unknown_watershed_percent"),
+        "radar_data_quality": values.get("radar_data_quality", "legacy_summary"),
+        "radar_data_sufficient": values.get("radar_data_sufficient", True),
         "grid_dbz": None,
         "grid_bbox": None,
     }
@@ -1751,9 +1850,14 @@ def rebuild_events_from_ledger(
             if wet_record:
                 analysis = dict(wet_record["analysis"])
                 analysis["grid_dbz"] = decode_grid(wet_record["grid_dbz_zlib"])
-                rain = np.asarray(
-                    [[float(wet_record.get("max_pixel_frame_inches") or 0.0)]],
-                    dtype=np.float32,
+                encoded_rain = wet_record.get("rain_grid_zlib")
+                rain = (
+                    np.asarray(decode_grid(encoded_rain), dtype=np.float32)
+                    if encoded_rain
+                    else rain_depth_inches(
+                        np.asarray(analysis["grid_dbz"], dtype=np.float32),
+                        config["model"],
+                    )
                 )
             else:
                 analysis = dry_analysis_from_summary(
@@ -2042,7 +2146,7 @@ def model_metadata(
 ) -> dict[str, Any]:
     model = config["model"]
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "method": {
             "radar_source": "Iowa Environmental Mesonet N0Q 5-minute composite",
             "rainfall_formula": (
@@ -2052,7 +2156,9 @@ def model_metadata(
             "rainfall_explanation": (
                 "The tracker converts each five-minute radar frame to rainfall, then "
                 "area-weights the pixels inside the watershed polygon. Radar rainfall "
-                "is an estimate and may be biased by hail, beam geometry, or evaporation."
+                "is an estimate and may be biased by hail, beam geometry, or evaporation. "
+                "Base reflectivity remains the storm-core evidence source. MRMS QPE can "
+                "be evaluated beside it later without replacing the existing gates."
             ),
             "rain_event_explanation": (
                 f"A new event requires at least {model['storm_dbz_threshold']} dBZ "
@@ -2067,7 +2173,20 @@ def model_metadata(
                 "Each run rechecks an overlapping 90-minute window. Newest frames are "
                 "provisional; once the exact timestamped IEM WMS-T frame is old enough, "
                 "it replaces the provisional record. Events are rebuilt from a "
-                "timestamp-keyed ledger so repeated frames cannot double-count rainfall."
+                "timestamp-keyed ledger so repeated frames cannot double-count rainfall. "
+                "Every retained rain frame includes its complete compressed spatial rain "
+                "grid, so moving cores and pre-trigger rainfall accumulate cell by cell."
+            ),
+            "radar_quality_explanation": (
+                f"Coverage and rainfall use only decoded radar cells. A frame with more "
+                f"than {config.get('maximum_unknown_watershed_percent', 20)}% unknown "
+                "watershed area is reported as insufficient radar data, not zero rain."
+            ),
+            "experimental_comparison_explanation": (
+                "Weak-echo persistence, connected-core area, watershed-size scaling, "
+                "MRMS QPE, and spatial curve-number runoff are reserved as disabled "
+                "comparison modes until historical and field calibration show that they "
+                "outperform the fixed baseline."
             ),
             "runoff_formula": (
                 "Adjusted NRCS direct runoff: S0.20 = 1000/CN − 10; "
@@ -2130,7 +2249,9 @@ def model_metadata(
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
                 "with duration-interpolated NOAA Atlas 14 point-frequency depths at the "
-                "canyon outlet. It is context, not a watershed return interval."
+                "canyon outlet. It is context, not a watershed return interval. The "
+                "comparison is suppressed when the event exceeds the longest available "
+                "duration instead of being clamped to a shorter storm."
             ),
             "scaling_basis": (
                 "Technical-section length replaces drainage-area scaling for pool storage. "
@@ -2215,7 +2336,8 @@ def model_metadata(
                 ),
                 "full_flush": (
                     "Runoff ratio at least 2.0, intense-rain footprint reached, and at "
-                    "least two wet five-minute frames: strong refill/flush likely; pools likely full"
+                    "least two wet five-minute frames: strong refill/flush potential; "
+                    "full pools possible"
                 ),
             },
             "limitations": [
@@ -2301,6 +2423,11 @@ def main() -> int:
         help="Workflow trigger name, normally schedule or workflow_dispatch",
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--require-existing-state",
+        action="store_true",
+        help="Fail instead of starting fresh when operational state is missing or invalid",
+    )
     arguments = parser.parse_args()
 
     config = json.loads(arguments.config.read_text(encoding="utf-8"))
@@ -2315,7 +2442,9 @@ def main() -> int:
         collection, atlas, config, hydrology
     )
     palette = load_palette(arguments.palette)
-    status = load_status(arguments.status, canyons)
+    status = load_status(
+        arguments.status, canyons, require_existing=arguments.require_existing_state
+    )
     refresh_status_events(status, canyons, config)
     if arguments.rebuild_from:
         rewind_status(status, canyons, parse_utc(arguments.rebuild_from))

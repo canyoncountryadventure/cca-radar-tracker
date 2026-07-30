@@ -15,6 +15,8 @@ Z = 10^(dBZ/10)
 
 Rainfall conversion is capped at 55 dBZ to limit hail-driven overestimation. Uncapped reflectivity is retained for the intense-rain footprint test. Rainfall is area-weighted across each watershed polygon for every five-minute frame.
 
+Every retained rain frame stores its full spatial rainfall grid. Event rebuilding therefore accumulates moving storm cores at their actual pixels and includes lower-reflectivity pre-trigger rainfall in both totals and maps. Decoded cells are used as the denominator; if more than 20% of a watershed is unknown, the result is **Insufficient radar data**, not zero rain.
+
 ### 2. Estimated watershed runoff
 
 The old fixed 5% runoff coefficient is not used. Accumulated basin-average rainfall is converted to NRCS direct runoff for dry, normal, and wet antecedent conditions using canyon-specific curve numbers from SSURGO soils and 2021 NLCD land cover:
@@ -87,13 +89,17 @@ The storage-fill ratio is normal-condition watershed runoff divided by the provi
 - 0.75-0.99: **Large partial refill possible; full pools uncertain**
 - At least 1.0 without both confirmation tests: **Potential major refill; confirmation incomplete**
 - At least 1.0 with footprint and duration tests: **Major refill likely; pools may be full**
-- At least 2.0 with footprint and duration tests: **Strong flush likely; pools likely full**
+- At least 2.0 with footprint and duration tests: **Strong refill/flush potential; full pools possible**
 
 Current pool level, channel transmission loss, bedrock fractures, disconnected drainage, radar error, and evaporation remain unknown.
 
 ## Atlas 14 and peak flow
 
-Atlas 14 equivalent and routed peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag.
+Atlas 14 equivalent and routed peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag.
+
+Generated NRCS watershed runoff is reported separately from delivered runoff. Delivered runoff remains uncalibrated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon. The existing Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
+
+Weak-echo persistence, connected-core area, watershed-size scaling, MRMS QPE, spatial curve-number response units, and delivery factors are configured as disabled comparison work. They do not replace the fixed baseline until known events and field observations show a measurable improvement.
 
 ## Dashboard
 
