@@ -21,6 +21,7 @@ const app = {
   status: null,
   watersheds: null,
   selectedId: null,
+  selectedEvent: null,
   map: null,
   baseLayers: {},
   activeBase: "satellite",
@@ -287,14 +288,19 @@ function populateSelect() {
 function renderSummary() {
   const container = $("canyon-summary");
   const rows = Object.entries(app.model.canyons).map(([id, model]) => {
-    const event = canyonStatus(id).last_rain_event;
+    const status = canyonStatus(id);
+    const event = status.last_rain_event;
+    const recent = status.recent_refill_evidence || {};
+    const record = status.historical_records?.peak_individual_event;
     const meta = eventCondition(event);
     return {
       id,
       model,
       event,
+      recent,
+      record,
       meta,
-      fill: fillVisual(event),
+      fill: fillVisual({ fill_ratio: Number(recent.ratio || 0) }),
       sortTime: eventSortTime(event),
     };
   });
@@ -302,7 +308,7 @@ function renderSummary() {
   // Most recently wet canyon first; canyons with no retained event stay last.
   rows.sort((a, b) => b.sortTime - a.sortTime || a.model.name.localeCompare(b.model.name));
 
-  container.innerHTML = rows.map(({ id, model, event, meta, fill }) => `
+  container.innerHTML = rows.map(({ id, model, event, recent, record, meta, fill }) => `
     <button type="button" class="summary-row ${meta.css} ${id === app.selectedId ? "selected" : ""}" data-canyon-id="${escapeHtml(id)}">
       <span
         class="summary-bubble ${fill.css}"
@@ -314,9 +320,10 @@ function renderSummary() {
       </span>
       <span class="summary-copy">
         <span class="summary-name">${escapeHtml(model.name)}</span>
-        <span class="summary-condition">${escapeHtml(event?.classification_label || meta.short)}</span>
+        <span class="summary-condition">Current 7-day evidence: ${number(recent.percent || 0, 0)}% · ${escapeHtml(recent.trend || "no recent evidence")}</span>
+        <span class="summary-record">${record ? `Peak event: ${number(record.percent || 0, 0)}% — ${escapeHtml(dateOnly(record.end_utc || record.start_utc))}` : "No historical peak yet"}</span>
       </span>
-      <span class="summary-date">${event ? summaryDateTime(event.end_utc || event.start_utc) : "—"}</span>
+      <span class="summary-date">${recent.last_meaningful_event_utc ? `Last meaningful: ${summaryDateTime(recent.last_meaningful_event_utc)}` : "No meaningful refill"}</span>
     </button>
   `).join("");
 
@@ -452,7 +459,7 @@ function drawSelectedRadar() {
   if (!app.radarLayer) return;
   app.radarLayer.clearLayers();
   const status = selectedStatus();
-  const event = status.last_rain_event || status.latest_analysis;
+  const event = app.selectedEvent || status.last_rain_event || status.latest_analysis;
   const grid = event?.peak_grid_dbz || event?.grid_dbz;
   const bbox = event?.grid_bbox;
   const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
@@ -686,51 +693,55 @@ function renderRefillHistory(status, model) {
   const panel = ensureRefillHistoryPanel();
   const summary = status.cumulative_refill_evidence || {};
   const history = Array.isArray(status.refill_history) ? status.refill_history : [];
-  const percent = Number(summary.percent || 0);
-  const balance = Number(summary.balance_ft3 || 0);
-  const overflow = Number(summary.overflow_ft3 || 0);
+  const recent = status.recent_refill_evidence || {};
+  const records = status.historical_records || {};
+  const peakEvent = records.peak_individual_event;
+  const peakWindow = records.peak_seven_day_evidence;
 
-  const rows = history.slice(0, 10).map((event) => `
+  const rows = history.map((event, index) => `
     <tr>
-      <td>${escapeHtml(dateTime(event.end_utc || event.start_utc))}</td>
+      <td><button type="button" class="event-date-button" data-history-index="${index}">${escapeHtml(dateTime(event.end_utc || event.start_utc))}</button></td>
       <td>${number(event.basin_rain_inches, 3)} in</td>
       <td>${number(event.direct_runoff_ft3, 0)} ft³</td>
       <td>${number(event.event_fill_ratio, 2)}×</td>
-      <td>${number(event.cumulative_percent, 0)}%</td>
-      <td>${number(event.overflow_ft3, 0)} ft³</td>
+      <td>${escapeHtml(event.classification_label || "Modeled event")}</td>
     </tr>
   `).join("");
 
   panel.innerHTML = `
-    <p class="event-kicker">MULTI-STORM ACCUMULATION</p>
-    <h3>Cumulative refill evidence — no pool loss modeled</h3>
+    <p class="event-kicker">RECENT AND HISTORICAL REFILL EVIDENCE</p>
+    <h3>Current seven-day evidence: ${number(recent.percent || 0, 0)}% — ${escapeHtml(recent.trend || "no recent evidence")}</h3>
     <p class="event-summary">
-      Retained storms provide ${number(balance, 0)} ft³ of cumulative no-loss refill evidence,
-      capped at ${number(model.fill_target_ft3, 0)} ft³ (${number(percent, 0)}%).
-      ${overflow > 0 ? `${number(overflow, 0)} ft³ is recorded as potential overflow or flushing.` : ""}
+      Contributions fade linearly across seven days. A new zero-runoff storm does not erase
+      earlier evidence. This is a freshness indicator, not a measured pool level.
     </p>
     <div class="event-meta-grid">
-      ${eventMeta("Retained events", number(summary.event_count || history.length, 0))}
-      ${eventMeta("Evidence period", summary.period_start_utc ? `${dateOnly(summary.period_start_utc)}–${dateOnly(summary.through_utc)}` : "No modeled events")}
-      ${eventMeta("Reached 25%", milestoneValue(summary, 25))}
-      ${eventMeta("Reached 50%", milestoneValue(summary, 50))}
-      ${eventMeta("Reached 75%", milestoneValue(summary, 75))}
-      ${eventMeta("Reached 100%", milestoneValue(summary, 100))}
+      ${eventMeta("Detailed history", `${history.length} event${history.length === 1 ? "" : "s"} retained for 90 days`)}
+      ${eventMeta("Last meaningful refill", recent.last_meaningful_event_utc ? dateTime(recent.last_meaningful_event_utc) : "None")}
+      ${eventMeta("Largest individual event", peakEvent ? `${number(peakEvent.percent || 0, 0)}% — ${dateOnly(peakEvent.end_utc || peakEvent.start_utc)}` : "None")}
+      ${eventMeta("Record seven-day evidence", peakWindow ? `${number(peakWindow.percent || 0, 0)}% — ${dateOnly(peakWindow.through_utc)}` : "None")}
     </div>
     <p class="event-coverage">
-      This starts at zero storage at the first retained event and adds modeled runoff from every
-      retained storm. Evaporation, seepage, drainage, and starting pool level are not modeled,
-      so this is not a current pool-depth percentage.
+      Click any storm date below to replace the map with that event’s retained peak radar frame.
     </p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Storm end</th><th>Radar rain</th><th>Modeled runoff</th><th>Storm ratio</th><th>Cumulative</th><th>Potential overflow</th></tr>
+          <tr><th>Storm end</th><th>Radar rain</th><th>Modeled runoff</th><th>Storm ratio</th><th>Result</th></tr>
         </thead>
-        <tbody>${rows || `<tr><td colspan="6">No retained modeled rain events.</td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="5">No retained modeled rain events.</td></tr>`}</tbody>
       </table>
     </div>
   `;
+  panel.querySelectorAll("[data-history-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const event = status.events?.[Number(button.dataset.historyIndex)] || history[Number(button.dataset.historyIndex)];
+      if (!event) return;
+      app.selectedEvent = event;
+      drawSelectedRadar();
+      $("radar-time").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
 }
 
 function initialAbstraction(curveNumber) {
@@ -894,6 +905,7 @@ function renderSelected() {
 function selectCanyon(id, fitMap = false) {
   if (!app.model?.canyons?.[id]) return;
   app.selectedId = id;
+  app.selectedEvent = null;
   renderSelected();
   updateMapSelection(fitMap);
   history.replaceState(null, "", `#${encodeURIComponent(id)}`);

@@ -128,6 +128,9 @@ a:hover { color: #b7dcff; }
 .canyon-summary { max-height: 470px; overflow: auto; padding: 8px; }
 .summary-row { width: 100%; display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 10px; padding: 11px 10px; border: 0; border-bottom: 1px solid var(--line-soft); border-radius: 8px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
 .summary-row:hover, .summary-row.selected { background: var(--panel-3); }
+.summary-record { display: block; margin-top: 3px; color: var(--muted); font-size: .72rem; }
+.event-date-button { padding: 0; border: 0; color: var(--blue-bright); background: transparent; font: inherit; font-weight: 750; text-decoration: underline; cursor: pointer; }
+.event-date-button:hover, .event-date-button:focus { color: #fff; }
 .summary-copy { min-width: 0; }
 .summary-bubble {
   --bubble-fill: 0%;
