@@ -650,7 +650,7 @@ function renderEventCard(event, title, emptyText) {
       ${eventMeta("Routed peak — context", `${number(peak, 2)} cfs`)}
       ${eventMeta("Peak radar", `${number(event.peak_dbz, 1)} dBZ`)}
       ${eventMeta("Fill ratio", `${number(event.fill_ratio || 0, 2)}×`)}
-      ${eventMeta("Heavy-rain footprint", (decision.heavy_rain_footprint_met ?? event.spatial_gate_seen) ? "Passed" : "Not reached")}
+      ${eventMeta("Historical dBZ footprint", (decision.heavy_rain_footprint_observed ?? event.spatial_gate_seen) ? "Reached (context only)" : "Not reached")}
     </div>
     <p class="event-coverage">${escapeHtml(coverageText(event))}</p>
     ${event.iem_archive_url ? `<a class="event-link" href="${escapeHtml(event.iem_archive_url)}" target="_blank" rel="noopener">Open archived radar animation</a>` : ""}
@@ -812,7 +812,6 @@ function renderDecision(model, event) {
   container.innerHTML = [
     decisionRow(Boolean(tests.storage_target_met ?? ratio >= 1), "Empty-storage volume test", `${number(ratio, 2)}×; likely-full threshold is 1.00×`),
     decisionRow(Boolean(tests.flush_target_met ?? ratio >= 2), "Strong-flush volume test", `${number(ratio, 2)}×; strong-flush threshold is 2.00×`),
-    decisionRow(Boolean(tests.heavy_rain_footprint_met ?? event.spatial_gate_seen), "Intense-rain footprint", "Any one fixed dBZ/coverage gate must pass"),
     decisionRow(Boolean(tests.minimum_wet_duration_met ?? Number(event.wet_frames || 0) >= minimumFrames), "Minimum wet duration", `${number(event.wet_frames || 0, 0)} wet frames; ${minimumFrames} required`),
     decisionRow(true, event.classification_label || "Model result", event.classification_explanation || "Classification explanation unavailable"),
   ].join("");
@@ -831,14 +830,14 @@ function renderIntensityGates(model, event) {
         <td>${number(rule.minimum_area_sq_mi, 3)} mi²</td>
         <td>${number(coverage, 1)}%</td>
         <td>${number(area, 3)} mi²</td>
-        <td class="${qualified ? "gate-pass" : "gate-fail"}">${qualified ? "PASS" : "—"}</td>
+        <td class="${qualified ? "gate-pass" : "gate-fail"}">${qualified ? "REACHED" : "—"}</td>
       </tr>
     `;
   }).join("");
 
   $("intensity-gates").innerHTML = `
     <table>
-      <thead><tr><th>Intensity</th><th>Required %</th><th>Required area</th><th>Event peak %</th><th>Event peak area</th><th>Result</th></tr></thead>
+      <thead><tr><th>Intensity</th><th>Historical %</th><th>Historical area</th><th>Event peak %</th><th>Event peak area</th><th>Comparison</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   `;
