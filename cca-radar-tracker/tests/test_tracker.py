@@ -69,7 +69,7 @@ class TrackerTests(unittest.TestCase):
         self.assertNotIn("runoff_coefficient", model)
         self.assertEqual(model["storage_rate_percent_of_zerog"], 75.0)
 
-    def test_fixed_spatial_percentages_apply_to_every_watershed_size(self):
+    def test_historical_spatial_comparisons_remain_available_as_context(self):
         for canyon_id in (
             "zerog",
             "pool-arch",
@@ -93,7 +93,7 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual(tracker.nrcs_runoff_depth(0.05, cn), 0)
         self.assertGreater(tracker.nrcs_runoff_depth(0.10, cn), 0)
 
-    def test_storage_spatial_and_duration_tests_classify_likely_full(self):
+    def test_storage_and_duration_classify_likely_full_without_dbz_gate(self):
         canyon = self.by_id["zerog"]
         event = {
             "direct_runoff_ft3": canyon.model["fill_target_ft3"],
@@ -103,12 +103,13 @@ class TrackerTests(unittest.TestCase):
                 "wet": 70_000,
             },
             "wet_frames": 2,
-            "spatial_gate_seen": True,
+            "spatial_gate_seen": False,
         }
         classification, label = tracker.classify_event(event, canyon, self.config)
         self.assertEqual(classification, "likely_full")
         self.assertIn("may be full", label)
         self.assertTrue(event["decision_tests"]["storage_target_met"])
+        self.assertFalse(event["decision_tests"]["heavy_rain_footprint_observed"])
 
     def test_near_target_without_heavy_rain_is_partial_not_little_change(self):
         canyon = self.by_id["angel-cove"]
