@@ -15,7 +15,7 @@
     "target_formula": "Fill target = 52,442 ft\u00b3 \u00d7 (technical-section length \u00f7 0.75 mi) \u00d7 (1 + canyon pothole modifier)",
     "target_explanation": "Zero G is anchored to the 1-meter depression inventory of 114 depressions totaling 1,485.0 m\u00b3 (52,442 ft\u00b3). Other canyons are normalized by user-supplied technical-section length and adjusted for relative pothole/pool storage density. These are provisional empty-storage targets.",
     "spatial_formula": "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, or 60+ dBZ over 10%",
-    "spatial_explanation": "The same watershed-percentage gate applies to every canyon. It is a storm-footprint confirmation test and does not replace the runoff-volume test.",
+    "spatial_explanation": "These historical watershed-percentage comparisons are retained only as storm context. They do not control the canyon-condition classification.",
     "fill_ratio_explanation": "Estimated fill ratio = normal-condition NRCS watershed direct runoff \u00f7 provisional empty-pool storage target. It is not a measured pool-depth percentage and does not explicitly subtract channel transmission losses.",
     "cumulative_refill_explanation": "Current refill evidence combines modeled event fill ratios from the previous seven days with a linear age weight. New zero-runoff events do not erase prior evidence. Detailed events and their peak radar maps are retained for 90 days; all-time individual-event and seven-day records are retained separately.",
     "pool_loss_explanation": "The seven-day weighting represents evidence freshness, not physical pool-water loss. Pool geometry, shade, wind, temperature, humidity, seepage, and drainage remain uncalibrated and can produce very different hydroperiods.",
