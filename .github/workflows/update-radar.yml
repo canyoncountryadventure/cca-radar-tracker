@@ -162,11 +162,11 @@ jobs:
 
           if collection.get("type") != "FeatureCollection":
               raise SystemExit("watersheds.geojson is not a GeoJSON FeatureCollection")
-          if len(features) != 17:
+          if len(features) != 21:
               raise SystemExit(
-                  f"Expected 17 watershed polygons, found {len(features)}"
+                  f"Expected 21 watershed polygons, found {len(features)}"
               )
-          if "" in ids or len(ids) != 17:
+          if "" in ids or len(ids) != 21:
               raise SystemExit(
                   "Every watershed must have one unique nonblank properties.id value"
               )
@@ -220,6 +220,10 @@ jobs:
           status = json.loads(path.read_text(encoding="utf-8"))
           if not isinstance(status.get("canyons"), dict):
               raise SystemExit("Published status.json does not contain canyon state")
+          if status.get("schema_version") not in {2, 3, 4}:
+              raise SystemExit(
+                  f"Unsupported published state schema: {status.get('schema_version')}"
+              )
           print(
               "Restored published tracker state with schema",
               status.get("schema_version"),
@@ -228,11 +232,8 @@ jobs:
             mv "$temporary" cca-radar-tracker/docs/data/status.json
           else
             rm -f "$temporary"
-            if [[ -s cca-radar-tracker/docs/data/status.json ]]; then
-              echo "Published status unavailable; retaining checked-out fallback state."
-            else
-              echo "No prior status is available; tracker will initialize a new ledger."
-            fi
+            echo "Published operational state is unavailable; refusing stale checked-out fallback."
+            exit 1
           fi
 
       - name: Analyze and reconcile radar frames
@@ -244,11 +245,11 @@ jobs:
           set -euo pipefail
           if [[ -n "$REBUILD_FROM_UTC" ]]; then
             echo "Replaying exact radar frames from $REBUILD_FROM_UTC"
-            python tracker.py \
+            python tracker.py --require-existing-state \
               --run-trigger "$RUN_TRIGGER" \
               --rebuild-from "$REBUILD_FROM_UTC"
           else
-            python tracker.py --run-trigger "$RUN_TRIGGER"
+            python tracker.py --require-existing-state --run-trigger "$RUN_TRIGGER"
           fi
 
       - name: Verify revised refill model
