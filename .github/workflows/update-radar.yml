@@ -358,9 +358,27 @@ jobs:
                   f"extra polygons: {sorted(watershed_ids - model_ids)}"
               )
 
+          if len(model_ids) != 21:
+              raise SystemExit(
+                  f"Expected 21 modeled canyons, found {len(model_ids)}"
+              )
+
+          required_atlas_durations = {
+              "5-min", "10-min", "15-min", "30-min", "60-min",
+              "120-min", "180-min", "360-min", "720-min", "1440-min",
+          }
+          for canyon_id, canyon in model["canyons"].items():
+              actual_durations = set(canyon.get("atlas14_inches", {}))
+              if actual_durations != required_atlas_durations:
+                  raise SystemExit(
+                      f"{canyon_id} Atlas 14 durations are incomplete. "
+                      f"Expected {sorted(required_atlas_durations)}; "
+                      f"found {sorted(actual_durations)}"
+                  )
+
           print(
-              "Verified revised pool-refill model, all 17 watershed polygons, "
-              "and the front-end data contract."
+              "Verified revised pool-refill model, all 21 watershed polygons, "
+              "all Atlas 14 durations, and the front-end data contract."
           )
           PY
 
