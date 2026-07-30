@@ -154,6 +154,11 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
         "pothole_modifier": 0.00,
         "basis": "User technical-section length and Zero G-equivalent storage rate",
     },
+    "yankee-doodle": {
+        "technical_length_miles": 0.40,
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and Zero G-equivalent storage rate",
+    },
 }
 
 FIXED_SPATIAL_RULES = (

@@ -1020,6 +1020,50 @@
         "ELEV": 5785.602
       },
       "parameter_quality": "screening; field calibration required"
+    },
+    "yankee-doodle": {
+      "name": "Yankee Doodle",
+      "area_sq_mi": 4.446,
+      "curve_number": {
+        "dry": 71.9,
+        "normal": 85.4,
+        "wet": 93.2
+      },
+      "retention_s05_inches": {
+        "dry": 6.385,
+        "normal": 2.474,
+        "wet": 0.93
+      },
+      "initial_abstraction_inches": {
+        "dry": 0.319,
+        "normal": 0.124,
+        "wet": 0.046
+      },
+      "hydrologic_soil_group_percent": {
+        "A": 2.0,
+        "C": 21.3,
+        "D": 76.7
+      },
+      "soil_unmapped_percent": 0.0,
+      "unmapped_soil_assigned_to_hsg": "D",
+      "soil_group_inferred_percent": 75.2,
+      "land_cover_percent": {
+        "42": 13.5,
+        "52": 86.5
+      },
+      "elevation_min_ft": 3832,
+      "elevation_mean_ft": 4901,
+      "elevation_max_ft": 6844,
+      "mean_slope_percent": 30.7,
+      "hydraulic_length_miles": 4.22,
+      "lag_hours": 0.57,
+      "time_of_concentration_hours": 0.96,
+      "streamstats": {
+        "BSLDEM10M": 26.394,
+        "DRNAREA": 4.45,
+        "ELEV": 4851.705
+      },
+      "parameter_quality": "screening; field calibration required"
     }
   }
 }
