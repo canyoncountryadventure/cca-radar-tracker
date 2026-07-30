@@ -854,16 +854,12 @@ def refresh_status_events(
         canyon_status = status.get("canyons", {}).get(canyon.canyon_id, {})
         for key in ("last_rain_event", "last_qualifying_event"):
             event = canyon_status.get(key)
-            if (
-                event
-                and event.get("estimated_runoff_ft3") is not None
-                and event.get("frames")
-            ):
+            if event and event.get("frames") and event.get("basin_rain_inches") is not None:
                 canyon_status[key] = event_public(event, canyon, config, include_grid=True)
 
         refreshed = []
         for event in canyon_status.get("events", []):
-            if event.get("estimated_runoff_ft3") is not None and event.get("frames"):
+            if event.get("frames") and event.get("basin_rain_inches") is not None:
                 refreshed.append(event_public(event, canyon, config, include_grid=True))
             else:
                 refreshed.append(event)
