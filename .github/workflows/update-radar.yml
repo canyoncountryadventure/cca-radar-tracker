@@ -133,6 +133,10 @@ jobs:
                   "cumulative_refill_evidence" in tracker
                   and "renderRefillHistory" in app
               ),
+              "peak-event radar is canyon-click default": (
+                  "function peakEventRadar" in app
+                  and "app.selectedEvent = peakEventRadar(canyonStatus(id))" in app
+              ),
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
               ),
@@ -223,13 +227,24 @@ jobs:
           status = json.loads(path.read_text(encoding="utf-8"))
           if not isinstance(status.get("canyons"), dict):
               raise SystemExit("Published status.json does not contain canyon state")
-          if status.get("schema_version") not in {2, 3, 4}:
+          raw_schema = status.get("schema_version")
+          try:
+              schema = int(raw_schema)
+          except (TypeError, ValueError):
               raise SystemExit(
-                  f"Unsupported published state schema: {status.get('schema_version')}"
+                  "Unsupported published state schema: "
+                  f"{raw_schema!r} ({type(raw_schema).__name__})"
               )
+          if schema not in {2, 3, 4, 5}:
+              raise SystemExit(
+                  "Unsupported published state schema: "
+                  f"{raw_schema!r} ({type(raw_schema).__name__})"
+              )
+          status["schema_version"] = schema
+          path.write_text(json.dumps(status), encoding="utf-8")
           print(
               "Restored published tracker state with schema",
-              status.get("schema_version"),
+              schema,
           )
           PY
             mv "$temporary" cca-radar-tracker/docs/data/status.json
