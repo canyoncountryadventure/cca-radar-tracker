@@ -96,7 +96,7 @@ Current pool level, channel transmission loss, bedrock fractures, disconnected d
 
 ## Atlas 14 and peak flow
 
-Atlas 14 equivalent and routed peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag.
+Atlas 14 equivalent and peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag. Zero G applies a provisional 0.14 peak-flow factor based on one field-estimated 3–6 cfs flash; other canyons remain explicitly uncalibrated.
 
 The NRCS estimate represents watershed-generated runoff only. No canyon-delivery volume is calculated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon and remain uncalibrated. The existing Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
 
@@ -108,8 +108,10 @@ The dashboard includes:
 
 - Blue watershed polygons and retained peak-event radar pixels
 - Clickable 90-day storm dates that redraw the map with the selected event
-- Current seven-day, age-weighted refill evidence that is not reset by a dry storm
-- Permanent largest-event and record seven-day evidence dates
+- Persistent current-condition estimate that is not reset by a dry or weak storm
+- Confidence that ages instead of numerically decaying an unmeasured pool level
+- Zero G field anchor: 98% full on August 1, 2026
+- Permanent largest-event and historical seven-day-high dates
 - Last rain event with Atlas 14 equivalent
 - Retained last major-refill event
 - Estimated watershed runoff and routed peak-flow range

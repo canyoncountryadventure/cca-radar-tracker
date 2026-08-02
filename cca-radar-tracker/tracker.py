@@ -170,7 +170,20 @@ FIXED_SPATIAL_RULES = (
 MINOR_REFILL_RATIO = 0.25
 SUBSTANTIAL_REFILL_RATIO = 0.50
 LARGE_REFILL_RATIO = 0.75
-STATUS_SCHEMA_VERSION = 4
+STATUS_SCHEMA_VERSION = 5
+
+# Rare field checks are calibration anchors, not recurring workflow inputs.
+FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
+    "zerog": {
+        "observed_utc": "2026-08-01T12:00:00Z",
+        "percent": 98,
+        "description": "Field verified throughout the technical section",
+        "notes": "Two water-level loggers installed: one persistent half-shaded pool and one fast-drying full-sun pool.",
+    },
+}
+
+# Peak-flow calibration is deliberately separate from runoff volume and refill.
+PEAK_FLOW_FACTORS: dict[str, float] = {"zerog": 0.14}
 
 
 def utc_text(value: datetime) -> str:
@@ -523,6 +536,12 @@ def canyon_model(
             "52,442 ft3 × (technical length / 0.75 mi) × (1 + pothole modifier)"
         ),
         "spatial_rules": rules,
+        "peak_flow_factor": PEAK_FLOW_FACTORS.get(canyon_id),
+        "peak_flow_calibration": (
+            "Provisional field calibration from one estimated 3–6 cfs flash"
+            if canyon_id == "zerog"
+            else "Uncalibrated experimental estimate"
+        ),
     }
     if hydrology:
         result["hydrology"] = hydrology
@@ -706,6 +725,15 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
             "last_meaningful_event_utc": None,
             "trend": "no recent evidence",
         },
+        "condition_estimate": {
+            "percent": 0,
+            "current_condition": "unknown",
+            "confidence": "Unknown",
+            "basis": "No meaningful refill recorded",
+            "basis_utc": None,
+            "last_verified": None,
+            "last_meaningful_refill_utc": None,
+        },
         "cumulative_refill_evidence": {
             "event_count": 0,
             "balance_ft3": 0,
@@ -822,7 +850,7 @@ def load_status(
             raise ValueError("Operational state root must be a JSON object")
         return fresh
 
-    if existing.get("schema_version") in {2, 3, STATUS_SCHEMA_VERSION}:
+    if existing.get("schema_version") in {2, 3, 4, STATUS_SCHEMA_VERSION}:
         restored = ensure_status_defaults(existing, canyons)
         restored["state_restoration"] = {"validated": True, "source": str(path)}
         return restored
@@ -1085,8 +1113,22 @@ def apply_hydrologic_model(
     event["runoff_depth_inches"] = runoff_depths
     event["direct_runoff_ft3_range"] = volumes
     event["direct_runoff_ft3"] = volumes["normal"]
-    event["routed_peak_cfs_range"] = peaks
-    event["routed_peak_cfs"] = peaks["normal"]
+    event["uncalibrated_routed_peak_cfs_range"] = peaks
+    event["uncalibrated_routed_peak_cfs"] = peaks["normal"]
+    peak_factor = PEAK_FLOW_FACTORS.get(canyon.canyon_id)
+    if peak_factor is not None:
+        calibrated_peaks = {
+            state: round(value * peak_factor, 2) for state, value in peaks.items()
+        }
+        event["routed_peak_cfs_range"] = calibrated_peaks
+        event["routed_peak_cfs"] = calibrated_peaks["normal"]
+        event["peak_flow_factor"] = peak_factor
+        event["peak_flow_status"] = "provisional_field_calibration"
+    else:
+        event["routed_peak_cfs_range"] = peaks
+        event["routed_peak_cfs"] = peaks["normal"]
+        event["peak_flow_factor"] = None
+        event["peak_flow_status"] = "uncalibrated_experimental"
     event["generated_runoff_ft3"] = volumes["normal"]
     event["generated_runoff_ft3_range"] = volumes
     event["delivered_runoff_ft3"] = None
@@ -1730,7 +1772,7 @@ def cumulative_refill_evidence(
     canyon: Canyon,
     config: dict[str, Any],
 ) -> None:
-    """Build seven-day evidence, 90-day details, and permanent peak records."""
+    """Build persistent condition, 90-day details, and permanent peak records."""
     candidates = list(canyon_status.get("events", []))
     latest = canyon_status.get("last_rain_event")
     if latest:
@@ -1928,6 +1970,73 @@ def cumulative_refill_evidence(
             "Starts at zero storage at the first retained modeled event and "
             "subtracts no evaporation, seepage, drainage, or other losses."
         ),
+    }
+
+    anchor = FIELD_CONDITION_ANCHORS.get(canyon.canyon_id)
+    meaningful_events = [
+        event for event in events if float(event.get("fill_ratio") or 0.0) >= 0.25
+    ]
+    last_meaningful = meaningful_events[-1] if meaningful_events else None
+    last_meaningful_utc = (
+        last_meaningful.get("end_utc") or last_meaningful.get("start_utc")
+        if last_meaningful
+        else None
+    )
+
+    if anchor:
+        basis_time = parse_utc(str(anchor["observed_utc"]))
+        condition_ratio = float(anchor["percent"]) / 100.0
+        for event in events:
+            if event_end_utc(event) > basis_time:
+                condition_ratio += max(0.0, float(event.get("fill_ratio") or 0.0))
+        condition_ratio = min(1.0, condition_ratio)
+        basis = "Field verified"
+        last_verified = dict(anchor)
+    elif last_meaningful:
+        basis_time = event_end_utc(last_meaningful)
+        condition_ratio = min(1.0, balance / target) if target > 0 else 0.0
+        basis = "Modeled refill history"
+        last_verified = None
+    else:
+        basis_time = now
+        condition_ratio = 0.0
+        basis = "No meaningful refill recorded"
+        last_verified = None
+
+    age_days = max(0.0, (now - basis_time).total_seconds() / 86400.0)
+    if not anchor and not last_meaningful:
+        confidence = "Unknown"
+    elif age_days <= 14:
+        confidence = "High"
+    elif age_days <= 30:
+        confidence = "Moderate"
+    elif age_days <= 60:
+        confidence = "Low"
+    else:
+        confidence = "Unknown"
+
+    if confidence == "Unknown":
+        current_condition = "unknown"
+    elif condition_ratio >= 0.9:
+        current_condition = "likely near full"
+    elif condition_ratio >= 0.5:
+        current_condition = "substantial water likely remains"
+    elif condition_ratio >= 0.25:
+        current_condition = "some refill likely remains"
+    else:
+        current_condition = "limited refill indicated"
+
+    canyon_status["condition_estimate"] = {
+        "percent": min(100, round(condition_ratio * 100)),
+        "current_condition": current_condition,
+        "confidence": confidence,
+        "confidence_age_days": round(age_days, 1),
+        "basis": basis,
+        "basis_utc": utc_text(basis_time),
+        "last_verified": last_verified,
+        "last_meaningful_refill_utc": last_meaningful_utc,
+        "loss_model": "not_applied_pending_logger_calibration",
+        "retention_class": "logger calibration pending" if canyon.canyon_id == "zerog" else "unclassified",
     }
 
 
@@ -2324,9 +2433,9 @@ def model_metadata(
                 "base time; base time = rain duration + 2 × NRCS watershed lag"
             ),
             "peak_flow_explanation": (
-                "Peak flow is a routed screening estimate. Lag uses USGS 3DEP terrain, "
-                "the supplied outlet, and basin extent. It is not used by itself to declare "
-                "pools full."
+                "Peak flow is calibrated separately from runoff volume. Zero G uses a "
+                "provisional 0.14 factor based on one field-estimated 3–6 cfs flash; other "
+                "canyons remain uncalibrated. Peak flow does not declare pools full."
             ),
             "target_formula": (
                 "Fill target = 52,442 ft³ × (technical-section length ÷ 0.75 mi) "
@@ -2352,15 +2461,14 @@ def model_metadata(
                 "not explicitly subtract channel transmission losses."
             ),
             "cumulative_refill_explanation": (
-                "Current refill evidence combines modeled event fill ratios from the previous "
-                "seven days with a linear age weight. New zero-runoff events do not erase prior "
-                "evidence. Detailed events and their peak radar maps are retained for 90 days; "
-                "all-time individual-event and seven-day records are retained separately."
+                "The current condition retains meaningful modeled refill instead of resetting "
+                "or applying an invented numerical loss. A later dry or weak event cannot lower "
+                "the condition. Detailed events and peak radar maps are retained for 90 days."
             ),
             "pool_loss_explanation": (
-                "The seven-day weighting represents evidence freshness, not physical pool-water "
-                "loss. Pool geometry, shade, wind, temperature, humidity, seepage, and drainage "
-                "remain uncalibrated and can produce very different hydroperiods."
+                "Elapsed time lowers confidence in the retained condition, not the displayed "
+                "percentage. Zero G's shaded persistent-pool and full-sun fast-drying loggers "
+                "will support separate recession curves after enough storm cycles are recorded."
             ),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
@@ -2375,11 +2483,10 @@ def model_metadata(
                 "much watershed runoff a given rain depth can generate."
             ),
             "condition_language": (
-                "Condition statements describe modeled refill evidence, not observed pool depth. "
-                "Below 25% of the empty-storage target is reported as no meaningful refill "
-                "unless an intense-rain footprint is detected. 'Likely full' requires the "
-                "storage-volume, intense-rain footprint, "
-                "and minimum-duration tests to pass together."
+                "Condition statements retain the latest credible refill estimate while confidence "
+                "ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' "
+                "requires the storage-volume and minimum wet-duration tests; dBZ footprints are "
+                "context only."
             ),
             "sources": [
                 {
@@ -2443,16 +2550,16 @@ def model_metadata(
                     "full pools remain uncertain"
                 ),
                 "confirmation_incomplete": (
-                    "Runoff ratio at least 1.0 without both confirmation tests: the empty-storage "
+                    "Runoff ratio at least 1.0 without the duration confirmation test: the empty-storage "
                     "volume threshold was met, but a likely-full statement is withheld"
                 ),
                 "likely_full": (
-                    "Runoff ratio at least 1.0, intense-rain footprint reached, and at "
-                    "least two wet five-minute frames: major refill likely; pools may be full"
+                    "Runoff ratio at least 1.0 and at least two wet five-minute frames: "
+                    "major refill likely; pools may be full"
                 ),
                 "full_flush": (
-                    "Runoff ratio at least 2.0, intense-rain footprint reached, and at "
-                    "least two wet five-minute frames: strong refill/flush potential; "
+                    "Runoff ratio at least 2.0 and at least two wet five-minute frames: "
+                    "strong refill/flush potential; "
                     "full pools possible"
                 ),
             },
