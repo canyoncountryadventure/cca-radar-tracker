@@ -215,6 +215,11 @@ function selectedStatus() {
   return canyonStatus(app.selectedId);
 }
 
+function peakEventRadar(status) {
+  const peakEvent = status?.historical_records?.peak_individual_event;
+  return peakEvent?.peak_grid_dbz && peakEvent?.grid_bbox ? peakEvent : null;
+}
+
 function setHealth() {
   const status = app.status || {};
   const health = status.health || {};
@@ -892,7 +897,7 @@ function renderSelected() {
 function selectCanyon(id, fitMap = false) {
   if (!app.model?.canyons?.[id]) return;
   app.selectedId = id;
-  app.selectedEvent = null;
+  app.selectedEvent = peakEventRadar(canyonStatus(id));
   renderSelected();
   updateMapSelection(fitMap);
   history.replaceState(null, "", `#${encodeURIComponent(id)}`);
