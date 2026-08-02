@@ -133,6 +133,10 @@ jobs:
                   "cumulative_refill_evidence" in tracker
                   and "renderRefillHistory" in app
               ),
+              "peak-event radar is canyon-click default": (
+                  "function peakEventRadar" in app
+                  and "app.selectedEvent = peakEventRadar(canyonStatus(id))" in app
+              ),
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
               ),
