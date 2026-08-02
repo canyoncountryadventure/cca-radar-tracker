@@ -11,17 +11,17 @@
     "runoff_formula": "Adjusted NRCS direct runoff: S0.20 = 1000/CN \u2212 10; S0.05 = 1.33 \u00d7 S0.20^1.15; Ia = 0.05S0.05; Q = (P \u2212 Ia)\u00b2/(P + 0.95S0.05) when P > Ia",
     "direct_runoff_explanation": "No fixed runoff coefficient is used. Accumulated basin-average radar rainfall is converted to dry, normal, and wet direct-runoff estimates with canyon-specific composite curve numbers from SSURGO soils and 2021 NLCD land cover. Traditional table CNs are converted to the Ia/S = 0.05 retention basis before runoff is calculated. Pixels without a usable SSURGO group are conservatively assigned to HSG D. The central display uses the normal condition.",
     "peak_flow_formula": "Screening peak CFS = 2 \u00d7 direct-runoff volume \u00f7 triangular hydrograph base time; base time = rain duration + 2 \u00d7 NRCS watershed lag",
-    "peak_flow_explanation": "Peak flow is a routed screening estimate. Lag uses USGS 3DEP terrain, the supplied outlet, and basin extent. It is not used by itself to declare pools full.",
+    "peak_flow_explanation": "Peak flow is calibrated separately from runoff volume. Zero G uses a provisional 0.14 factor based on one field-estimated 3\u20136 cfs flash; other canyons remain uncalibrated. Peak flow does not declare pools full.",
     "target_formula": "Fill target = 52,442 ft\u00b3 \u00d7 (technical-section length \u00f7 0.75 mi) \u00d7 (1 + canyon pothole modifier)",
     "target_explanation": "Zero G is anchored to the 1-meter depression inventory of 114 depressions totaling 1,485.0 m\u00b3 (52,442 ft\u00b3). Other canyons are normalized by user-supplied technical-section length and adjusted for relative pothole/pool storage density. These are provisional empty-storage targets.",
     "spatial_formula": "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, or 60+ dBZ over 10%",
     "spatial_explanation": "These historical watershed-percentage comparisons are retained only as storm context. They do not control the canyon-condition classification.",
     "fill_ratio_explanation": "Estimated fill ratio = normal-condition NRCS watershed direct runoff \u00f7 provisional empty-pool storage target. It is not a measured pool-depth percentage and does not explicitly subtract channel transmission losses.",
-    "cumulative_refill_explanation": "Current refill evidence combines modeled event fill ratios from the previous seven days with a linear age weight. New zero-runoff events do not erase prior evidence. Detailed events and their peak radar maps are retained for 90 days; all-time individual-event and seven-day records are retained separately.",
-    "pool_loss_explanation": "The seven-day weighting represents evidence freshness, not physical pool-water loss. Pool geometry, shade, wind, temperature, humidity, seepage, and drainage remain uncalibrated and can produce very different hydroperiods.",
+    "cumulative_refill_explanation": "The current condition retains meaningful modeled refill instead of resetting or applying an invented numerical loss. A later dry or weak event cannot lower the condition. Detailed events and peak radar maps are retained for 90 days.",
+    "pool_loss_explanation": "Elapsed time lowers confidence in the retained condition, not the displayed percentage. Zero G's shaded persistent-pool and full-sun fast-drying loggers will support separate recession curves after enough storm cycles are recorded.",
     "atlas_explanation": "Atlas 14 context compares event-duration watershed-average radar rainfall with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is context, not a watershed return interval. The comparison is suppressed when the event exceeds the longest available duration instead of being clamped to a shorter storm.",
     "scaling_basis": "Technical-section length replaces drainage-area scaling for pool storage. Drainage area remains in the runoff calculation because it controls how much watershed runoff a given rain depth can generate.",
-    "condition_language": "Condition statements describe modeled refill evidence, not observed pool depth. Below 25% of the empty-storage target is reported as no meaningful refill unless an intense-rain footprint is detected. 'Likely full' requires the storage-volume, intense-rain footprint, and minimum-duration tests to pass together.",
+    "condition_language": "Condition statements retain the latest credible refill estimate while confidence ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' requires the storage-volume and minimum wet-duration tests; dBZ footprints are context only.",
     "sources": [
       {
         "label": "IEM N0Q composite documentation",
@@ -73,9 +73,9 @@
       "some_refill": "Runoff ratio from 0.25 through 0.49: some pool refill possible",
       "substantial_partial": "Runoff ratio from 0.50 through 0.74: substantial partial refill possible",
       "large_partial": "Runoff ratio from 0.75 through 0.99: large partial refill possible; full pools remain uncertain",
-      "confirmation_incomplete": "Runoff ratio at least 1.0 without both confirmation tests: the empty-storage volume threshold was met, but a likely-full statement is withheld",
-      "likely_full": "Runoff ratio at least 1.0, intense-rain footprint reached, and at least two wet five-minute frames: major refill likely; pools may be full",
-      "full_flush": "Runoff ratio at least 2.0, intense-rain footprint reached, and at least two wet five-minute frames: strong refill/flush potential; full pools possible"
+      "confirmation_incomplete": "Runoff ratio at least 1.0 without the duration confirmation test: the empty-storage volume threshold was met, but a likely-full statement is withheld",
+      "likely_full": "Runoff ratio at least 1.0 and at least two wet five-minute frames: major refill likely; pools may be full",
+      "full_flush": "Runoff ratio at least 2.0 and at least two wet five-minute frames: strong refill/flush potential; full pools possible"
     },
     "limitations": [
       "Only Zero G has a mapped depression-volume anchor. Other storage targets depend on technical-section lengths and user-assigned morphology modifiers.",
@@ -122,6 +122,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": 0.14,
+      "peak_flow_calibration": "Provisional field calibration from one estimated 3\u20136 cfs flash",
       "hydrology": {
         "name": "ZeroG",
         "area_sq_mi": 1.359,
@@ -329,6 +331,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Black Hole of White Canyon",
         "area_sq_mi": 262.582,
@@ -545,6 +549,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Leprechaun",
         "area_sq_mi": 1.117,
@@ -750,6 +756,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Woody",
         "area_sq_mi": 0.477,
@@ -954,6 +962,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Hog Canyons",
         "area_sq_mi": 1.488,
@@ -1164,6 +1174,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "No Kidding",
         "area_sq_mi": 0.34,
@@ -1369,6 +1381,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Angel Cove",
         "area_sq_mi": 1.399,
@@ -1576,6 +1590,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Constrychnine",
         "area_sq_mi": 0.365,
@@ -1778,6 +1794,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Alcatraz",
         "area_sq_mi": 8.887,
@@ -1986,6 +2004,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Poe",
         "area_sq_mi": 1.526,
@@ -2194,6 +2214,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Entrajo",
         "area_sq_mi": 1.786,
@@ -2402,6 +2424,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Pool Arch",
         "area_sq_mi": 0.701,
@@ -2606,6 +2630,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "The Squeeze",
         "area_sq_mi": 7.028,
@@ -2812,6 +2838,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Cable Canyon",
         "area_sq_mi": 3.89,
@@ -3017,6 +3045,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Eardley",
         "area_sq_mi": 77.36,
@@ -3231,6 +3261,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "North Fork of Iron Wash",
         "area_sq_mi": 3.254,
@@ -3436,6 +3468,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Upper Greasewood",
         "area_sq_mi": 3.581,
@@ -3644,6 +3678,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Wonderland Canyon",
         "area_sq_mi": 0.581,
@@ -3851,6 +3887,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Hogwarts",
         "area_sq_mi": 0.188,
@@ -4060,6 +4098,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Neon",
         "area_sq_mi": 6.265,
@@ -4267,6 +4307,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Quandary",
         "area_sq_mi": 0.822,
@@ -4472,6 +4514,8 @@
           "minimum_coverage_percent": 10.0
         }
       ],
+      "peak_flow_factor": null,
+      "peak_flow_calibration": "Uncalibrated experimental estimate",
       "hydrology": {
         "name": "Yankee Doodle",
         "area_sq_mi": 4.446,
