@@ -114,7 +114,10 @@ jobs:
               "recent-rain sorting": "eventSortTime" in app,
               "fill bubbles": "summary-bubble" in app,
               "metric hover help": "metric-tooltip" in app,
-              "clear archive health display": ("At the last completed check" in app and "0 missing" in app),
+              "clear archive health display": (
+                  "Archive current through" in app
+                  and "archive frame${missing === 1 ? \"\" : \"s\"} missing · retry pending" in app
+              ),
               "Moab and Zulu status times": "Zulu:" in app and "Moab:" in app,
               "manual replay guidance": (
                   "manual_replay_from_utc" in tracker
