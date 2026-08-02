@@ -180,6 +180,24 @@ class TrackerTests(unittest.TestCase):
         public = tracker.event_public(event, canyon, self.config)
         self.assertIn("direct_runoff_ft3", public)
         self.assertIn("routed_peak_cfs_range", public)
+
+    def test_zero_g_peak_is_calibrated_without_changing_runoff_volume(self):
+        event = {
+            "start_utc": "2026-07-21T00:00:00Z",
+            "end_utc": "2026-07-21T01:00:00Z",
+            "peak_frame_utc": "2026-07-21T00:30:00Z",
+            "frames": 13,
+            "wet_frames": 13,
+            "basin_rain_inches": 1.0,
+        }
+        public = tracker.event_public(event, self.by_id["zerog"], self.config)
+        self.assertEqual(public["peak_flow_factor"], 0.14)
+        self.assertEqual(public["peak_flow_status"], "provisional_field_calibration")
+        self.assertEqual(
+            public["routed_peak_cfs"],
+            round(public["uncalibrated_routed_peak_cfs"] * 0.14, 2),
+        )
+        self.assertEqual(public["direct_runoff_ft3"], public["generated_runoff_ft3"])
         self.assertNotIn("estimated_runoff_ft3", public)
         self.assertNotIn("estimated_peak_cfs", public)
         self.assertIn("decision_tests", public)
@@ -201,8 +219,9 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("timestamp-keyed ledger", method["frame_reconciliation_explanation"])
         self.assertIn("25 dBZ", method["rain_event_explanation"])
         self.assertIn("30 consecutive minutes", method["rain_event_explanation"])
-        self.assertIn("previous seven days", method["cumulative_refill_explanation"])
-        self.assertIn("evidence freshness", method["pool_loss_explanation"])
+        self.assertIn("invented numerical loss", method["cumulative_refill_explanation"])
+        self.assertIn("lowers confidence", method["pool_loss_explanation"])
+        self.assertIn("0.14 factor", method["peak_flow_explanation"])
         self.assertEqual(self.config["model"]["storm_dbz_threshold"], 25)
         self.assertIn("S0.05", method["runoff_formula"])
         self.assertIn("HSG D", method["direct_runoff_explanation"])
@@ -223,7 +242,7 @@ class TrackerTests(unittest.TestCase):
             path = Path(directory) / "status.json"
             path.write_text(json.dumps(legacy))
             migrated = tracker.load_status(path, self.canyons)
-        self.assertEqual(migrated["schema_version"], 4)
+        self.assertEqual(migrated["schema_version"], 5)
         self.assertEqual(
             migrated["canyons"]["zerog"]["last_qualifying_event"]["start_utc"],
             "2024-06-21T22:25:00Z",
