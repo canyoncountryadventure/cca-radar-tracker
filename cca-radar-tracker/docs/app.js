@@ -126,18 +126,17 @@ function fillVisual(event) {
 
   const ratio = Math.max(0, Number(event.fill_ratio || 0));
   const percent = Math.min(100, Math.round(ratio * 100));
-  let css = "fill-minor";
-  if (ratio >= 2) css = "fill-flush";
-  else if (ratio >= 1) css = "fill-full";
+  let css = percent === 0 ? "fill-none" : "fill-minor";
+  if (ratio >= 0.9) css = "fill-full";
   else if (ratio >= 0.75) css = "fill-large";
   else if (ratio >= 0.50) css = "fill-substantial";
   else if (ratio >= 0.25) css = "fill-some";
 
   return {
     percent,
-    text: ratio >= 1 ? "100%+" : `${percent}%`,
+    text: `${percent}%`,
     css,
-    title: `Estimated storage-fill ratio: ${number(ratio, 2)}×`,
+    title: `Current modeled condition: ${percent}%`,
   };
 }
 
@@ -704,7 +703,7 @@ function renderRefillHistory(status, model) {
     <p class="event-kicker">CURRENT CONDITION AND REFILL HISTORY</p>
     <h3>Current condition: ${escapeHtml(condition.current_condition || "unknown")} — ${escapeHtml(condition.confidence || "Unknown")} confidence</h3>
     <p class="event-summary">
-      Refill is retained instead of numerically decayed. Confidence ages until logger data support a measured recession model.
+      The percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day. New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
     </p>
     <div class="event-meta-grid">
       ${eventMeta("Last verified", condition.last_verified ? `${number(condition.last_verified.percent, 0)}% — ${dateOnly(condition.last_verified.observed_utc)}` : "No field verification")}

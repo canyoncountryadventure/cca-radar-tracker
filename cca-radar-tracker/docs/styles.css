@@ -182,14 +182,13 @@ a:hover { color: #b7dcff; }
   text-shadow: 0 1px 3px rgba(0,0,0,.9);
 }
 .summary-bubble.fill-none { --bubble-color: #53666d; }
-.summary-bubble.fill-minor { --bubble-color: #688692; }
-.summary-bubble.fill-some { --bubble-color: #e0b14e; }
-.summary-bubble.fill-substantial { --bubble-color: #ef953f; }
-.summary-bubble.fill-large { --bubble-color: #3f98ff; }
-.summary-bubble.fill-full { --bubble-color: #49c77f; }
-.summary-bubble.fill-flush {
-  --bubble-color: #e96acb;
-  box-shadow: 0 0 0 3px rgba(233,106,203,.15), inset 0 0 0 2px rgba(255,255,255,.05);
+.summary-bubble.fill-minor { --bubble-color: #c66d35; }
+.summary-bubble.fill-some { --bubble-color: #d6ad3f; }
+.summary-bubble.fill-substantial { --bubble-color: #4e9ac7; }
+.summary-bubble.fill-large { --bubble-color: #257ed0; }
+.summary-bubble.fill-full {
+  --bubble-color: #135fbd;
+  box-shadow: 0 0 0 3px rgba(37,126,208,.16), inset 0 0 0 2px rgba(255,255,255,.05);
 }
 .summary-name { display: block; font-weight: 780; }
 .summary-condition { display: block; margin-top: 2px; color: var(--muted); font-size: .74rem; line-height: 1.25; }
