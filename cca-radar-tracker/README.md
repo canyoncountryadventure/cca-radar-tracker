@@ -109,7 +109,8 @@ The dashboard includes:
 - Blue watershed polygons and retained peak-event radar pixels
 - Clickable 90-day storm dates that redraw the map with the selected event
 - Persistent current-condition estimate that is not reset by a dry or weak storm
-- Confidence that ages instead of numerically decaying an unmeasured pool level
+- A provisional 0.8-percentage-point daily decrease, with new modeled runoff added to the current percentage and capped at 100%
+- Confidence that also declines as the supporting observation or refill event ages
 - Zero G field anchor: 98% full on August 1, 2026
 - Permanent largest-event and historical seven-day-high dates
 - Last rain event with Atlas 14 equivalent

@@ -1983,18 +1983,44 @@ def cumulative_refill_evidence(
         else None
     )
 
+    decay_points_per_day = max(
+        0.0, float(config.get("condition_decay_percentage_points_per_day", 0.8))
+    )
+    decay_ratio_per_day = decay_points_per_day / 100.0
+
+    def apply_decay(value: float, start: datetime, end: datetime) -> float:
+        elapsed_days = max(0.0, (end - start).total_seconds() / 86400.0)
+        return max(0.0, value - decay_ratio_per_day * elapsed_days)
+
     if anchor:
         basis_time = parse_utc(str(anchor["observed_utc"]))
         condition_ratio = float(anchor["percent"]) / 100.0
+        condition_time = basis_time
         for event in events:
-            if event_end_utc(event) > basis_time:
-                condition_ratio += max(0.0, float(event.get("fill_ratio") or 0.0))
-        condition_ratio = min(1.0, condition_ratio)
+            event_time = event_end_utc(event)
+            if event_time > basis_time:
+                condition_ratio = apply_decay(condition_ratio, condition_time, event_time)
+                condition_ratio = min(
+                    1.0,
+                    condition_ratio + max(0.0, float(event.get("fill_ratio") or 0.0)),
+                )
+                condition_time = event_time
+        condition_ratio = apply_decay(condition_ratio, condition_time, now)
         basis = "Field verified"
         last_verified = dict(anchor)
     elif last_meaningful:
         basis_time = event_end_utc(last_meaningful)
-        condition_ratio = min(1.0, balance / target) if target > 0 else 0.0
+        condition_ratio = 0.0
+        condition_time = event_end_utc(events[0])
+        for event in events:
+            event_time = event_end_utc(event)
+            condition_ratio = apply_decay(condition_ratio, condition_time, event_time)
+            condition_ratio = min(
+                1.0,
+                condition_ratio + max(0.0, float(event.get("fill_ratio") or 0.0)),
+            )
+            condition_time = event_time
+        condition_ratio = apply_decay(condition_ratio, condition_time, now)
         basis = "Modeled refill history"
         last_verified = None
     else:
@@ -2003,7 +2029,10 @@ def cumulative_refill_evidence(
         basis = "No meaningful refill recorded"
         last_verified = None
 
-    age_days = max(0.0, (now - basis_time).total_seconds() / 86400.0)
+    confidence_time = basis_time
+    if last_meaningful:
+        confidence_time = max(confidence_time, event_end_utc(last_meaningful))
+    age_days = max(0.0, (now - confidence_time).total_seconds() / 86400.0)
     if not anchor and not last_meaningful:
         confidence = "Unknown"
     elif age_days <= 14:
@@ -2031,12 +2060,14 @@ def cumulative_refill_evidence(
         "current_condition": current_condition,
         "confidence": confidence,
         "confidence_age_days": round(age_days, 1),
+        "confidence_basis_utc": utc_text(confidence_time),
         "basis": basis,
         "basis_utc": utc_text(basis_time),
         "last_verified": last_verified,
         "last_meaningful_refill_utc": last_meaningful_utc,
-        "loss_model": "not_applied_pending_logger_calibration",
-        "retention_class": "logger calibration pending" if canyon.canyon_id == "zerog" else "unclassified",
+        "loss_model": "provisional_linear_decay",
+        "decay_percentage_points_per_day": decay_points_per_day,
+        "retention_class": "provisional Zero G field calibration",
     }
 
 
@@ -2262,7 +2293,7 @@ def scheduled_timestamps(
 ) -> list[datetime]:
     """Return catch-up timestamps plus an overlapping live/archive reconciliation window."""
     frame_minutes = int(config["model"]["frame_minutes"])
-    overlap_minutes = int(config.get("reconciliation_window_minutes", 90))
+    overlap_minutes = int(config.get("reconciliation_window_minutes", 240))
     overlap_start = floor_five_minutes(
         latest_complete - timedelta(minutes=overlap_minutes)
     )
@@ -2283,7 +2314,7 @@ def scheduled_timestamps(
     else:
         catchup_start = floor_five_minutes(
             latest_complete
-            - timedelta(minutes=int(config.get("schedule_lookback_minutes", 180)))
+            - timedelta(minutes=int(config.get("schedule_lookback_minutes", 240)))
         )
     catchup_end = overlap_start - timedelta(minutes=frame_minutes)
     if catchup_start <= catchup_end:
@@ -2396,7 +2427,7 @@ def model_metadata(
                 "before the trigger is also included when it falls within that dry-gap window."
             ),
             "frame_reconciliation_explanation": (
-                "Each run rechecks an overlapping 90-minute window. Newest frames are "
+                f"Each run rechecks an overlapping {config.get('reconciliation_window_minutes', 240)}-minute window. Newest frames are "
                 "provisional; once the exact timestamped IEM WMS-T frame is old enough, "
                 "it replaces the provisional record. Events are rebuilt from a "
                 "timestamp-keyed ledger so repeated frames cannot double-count rainfall. "
@@ -2461,14 +2492,16 @@ def model_metadata(
                 "not explicitly subtract channel transmission losses."
             ),
             "cumulative_refill_explanation": (
-                "The current condition retains meaningful modeled refill instead of resetting "
-                "or applying an invented numerical loss. A later dry or weak event cannot lower "
-                "the condition. Detailed events and peak radar maps are retained for 90 days."
+                f"The current condition applies a provisional linear loss of "
+                f"{config.get('condition_decay_percentage_points_per_day', 0.8):g} percentage "
+                "point per day. New modeled runoff is added to the decayed balance and capped "
+                "at 100%. Detailed events and peak radar maps are retained for 90 days."
             ),
             "pool_loss_explanation": (
-                "Elapsed time lowers confidence in the retained condition, not the displayed "
-                "percentage. Zero G's shaded persistent-pool and full-sun fast-drying loggers "
-                "will support separate recession curves after enough storm cycles are recorded."
+                f"The temporary {config.get('condition_decay_percentage_points_per_day', 0.8):g}-point daily loss is based on "
+                "Zero G being full on July 29 and field-verified at 98% on August 1. It applies "
+                "to every canyon until logger and field measurements support canyon-specific "
+                "and seasonal recession curves. Confidence also declines as observations age."
             ),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
@@ -2483,8 +2516,8 @@ def model_metadata(
                 "much watershed runoff a given rain depth can generate."
             ),
             "condition_language": (
-                "Condition statements retain the latest credible refill estimate while confidence "
-                "ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' "
+                "Condition statements combine modeled refill with the provisional daily loss while "
+                "confidence ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' "
                 "requires the storage-volume and minimum wet-duration tests; dBZ footprints are "
                 "context only."
             ),
@@ -2575,9 +2608,9 @@ def model_metadata(
                     "transmission losses, diversions, and disconnected subbasins can reduce delivery."
                 ),
                 (
-                    "Existing pool level is unknown. Cumulative no-loss evidence preserves "
-                    "multiple storm contributions, but evaporation, seepage, drainage, and "
-                    "starting pool level are not yet modeled."
+                    "Existing pool level is not directly measured. The current percentage uses "
+                    "the provisional daily loss; the separate cumulative evidence total preserves "
+                    "modeled storm additions without losses for historical comparison only."
                 ),
                 (
                     "Radar reflectivity is an indirect rainfall estimate; hail and radar "

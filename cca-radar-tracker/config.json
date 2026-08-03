@@ -2,8 +2,8 @@
   "title": "Slot Canyon Pool Conditions",
   "timezone": "America/Denver",
   "recent_window_days": 14,
-  "schedule_lookback_minutes": 180,
-  "reconciliation_window_minutes": 90,
+  "schedule_lookback_minutes": 240,
+  "reconciliation_window_minutes": 240,
   "frame_ledger_retention_hours": 72,
   "archive_confirmation_delay_minutes": 10,
   "missing_frame_warning_minutes": 20,
@@ -42,5 +42,6 @@
   "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png",
   "event_detail_retention_days": 90,
   "recent_refill_window_days": 7,
+  "condition_decay_percentage_points_per_day": 0.8,
   "max_retained_events_per_canyon": 500
 }
