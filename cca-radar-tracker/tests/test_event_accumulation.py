@@ -255,15 +255,17 @@ class EventAccumulationTests(unittest.TestCase):
             50,
         )
 
-    def test_zero_g_field_anchor_persists_without_numeric_decay(self):
+    def test_zero_g_field_anchor_uses_provisional_numeric_decay(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
         tracker.cumulative_refill_evidence(status, canyon, self.config)
         condition = status["condition_estimate"]
-        self.assertEqual(condition["percent"], 98)
+        self.assertLess(condition["percent"], 98)
+        self.assertGreaterEqual(condition["percent"], 95)
         self.assertEqual(condition["basis"], "Field verified")
         self.assertEqual(condition["last_verified"]["observed_utc"], "2026-08-01T12:00:00Z")
-        self.assertEqual(condition["loss_model"], "not_applied_pending_logger_calibration")
+        self.assertEqual(condition["loss_model"], "provisional_linear_decay")
+        self.assertEqual(condition["decay_percentage_points_per_day"], 0.8)
 
     def test_event_after_field_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)
@@ -275,7 +277,7 @@ class EventAccumulationTests(unittest.TestCase):
             "fill_ratio": 0.1,
         }]
         tracker.cumulative_refill_evidence(status, canyon, self.config)
-        self.assertEqual(status["condition_estimate"]["percent"], 100)
+        self.assertGreaterEqual(status["condition_estimate"]["percent"], 98)
 
     def test_moving_storm_core_accumulates_at_its_actual_pixels(self):
         canyon = spatial_canyon_fixture()
