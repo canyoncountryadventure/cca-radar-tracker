@@ -208,6 +208,7 @@ jobs:
       - name: Restore previously published tracker state
         env:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
+          STATUS_BACKUP_URL: https://raw.githubusercontent.com/${{ github.repository }}/operational-data/latest/status.json
         run: |
           set -euo pipefail
           mkdir -p cca-radar-tracker/docs/data
@@ -249,9 +250,28 @@ jobs:
           PY
             mv "$temporary" cca-radar-tracker/docs/data/status.json
           else
-            rm -f "$temporary"
-            echo "Published operational state is unavailable; refusing stale checked-out fallback."
-            exit 1
+            echo "Published state unavailable; attempting the durable operational-data backup."
+            if curl --fail --silent --show-error --location --max-time 30 \
+              --header "Cache-Control: no-cache" \
+              "${STATUS_BACKUP_URL}?${cache_buster}" \
+              --output "$temporary"; then
+              python - "$temporary" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          status = json.loads(path.read_text(encoding="utf-8"))
+          if not isinstance(status.get("canyons"), dict):
+              raise SystemExit("Backup status.json does not contain canyon state")
+          print("Restored durable operational-data backup.")
+          PY
+              mv "$temporary" cca-radar-tracker/docs/data/status.json
+            else
+              rm -f "$temporary"
+              echo "Neither published state nor the durable backup is available."
+              exit 1
+            fi
           fi
 
       - name: Analyze and reconcile radar frames
@@ -400,6 +420,69 @@ jobs:
               "all Atlas 14 durations, and the front-end data contract."
           )
           PY
+
+      - name: Back up operational state daily and after meaningful refill changes
+        env:
+          DATA_BRANCH: operational-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          backup_worktree="$(mktemp -d)"
+          if git ls-remote --exit-code --heads origin "$DATA_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
+            git worktree add "$backup_worktree" "$DATA_BRANCH"
+          else
+            git worktree add -b "$DATA_BRANCH" "$backup_worktree" HEAD
+          fi
+
+          mkdir -p "$backup_worktree/latest"
+          backup_date="$(date -u +%F)"
+          daily_path="$backup_worktree/backups/$backup_date/status.json"
+          latest_path="$backup_worktree/latest/status.json"
+          should_backup="$(python - \
+            cca-radar-tracker/docs/data/status.json \
+            "$latest_path" \
+            "$daily_path" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          current_path, latest_path, daily_path = map(Path, sys.argv[1:])
+          if not daily_path.exists() or not latest_path.exists():
+              print("yes")
+              raise SystemExit
+
+          current = json.loads(current_path.read_text(encoding="utf-8"))
+          previous = json.loads(latest_path.read_text(encoding="utf-8"))
+
+          def meaningful_times(status):
+              return {
+                  canyon_id: (canyon.get("condition_estimate") or {}).get(
+                      "last_meaningful_refill_utc"
+                  )
+                  for canyon_id, canyon in (status.get("canyons") or {}).items()
+              }
+
+          print("yes" if meaningful_times(current) != meaningful_times(previous) else "no")
+          PY
+          )"
+
+          if [[ "$should_backup" == "yes" ]]; then
+            mkdir -p "$(dirname "$daily_path")"
+            cp cca-radar-tracker/docs/data/status.json "$latest_path"
+            cp cca-radar-tracker/docs/data/status.json "$daily_path"
+            git -C "$backup_worktree" add -- latest/status.json "backups/$backup_date/status.json"
+            if ! git -C "$backup_worktree" diff --cached --quiet; then
+              git -C "$backup_worktree" commit -m "Back up operational state $backup_date"
+              git -C "$backup_worktree" push origin "$DATA_BRANCH"
+            fi
+          else
+            echo "Today's backup exists and no meaningful refill timestamp changed."
+          fi
+
+          git worktree remove "$backup_worktree"
 
       - name: Commit generated website reference data
         run: |
