@@ -2,7 +2,6 @@ import json
 import sys
 import unittest
 from datetime import datetime, timedelta, timezone
-from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -270,9 +269,10 @@ class EventAccumulationTests(unittest.TestCase):
     def test_event_after_field_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
+        event_time = datetime.now(timezone.utc) - timedelta(hours=1)
         status["events"] = [{
-            "start_utc": "2026-08-01T18:00:00Z",
-            "end_utc": "2026-08-01T18:00:00Z",
+            "start_utc": tracker.utc_text(event_time),
+            "end_utc": tracker.utc_text(event_time),
             "direct_runoff_ft3": 10,
             "fill_ratio": 0.1,
         }]
@@ -359,6 +359,9 @@ class EventAccumulationTests(unittest.TestCase):
             [[0.1, 0.1], [0.0, 0.0]],
         )
 
+
+if __name__ == "__main__":
+    unittest.main()
 
 if __name__ == "__main__":
     unittest.main()
