@@ -257,10 +257,12 @@ class EventAccumulationTests(unittest.TestCase):
     def test_zero_g_field_anchor_uses_provisional_numeric_decay(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
-        tracker.cumulative_refill_evidence(status, canyon, self.config)
+        evaluation_time = datetime(2026, 8, 4, 12, tzinfo=timezone.utc)
+        tracker.cumulative_refill_evidence(
+            status, canyon, self.config, now_utc=evaluation_time
+        )
         condition = status["condition_estimate"]
-        self.assertLess(condition["percent"], 98)
-        self.assertGreaterEqual(condition["percent"], 95)
+        self.assertEqual(condition["percent"], 96)
         self.assertEqual(condition["basis"], "Field verified")
         self.assertEqual(condition["last_verified"]["observed_utc"], "2026-08-01T12:00:00Z")
         self.assertEqual(condition["loss_model"], "provisional_linear_decay")
@@ -269,15 +271,18 @@ class EventAccumulationTests(unittest.TestCase):
     def test_event_after_field_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
-        event_time = datetime.now(timezone.utc) - timedelta(hours=1)
+        evaluation_time = datetime(2026, 8, 4, 12, tzinfo=timezone.utc)
+        event_time = evaluation_time - timedelta(hours=1)
         status["events"] = [{
             "start_utc": tracker.utc_text(event_time),
             "end_utc": tracker.utc_text(event_time),
             "direct_runoff_ft3": 10,
             "fill_ratio": 0.1,
         }]
-        tracker.cumulative_refill_evidence(status, canyon, self.config)
-        self.assertGreaterEqual(status["condition_estimate"]["percent"], 98)
+        tracker.cumulative_refill_evidence(
+            status, canyon, self.config, now_utc=evaluation_time
+        )
+        self.assertEqual(status["condition_estimate"]["percent"], 100)
 
     def test_moving_storm_core_accumulates_at_its_actual_pixels(self):
         canyon = spatial_canyon_fixture()
@@ -359,9 +364,6 @@ class EventAccumulationTests(unittest.TestCase):
             [[0.1, 0.1], [0.0, 0.0]],
         )
 
-
-if __name__ == "__main__":
-    unittest.main()
 
 if __name__ == "__main__":
     unittest.main()
