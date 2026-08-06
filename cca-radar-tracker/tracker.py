@@ -1771,6 +1771,8 @@ def cumulative_refill_evidence(
     canyon_status: dict[str, Any],
     canyon: Canyon,
     config: dict[str, Any],
+    *,
+    now_utc: datetime | None = None,
 ) -> None:
     """Build persistent condition, 90-day details, and permanent peak records."""
     candidates = list(canyon_status.get("events", []))
@@ -1793,7 +1795,7 @@ def cumulative_refill_evidence(
     target = float(canyon.model["fill_target_ft3"])
     window_days = int(config.get("recent_refill_window_days", 7))
     retention_days = int(config.get("event_detail_retention_days", 90))
-    now = datetime.now(timezone.utc)
+    now = now_utc.astimezone(UTC) if now_utc is not None else datetime.now(UTC)
     if events and now < event_end_utc(events[-1]):
         now = event_end_utc(events[-1])
 
