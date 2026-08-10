@@ -133,9 +133,9 @@ jobs:
                   "cumulative_refill_evidence" in tracker
                   and "renderRefillHistory" in app
               ),
-              "peak-event radar is canyon-click default": (
-                  "function peakEventRadar" in app
-                  and "app.selectedEvent = peakEventRadar(canyonStatus(id))" in app
+              "most-recent storm radar is canyon-click default": (
+                  "function mostRecentStormRadar" in app
+                  and "app.selectedEvent = mostRecentStormRadar(canyonStatus(id))" in app
               ),
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
@@ -323,7 +323,7 @@ jobs:
               "alcatraz": 54540,
               "cable-canyon": 262210,
               "constrychnine": 20977,
-              "eardley": 132853,
+              "eardley": 265706,
               "north-fork-iron-wash": 52442,
               "poe": 90899,
               "the-squeeze": 152956,
@@ -498,39 +498,3 @@ jobs:
 
       - name: Commit generated website reference data
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             cca-radar-tracker/docs/data/model.json             cca-radar-tracker/docs/watersheds.geojson
-
-          if git diff --cached --quiet; then
-            echo "Website model and watershed polygons are already current."
-          else
-            git commit -m "Update canyon model and watershed polygons"
-            git push
-          fi
-
-      - name: Send canyon refill and missing-frame alerts
-        working-directory: cca-radar-tracker
-        env:
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          SMTP_USERNAME: canyoncountryadventure@gmail.com
-          ALERT_TO: canyoncountryadventure@gmail.com
-          SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
-        run: |
-          if [[ "$SEND_TEST_EMAIL" == "true" ]]; then
-            python send_alert.py --test
-          else
-            python send_alert.py
-          fi
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload website
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: cca-radar-tracker/docs
-
-      - name: Publish website
-        id: deployment
-        uses: actions/deploy-pages@v5
