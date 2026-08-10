@@ -183,6 +183,32 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("routed_peak_cfs_range", public)
         self.assertEqual(public["accumulated_rain_grid_inches"], [[0.1, 0.2]])
 
+    def test_event_public_reports_watershed_grid_max_and_weighted_mean_check(self):
+        canyon = self.by_id["zerog"]
+        accumulated = np.full(canyon.weights.shape, 0.3, dtype=np.float32)
+        first_inside = np.argwhere(canyon.weights > 0)[0]
+        accumulated[tuple(first_inside)] = 0.6
+        weighted_mean = float((accumulated * canyon.weights).sum() / canyon.weights.sum())
+        event = {
+            "start_utc": "2026-08-09T21:00:00Z",
+            "end_utc": "2026-08-09T22:00:00Z",
+            "peak_frame_utc": "2026-08-09T21:30:00Z",
+            "frames": 13,
+            "wet_frames": 13,
+            "basin_rain_inches": round(weighted_mean, 4),
+            "accumulated_rain_grid_inches": tracker.grid_list(accumulated, 4),
+            "spatial_gate_seen": False,
+            "peak_dbz": 50.0,
+        }
+        public = tracker.event_public(event, canyon, self.config)
+        self.assertEqual(public["maximum_watershed_cell_storm_inches"], 0.6)
+        self.assertAlmostEqual(
+            public["accumulation_grid_area_weighted_mean_inches"],
+            weighted_mean,
+            places=3,
+        )
+        self.assertTrue(public["accumulation_grid_mean_consistent"])
+
     def test_zero_g_peak_is_calibrated_without_changing_runoff_volume(self):
         event = {
             "start_utc": "2026-07-21T00:00:00Z",
