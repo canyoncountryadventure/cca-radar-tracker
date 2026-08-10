@@ -8,7 +8,7 @@
   "archive_confirmation_delay_minutes": 10,
   "missing_frame_warning_minutes": 20,
   "maximum_unknown_watershed_percent": 20,
-  "max_catchup_frames_per_run": 72,
+  "max_catchup_frames_per_run": 95,
   "max_frames_per_run": 144,
   "request_timeout_seconds": 30,
   "request_retries": 3,
