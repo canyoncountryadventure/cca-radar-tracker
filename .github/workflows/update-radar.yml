@@ -133,9 +133,9 @@ jobs:
                   "cumulative_refill_evidence" in tracker
                   and "renderRefillHistory" in app
               ),
-              "peak-event radar is canyon-click default": (
-                  "function peakEventRadar" in app
-                  and "app.selectedEvent = peakEventRadar(canyonStatus(id))" in app
+              "most-recent storm radar is canyon-click default": (
+                  "function mostRecentStormRadar" in app
+                  and "app.selectedEvent = mostRecentStormRadar(canyonStatus(id))" in app
               ),
               "event cards before metrics": (
                   index.find('class="events-grid"') < index.find('id="metrics-grid"')
@@ -323,7 +323,7 @@ jobs:
               "alcatraz": 54540,
               "cable-canyon": 262210,
               "constrychnine": 20977,
-              "eardley": 132853,
+              "eardley": 265706,
               "north-fork-iron-wash": 52442,
               "poe": 90899,
               "the-squeeze": 152956,
