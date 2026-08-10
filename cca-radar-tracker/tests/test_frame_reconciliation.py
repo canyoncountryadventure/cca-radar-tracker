@@ -157,6 +157,7 @@ class FrameReconciliationTests(unittest.TestCase):
     def test_planned_first_frame_is_reported_missing_when_fetch_never_succeeds(self):
         status = tracker.empty_status([self.canyon])
         tracker.note_planned_ledger_start(status, dt("2026-07-26T23:00:00Z"))
+        tracker.record_frame_attempt(status, dt("2026-07-26T23:00:00Z"), False)
         tracker.upsert_frame_record(status, dry_record("2026-07-26T23:05:00Z"))
         tracker.update_frame_health(
             status, dt("2026-07-26T23:20:00Z"), self.config
@@ -173,6 +174,8 @@ class FrameReconciliationTests(unittest.TestCase):
             "2026-07-26T23:15:00Z",
         ):
             tracker.upsert_frame_record(status, dry_record(timestamp))
+        tracker.record_frame_attempt(status, dt("2026-07-26T23:05:00Z"), False)
+        tracker.record_frame_attempt(status, dt("2026-07-26T23:20:00Z"), False)
         tracker.update_frame_health(
             status, dt("2026-07-26T23:30:00Z"), self.config
         )
@@ -186,7 +189,7 @@ class FrameReconciliationTests(unittest.TestCase):
         )
         self.assertEqual(
             status["latest_archive_confirmed_frame_utc"],
-            "2026-07-26T23:00:00Z",
+            "2026-07-26T23:15:00Z",
         )
         self.assertEqual(
             status["earliest_missing_archive_frame_utc"],
@@ -196,6 +199,46 @@ class FrameReconciliationTests(unittest.TestCase):
             status["manual_replay_from_utc"],
             "2026-07-26T23:05:00Z",
         )
+
+    def test_pruning_ledger_does_not_manufacture_missing_frames(self):
+        status = tracker.empty_status([self.canyon])
+        for hour in range(4):
+            tracker.upsert_frame_record(
+                status, dry_record(f"2026-07-26T{hour:02d}:00:00Z")
+            )
+        config = {**self.config, "frame_ledger_retention_hours": 1}
+        latest = dt("2026-07-26T04:00:00Z")
+        tracker.prune_frame_ledger(status, latest, config)
+        tracker.update_frame_health(status, latest, config)
+        self.assertEqual(status["missing_archive_frames_utc"], [])
+
+    def test_scheduler_advances_real_outage_backlog_oldest_first(self):
+        status = tracker.empty_status([self.canyon])
+        status["last_checked_utc"] = "2026-07-26T12:02:00Z"
+        config = {
+            **self.config,
+            "reconciliation_window_minutes": 60,
+            "max_frames_per_run": 24,
+            "max_catchup_frames_per_run": 12,
+        }
+        values = tracker.scheduled_timestamps(
+            status, config, dt("2026-07-26T18:00:00Z")
+        )
+        self.assertIn(dt("2026-07-26T12:05:00Z"), values)
+        self.assertNotIn(dt("2026-07-26T14:00:00Z"), values)
+        self.assertIn(dt("2026-07-26T18:00:00Z"), values)
+        self.assertIn(
+            "2026-07-26T14:00:00Z", status["missing_archive_frames_utc"]
+        )
+
+        for value in values:
+            if value < dt("2026-07-26T17:00:00Z"):
+                tracker.record_frame_attempt(status, value, True)
+        status["last_checked_utc"] = "2026-07-26T18:02:00Z"
+        next_values = tracker.scheduled_timestamps(
+            status, config, dt("2026-07-26T19:00:00Z")
+        )
+        self.assertIn(dt("2026-07-26T13:05:00Z"), next_values)
 
     def test_rebuild_is_idempotent_and_retains_radar_grids(self):
         status = tracker.empty_status([self.canyon])
