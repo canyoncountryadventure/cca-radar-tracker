@@ -2213,19 +2213,19 @@ def update_frame_health(
     confirmation_end = floor_five_minutes(
         latest_reference - timedelta(minutes=delay)
     )
-    started_text = status.get("ledger_started_utc")
-    if not started_text or parse_utc(started_text) > confirmation_end:
-        expected: list[datetime] = []
-    else:
-        expected = list(
-            iter_five_minutes(parse_utc(started_text), confirmation_end)
-        )
-
-    missing = [
+    # The retry queue is authoritative.  Do not infer missing frames from gaps in
+    # the rolling ledger: old confirmed records are intentionally pruned and a
+    # sparse ledger is not proof that an archive request failed.
+    queued = {
+        parse_utc(value)
+        for value in status.get("missing_archive_frames_utc", [])
+        if parse_utc(value) <= confirmation_end
+    }
+    missing = sorted(
         timestamp
-        for timestamp in expected
+        for timestamp in queued
         if not ledger.get(utc_text(timestamp), {}).get("confirmed")
-    ]
+    )
     stale = [
         timestamp
         for timestamp in missing
@@ -2243,11 +2243,10 @@ def update_frame_health(
         utc_text(earliest_missing) if earliest_missing else None
     )
 
-    confirmed_through: datetime | None = None
-    for timestamp in expected:
-        if not ledger.get(utc_text(timestamp), {}).get("confirmed"):
-            break
-        confirmed_through = timestamp
+    confirmed_frames = sorted(
+        parse_utc(key) for key, value in ledger.items() if value.get("confirmed")
+    )
+    confirmed_through = confirmed_frames[-1] if confirmed_frames else None
     status["latest_archive_confirmed_frame_utc"] = (
         utc_text(confirmed_through) if confirmed_through else None
     )
@@ -2301,18 +2300,19 @@ def scheduled_timestamps(
     )
     overlap = list(iter_five_minutes(overlap_start, latest_complete))
 
-    ledger = status.get("frame_ledger", {})
     catchup_candidates: list[datetime] = []
     for value in status.get("missing_archive_frames_utc", []):
         timestamp = parse_utc(value)
         if timestamp < overlap_start:
             catchup_candidates.append(timestamp)
 
-    confirmed = status.get("latest_archive_confirmed_frame_utc")
-    if confirmed:
-        catchup_start = parse_utc(confirmed) + timedelta(minutes=frame_minutes)
-    elif status.get("ledger_started_utc"):
-        catchup_start = parse_utc(status["ledger_started_utc"])
+    # A scheduler outage creates a real chronological backlog.  Base it on the
+    # prior completed run, never on the first retained ledger record.
+    last_checked = status.get("last_checked_utc")
+    if last_checked:
+        catchup_start = floor_five_minutes(parse_utc(last_checked)) + timedelta(
+            minutes=frame_minutes
+        )
     else:
         catchup_start = floor_five_minutes(
             latest_complete
@@ -2321,9 +2321,14 @@ def scheduled_timestamps(
     catchup_end = overlap_start - timedelta(minutes=frame_minutes)
     if catchup_start <= catchup_end:
         for timestamp in iter_five_minutes(catchup_start, catchup_end):
-            record = ledger.get(utc_text(timestamp))
-            if not record or not record.get("confirmed"):
-                catchup_candidates.append(timestamp)
+            catchup_candidates.append(timestamp)
+
+    # Persist the entire genuine outage interval before applying this run's
+    # processing cap.  Otherwise last_checked_utc would advance and orphan the
+    # unprocessed remainder on the next run.
+    pending = set(status.get("missing_archive_frames_utc", []))
+    pending.update(utc_text(value) for value in catchup_candidates)
+    status["missing_archive_frames_utc"] = sorted(pending)
 
     catchup = sorted(set(catchup_candidates))[
         : int(config.get("max_catchup_frames_per_run", 72))
@@ -2332,6 +2337,19 @@ def scheduled_timestamps(
     room = max(0, maximum - len(overlap))
     selected = sorted(set(catchup[:room] + overlap))
     return selected
+
+
+def record_frame_attempt(
+    status: dict[str, Any], timestamp: datetime, confirmed: bool
+) -> None:
+    """Update the explicit retry queue after one scheduled archive attempt."""
+    key = utc_text(timestamp)
+    pending = set(status.get("missing_archive_frames_utc", []))
+    if confirmed:
+        pending.discard(key)
+    else:
+        pending.add(key)
+    status["missing_archive_frames_utc"] = sorted(pending)
 
 
 def process_timestamp(
@@ -2767,6 +2785,7 @@ def main() -> int:
             )
             if upsert_frame_record(status, record):
                 replaced += 1
+            record_frame_attempt(status, timestamp, bool(record.get("confirmed")))
             wet_canyons = [
                 canyon_id
                 for canyon_id, values in summary.items()
@@ -2789,6 +2808,7 @@ def main() -> int:
             )
             processed += 1
         except Exception as exc:  # pragma: no cover - network/runtime failure path
+            record_frame_attempt(status, timestamp, False)
             failures.append((timestamp, str(exc)))
             print(
                 f"{utc_text(timestamp)}: frame retrieval failed and will be retried: {exc}",
