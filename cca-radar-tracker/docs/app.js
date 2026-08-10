@@ -470,6 +470,7 @@ function drawSelectedRadar() {
   const status = selectedStatus();
   const event = app.selectedEvent || status.last_rain_event || status.latest_analysis;
   const hasAccumulation = Array.isArray(event?.accumulated_rain_grid_inches);
+  const hasPeakGrid = Array.isArray(event?.peak_grid_dbz || event?.grid_dbz);
   const showAccumulation = app.radarView === "accumulation" && hasAccumulation;
   const grid = showAccumulation ? event.accumulated_rain_grid_inches : (event?.peak_grid_dbz || event?.grid_dbz);
   const bbox = event?.grid_bbox;
@@ -480,8 +481,10 @@ function drawSelectedRadar() {
     : "";
   $("radar-time").textContent = showAccumulation
     ? `Total radar-estimated rainfall across the full event — watershed area-weighted mean: ${number(event.basin_rain_inches, 3)} in; maximum watershed cell: ${number(event.maximum_watershed_cell_storm_inches, 3)} in.${meanCheckWarning}`
-    : requestedUnavailableAccumulation
+    : requestedUnavailableAccumulation && hasPeakGrid
     ? "Total-rain map unavailable for this older storm; showing its retained peak dBZ frame instead."
+    : requestedUnavailableAccumulation
+    ? `No retained radar grid is available for the selected storm${event?.end_utc || event?.start_utc ? ` ending ${dateTime(event.end_utc || event.start_utc)}` : ""}.`
     : time
     ? `Peak five-minute reflectivity frame: ${dateTime(time)}`
     : "No retained radar grid for the selected canyon";
@@ -675,6 +678,24 @@ function coverageText(event) {
   return `Peak watershed coverage: 50+ dBZ ${number(p["50"] || 0, 1)}%, 55+ ${number(p["55"] || 0, 1)}%, 60+ ${number(p["60"] || 0, 1)}%.`;
 }
 
+function matchingHistoryEvent(status, historyEvent) {
+  if (!historyEvent) return null;
+  const events = Array.isArray(status?.events) ? status.events : [];
+  const historyStart = historyEvent.start_utc || null;
+  const historyEnd = historyEvent.end_utc || null;
+
+  const exactMatch = events.find((event) =>
+    (event.start_utc || null) === historyStart
+    && (event.end_utc || null) === historyEnd
+  );
+  if (exactMatch) return exactMatch;
+
+  // A retained history row may outlive its detailed radar payload. Never use
+  // an array-position fallback here: events and refill_history are separately
+  // deduplicated and retained, so their indexes are not stable identities.
+  return historyEvent;
+}
+
 function renderEventCard(event, title, emptyText) {
   if (!event) {
     return `
@@ -785,7 +806,8 @@ function renderRefillHistory(status, model) {
   `;
   panel.querySelectorAll("[data-history-index]").forEach((button) => {
     button.addEventListener("click", () => {
-      const event = status.events?.[Number(button.dataset.historyIndex)] || history[Number(button.dataset.historyIndex)];
+      const historyEvent = history[Number(button.dataset.historyIndex)];
+      const event = matchingHistoryEvent(status, historyEvent);
       if (!event) return;
       app.selectedEvent = event;
       drawSelectedRadar();
