@@ -294,6 +294,24 @@ class FrameReconciliationTests(unittest.TestCase):
         self.assertEqual(second["peak_grid_dbz"], [[45.0]])
         self.assertEqual(len(canyon_status["events"]), 2)
 
+    def test_rebuild_retains_accumulation_grids_for_multiple_recent_storms(self):
+        status = tracker.empty_status([self.canyon])
+        for timestamp in (
+            "2026-07-26T20:00:00Z",
+            "2026-07-26T20:05:00Z",
+            "2026-07-26T21:00:00Z",
+            "2026-07-26T21:05:00Z",
+        ):
+            tracker.upsert_frame_record(status, wet_record(timestamp))
+        tracker.upsert_frame_record(status, dry_record("2026-07-26T20:35:00Z"))
+        tracker.upsert_frame_record(status, dry_record("2026-07-26T21:35:00Z"))
+
+        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+
+        events = status["canyons"]["zerog"]["events"]
+        self.assertEqual(len(events), 2)
+        self.assertTrue(all(event.get("accumulated_rain_grid_inches") for event in events))
+
     def test_missing_retained_event_grid_is_restored_from_peak_frame(self):
         status = tracker.empty_status([self.canyon])
         event = {

@@ -47,6 +47,10 @@ a:hover { color: #b7dcff; }
 .map-note { max-width: 520px; text-align: right; }
 .panel-note { max-width: 520px; margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.45; text-align: right; }
 .radar-time { margin: 5px 0 0; color: var(--blue-bright); font-size: .74rem; font-weight: 750; }
+.radar-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 9px; margin-top: 8px; color: var(--muted); font-size: .68rem; }
+.radar-legend-title { color: var(--ink); font-weight: 800; }
+.radar-legend-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.radar-legend-item i { width: 14px; height: 10px; border: 1px solid rgba(255,255,255,.45); border-radius: 2px; background: var(--legend-color); }
 .map-panel { min-width: 0; }
 .map-frame {
   position: relative;

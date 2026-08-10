@@ -468,17 +468,33 @@ function drawSelectedRadar() {
   const grid = showAccumulation ? event.accumulated_rain_grid_inches : (event?.peak_grid_dbz || event?.grid_dbz);
   const bbox = event?.grid_bbox;
   const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
+  const requestedUnavailableAccumulation = app.radarView === "accumulation" && !hasAccumulation;
   $("radar-time").textContent = showAccumulation
     ? `Total radar-estimated rainfall across the event: ${number(event.basin_rain_inches, 3)} in watershed average`
+    : requestedUnavailableAccumulation
+    ? "Total-rain map unavailable for this older storm; showing its retained peak dBZ frame instead."
     : time
     ? `Peak five-minute reflectivity frame: ${dateTime(time)}`
     : "No retained radar grid for the selected canyon";
+
+  const accumulationLegend = [
+    ["<0.01", 0.005], ["0.01–0.05", 0.03], ["0.05–0.10", 0.075],
+    ["0.10–0.25", 0.175], ["0.25–0.50", 0.375], ["0.50–1.00", 0.75],
+    ["1.00–2.00", 1.5], ["2.00+", 2.01],
+  ];
+  const dbzLegend = [10, 20, 30, 40, 50, 60, 70];
+  $("radar-legend").innerHTML = showAccumulation
+    ? `<span class="radar-legend-title">Event rain (in)</span>${accumulationLegend.map(([label, value]) => `<span class="radar-legend-item"><i style="--legend-color:${rainfallColor(value)}"></i>${label}</span>`).join("")}`
+    : `<span class="radar-legend-title">Peak reflectivity (dBZ)</span>${dbzLegend.map((value) => `<span class="radar-legend-item"><i style="--legend-color:${radarColor(value)}"></i>${value}</span>`).join("")}`;
 
   document.querySelectorAll("[data-radar-view]").forEach((button) => {
     const active = button.dataset.radarView === (showAccumulation ? "accumulation" : "peak");
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
-    if (button.dataset.radarView === "accumulation") button.disabled = !hasAccumulation;
+    if (button.dataset.radarView === "accumulation") {
+      button.disabled = !hasAccumulation;
+      button.title = hasAccumulation ? "Show total event rainfall" : "Total-rain map unavailable for this older storm";
+    }
   });
 
   if (!Array.isArray(grid) || !grid.length || !Array.isArray(grid[0]) || !bbox) return;
@@ -746,7 +762,7 @@ function renderRefillHistory(status, model) {
       ${eventMeta("Historic seven-day high", peakWindow ? `${number(peakWindow.percent || 0, 0)}% — ${dateOnly(peakWindow.through_utc)}` : "None")}
     </div>
     <p class="event-coverage">
-      Click any storm date below to replace the map with that event’s retained peak radar frame.
+      Click any storm date below to map that event. Recent storms show total rainfall; older storms without a recoverable accumulation grid clearly fall back to their retained peak radar frame.
     </p>
     <div class="table-wrap">
       <table>
