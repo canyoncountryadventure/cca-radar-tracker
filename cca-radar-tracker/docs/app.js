@@ -337,13 +337,19 @@ function watershedStyle(feature) {
 
 function radarColor(value) {
   if (value == null || value < 10) return "transparent";
-  if (value < 20) return "#183f64";
-  if (value < 30) return "#14715b";
-  if (value < 40) return "#42a84a";
-  if (value < 50) return "#ead943";
-  if (value < 55) return "#f29b38";
-  if (value < 60) return "#ef594f";
-  return "#ec64cf";
+  if (value < 15) return "#04e9e7";
+  if (value < 20) return "#019ff4";
+  if (value < 25) return "#00ff00";
+  if (value < 30) return "#00c000";
+  if (value < 35) return "#008e00";
+  if (value < 40) return "#ffff00";
+  if (value < 45) return "#e7c000";
+  if (value < 50) return "#ff9000";
+  if (value < 55) return "#ff0000";
+  if (value < 60) return "#d60000";
+  if (value < 65) return "#ffffff";
+  if (value < 70) return "#ff00ff";
+  return "#9000c0";
 }
 
 function rainfallColor(inches) {
@@ -469,8 +475,11 @@ function drawSelectedRadar() {
   const bbox = event?.grid_bbox;
   const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
   const requestedUnavailableAccumulation = app.radarView === "accumulation" && !hasAccumulation;
+  const meanCheckWarning = event?.accumulation_grid_mean_consistent === false
+    ? " WARNING: displayed grid mean does not match the reported watershed mean."
+    : "";
   $("radar-time").textContent = showAccumulation
-    ? `Total radar-estimated rainfall across the event: ${number(event.basin_rain_inches, 3)} in watershed average`
+    ? `Total radar-estimated rainfall across the full event — watershed area-weighted mean: ${number(event.basin_rain_inches, 3)} in; maximum watershed cell: ${number(event.maximum_watershed_cell_storm_inches, 3)} in.${meanCheckWarning}`
     : requestedUnavailableAccumulation
     ? "Total-rain map unavailable for this older storm; showing its retained peak dBZ frame instead."
     : time
@@ -482,7 +491,7 @@ function drawSelectedRadar() {
     ["0.10–0.25", 0.175], ["0.25–0.50", 0.375], ["0.50–1.00", 0.75],
     ["1.00–2.00", 1.5], ["2.00+", 2.01],
   ];
-  const dbzLegend = [10, 20, 30, 40, 50, 60, 70];
+  const dbzLegend = [10, 20, 30, 40, 45, 50, 55, 60, 65, 70];
   $("radar-legend").innerHTML = showAccumulation
     ? `<span class="radar-legend-title">Event rain (in)</span>${accumulationLegend.map(([label, value]) => `<span class="radar-legend-item"><i style="--legend-color:${rainfallColor(value)}"></i>${label}</span>`).join("")}`
     : `<span class="radar-legend-title">Peak reflectivity (dBZ)</span>${dbzLegend.map((value) => `<span class="radar-legend-item"><i style="--legend-color:${radarColor(value)}"></i>${value}</span>`).join("")}`;
@@ -593,7 +602,7 @@ function renderMetrics(model, event) {
 
   const cards = [
     metricCard(
-      "Basin-average radar rain",
+      "Watershed area-weighted mean rainfall",
       event ? `${number(event.basin_rain_inches, 3)} in` : "—",
       "area-weighted event accumulation",
       "Radar-estimated rainfall averaged across every grid cell inside the watershed for the retained event. It is not a rain-gauge measurement or the maximum point rainfall.",
@@ -683,7 +692,8 @@ function renderEventCard(event, title, emptyText) {
     <p class="event-result"><strong>${escapeHtml(event.classification_label || "Modeled rain event")}</strong><br>${escapeHtml(event.classification_explanation || "Model classification explanation unavailable.")}</p>
     <div class="event-meta-grid">
       ${eventMeta("End", dateTime(event.end_utc))}
-      ${eventMeta("Basin-average rain", `${number(event.basin_rain_inches, 3)} in`)}
+      ${eventMeta("Area-weighted mean rainfall", `${number(event.basin_rain_inches, 3)} in`)}
+      ${eventMeta("Maximum watershed cell", event.maximum_watershed_cell_storm_inches == null ? "Not available" : `${number(event.maximum_watershed_cell_storm_inches, 3)} in`)}
       ${eventMeta("Atlas 14 context", atlasText(event))}
       ${eventMeta("Estimated watershed runoff", `${number(runoff, 0)} ft³`)}
       ${eventMeta("Routed peak — context", `${number(peak, 2)} cfs`)}
