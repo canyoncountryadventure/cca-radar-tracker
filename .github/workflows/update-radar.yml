@@ -421,7 +421,7 @@ jobs:
           )
           PY
 
-      - name: Back up operational state daily and after meaningful refill changes
+      - name: Back up operational state after meaningful changes
         env:
           DATA_BRANCH: operational-data
         run: |
@@ -465,7 +465,19 @@ jobs:
                   for canyon_id, canyon in (status.get("canyons") or {}).items()
               }
 
-          print("yes" if meaningful_times(current) != meaningful_times(previous) else "no")
+          def retry_state(status):
+              missing = status.get("missing_archive_frames_utc") or []
+              return {
+                  "count": len(missing),
+                  "earliest": missing[0] if missing else None,
+                  "latest": missing[-1] if missing else None,
+              }
+
+          changed = (
+              meaningful_times(current) != meaningful_times(previous)
+              or retry_state(current) != retry_state(previous)
+          )
+          print("yes" if changed else "no")
           PY
           )"
 
@@ -479,7 +491,7 @@ jobs:
               git -C "$backup_worktree" push origin "$DATA_BRANCH"
             fi
           else
-            echo "Today's backup exists and no meaningful refill timestamp changed."
+            echo "Operational refill and retry state are already backed up."
           fi
 
           git worktree remove "$backup_worktree"

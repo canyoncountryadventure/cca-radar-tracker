@@ -2246,7 +2246,16 @@ def update_frame_health(
     confirmed_frames = sorted(
         parse_utc(key) for key, value in ledger.items() if value.get("confirmed")
     )
-    confirmed_through = confirmed_frames[-1] if confirmed_frames else None
+    newest_confirmed = confirmed_frames[-1] if confirmed_frames else None
+    frame_minutes = int(config["model"]["frame_minutes"])
+    # "Confirmed through" means the newest continuously complete point.  A
+    # later confirmed frame must not hide an older retry still waiting in the
+    # queue.
+    confirmed_through = newest_confirmed
+    if earliest_missing and (
+        confirmed_through is None or earliest_missing <= confirmed_through
+    ):
+        confirmed_through = earliest_missing - timedelta(minutes=frame_minutes)
     status["latest_archive_confirmed_frame_utc"] = (
         utc_text(confirmed_through) if confirmed_through else None
     )

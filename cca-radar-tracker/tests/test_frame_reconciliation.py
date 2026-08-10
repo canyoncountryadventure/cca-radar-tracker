@@ -189,7 +189,7 @@ class FrameReconciliationTests(unittest.TestCase):
         )
         self.assertEqual(
             status["latest_archive_confirmed_frame_utc"],
-            "2026-07-26T23:15:00Z",
+            "2026-07-26T23:00:00Z",
         )
         self.assertEqual(
             status["earliest_missing_archive_frame_utc"],
@@ -211,6 +211,29 @@ class FrameReconciliationTests(unittest.TestCase):
         tracker.prune_frame_ledger(status, latest, config)
         tracker.update_frame_health(status, latest, config)
         self.assertEqual(status["missing_archive_frames_utc"], [])
+
+    def test_confirmation_timestamp_stops_before_oldest_missing_frame(self):
+        status = tracker.empty_status([self.canyon])
+        for timestamp in (
+            "2026-07-26T23:00:00Z",
+            "2026-07-26T23:10:00Z",
+            "2026-07-26T23:15:00Z",
+        ):
+            tracker.upsert_frame_record(status, dry_record(timestamp))
+        tracker.record_frame_attempt(status, dt("2026-07-26T23:05:00Z"), False)
+
+        tracker.update_frame_health(
+            status, dt("2026-07-26T23:30:00Z"), self.config
+        )
+
+        self.assertEqual(
+            status["latest_archive_confirmed_frame_utc"],
+            "2026-07-26T23:00:00Z",
+        )
+        self.assertIn(
+            "archive-confirmed through 2026-07-26T23:00:00Z",
+            status["health"]["message"],
+        )
 
     def test_scheduler_advances_real_outage_backlog_oldest_first(self):
         status = tracker.empty_status([self.canyon])
