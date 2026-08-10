@@ -1297,6 +1297,31 @@ def event_public(
     )
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
     public["rainfall_depth_source"] = "base_reflectivity_zr_screening"
+    accumulated_values = public.get("accumulated_rain_grid_inches")
+    if accumulated_values is not None:
+        accumulated = np.asarray(accumulated_values, dtype=np.float32)
+        if accumulated.shape == canyon.weights.shape:
+            watershed_values = accumulated[canyon.weights > 0]
+            if np.any(np.isfinite(watershed_values)):
+                public["maximum_watershed_cell_storm_inches"] = round(
+                    float(np.nanmax(watershed_values)), 3
+                )
+            finite_weights = np.where(np.isfinite(accumulated), canyon.weights, 0.0)
+            finite_weight = float(finite_weights.sum())
+            if finite_weight > 0:
+                grid_mean = float(
+                    (np.nan_to_num(accumulated, nan=0.0) * finite_weights).sum()
+                    / finite_weight
+                )
+                reported_mean = float(public.get("basin_rain_inches") or 0.0)
+                difference = abs(grid_mean - reported_mean)
+                public["accumulation_grid_area_weighted_mean_inches"] = round(
+                    grid_mean, 4
+                )
+                public["accumulation_grid_mean_difference_inches"] = round(
+                    difference, 4
+                )
+                public["accumulation_grid_mean_consistent"] = difference <= 0.002
     public["storm_core_evidence_source"] = "base_reflectivity"
     public["experimental_model_applied"] = False
     public["storage_target_ft3"] = int(canyon.model["fill_target_ft3"])
