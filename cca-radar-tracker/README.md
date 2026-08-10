@@ -58,7 +58,7 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | Alcatraz | 0.65 | +0.20 | 54,540 | 109,080 |
 | Cable Canyon | 2.50 | +0.50 | 262,210 | 524,420 |
 | Constrychnine | 0.60 | -0.50 | 20,977 | 41,954 |
-| Eardley | 1.00 | +0.90 | 132,853 | 265,706 |
+| Eardley | 2.00 | +0.90 | 265,706 | 531,412 |
 | North Fork of Iron Wash | 0.75 | +0.00 | 52,442 | 104,884 |
 | Poe | 0.65 | +1.00 | 90,899 | 181,798 |
 | The Squeeze | 1.25 | +0.75 | 152,956 | 305,912 |

@@ -171,6 +171,23 @@ class EventAccumulationTests(unittest.TestCase):
         )
         self.assertEqual(len(canyon_status["refill_history"]), 2)
 
+    def test_peak_grid_is_frame_with_event_maximum_dbz(self):
+        records = [
+            record("2026-07-26T23:00:00Z", 44.0, 0.080, True),
+            # More basin rain, but lower reflectivity: this must not replace
+            # the event's peak-reflectivity snippet.
+            record("2026-07-26T23:05:00Z", 40.0, 0.120, True),
+        ]
+        records.extend(
+            record(f"2026-07-26T23:{minute:02d}:00Z")
+            for minute in (10, 15, 20, 25, 30, 35)
+        )
+        event = self.rebuild(records)["events"][0]
+        self.assertEqual(event["peak_dbz"], 44.0)
+        self.assertEqual(event["peak_frame_maximum_dbz"], 44.0)
+        self.assertEqual(event["peak_frame_utc"], "2026-07-26T23:00:00Z")
+        self.assertEqual(event["peak_grid_dbz"], [[44.0]])
+
     def test_cumulative_no_loss_evidence_preserves_multiple_storms(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)

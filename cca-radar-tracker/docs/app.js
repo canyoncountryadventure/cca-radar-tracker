@@ -215,9 +215,28 @@ function selectedStatus() {
   return canyonStatus(app.selectedId);
 }
 
-function peakEventRadar(status) {
-  const peakEvent = status?.historical_records?.peak_individual_event;
-  return peakEvent?.peak_grid_dbz && peakEvent?.grid_bbox ? peakEvent : null;
+function detailedRadarEvents(status) {
+  const candidates = [
+    status?.last_rain_event,
+    ...(Array.isArray(status?.events) ? status.events : []),
+  ];
+  const seen = new Set();
+  return candidates.filter((event) => {
+    if (!event) return false;
+    const hasRadar = Boolean(
+      event.grid_bbox
+      && (event.peak_grid_dbz || event.accumulated_rain_grid_inches)
+    );
+    if (!hasRadar) return false;
+    const identity = `${event.start_utc || ""}|${event.end_utc || ""}`;
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+
+function mostRecentStormRadar(status) {
+  return detailedRadarEvents(status).sort((a, b) => eventSortTime(b) - eventSortTime(a))[0] || null;
 }
 
 function setHealth() {
@@ -337,19 +356,19 @@ function watershedStyle(feature) {
 
 function radarColor(value) {
   if (value == null || value < 10) return "transparent";
-  if (value < 15) return "#04e9e7";
-  if (value < 20) return "#019ff4";
-  if (value < 25) return "#00ff00";
-  if (value < 30) return "#00c000";
-  if (value < 35) return "#008e00";
-  if (value < 40) return "#ffff00";
-  if (value < 45) return "#e7c000";
-  if (value < 50) return "#ff9000";
-  if (value < 55) return "#ff0000";
-  if (value < 60) return "#d60000";
-  if (value < 65) return "#ffffff";
-  if (value < 70) return "#ff00ff";
-  return "#9000c0";
+  if (value < 15) return "#4568a6";
+  if (value < 20) return "#60b4d4";
+  if (value < 25) return "#43d67e";
+  if (value < 30) return "#0eb314";
+  if (value < 35) return "#0b840e";
+  if (value < 40) return "#327308";
+  if (value < 45) return "#ffe200";
+  if (value < 50) return "#ffac00";
+  if (value < 55) return "#f80000";
+  if (value < 60) return "#aa0000";
+  if (value < 65) return "#ffeaff";
+  if (value < 70) return "#f960fa";
+  return "#a400f7";
 }
 
 function rainfallColor(inches) {
@@ -680,7 +699,7 @@ function coverageText(event) {
 
 function matchingHistoryEvent(status, historyEvent) {
   if (!historyEvent) return null;
-  const events = Array.isArray(status?.events) ? status.events : [];
+  const events = detailedRadarEvents(status);
   const historyStart = historyEvent.start_utc || null;
   const historyEnd = historyEvent.end_utc || null;
 
@@ -976,7 +995,7 @@ function renderSelected() {
 function selectCanyon(id, fitMap = false) {
   if (!app.model?.canyons?.[id]) return;
   app.selectedId = id;
-  app.selectedEvent = peakEventRadar(canyonStatus(id));
+  app.selectedEvent = mostRecentStormRadar(canyonStatus(id));
   renderSelected();
   updateMapSelection(fitMap);
   history.replaceState(null, "", `#${encodeURIComponent(id)}`);

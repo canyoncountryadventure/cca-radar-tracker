@@ -21,7 +21,7 @@ EXPECTED_POOL_TARGETS = {
     "alcatraz": 54_540,
     "cable-canyon": 262_210,
     "constrychnine": 20_977,
-    "eardley": 132_853,
+    "eardley": 265_706,
     "north-fork-iron-wash": 52_442,
     "poe": 90_899,
     "the-squeeze": 152_956,
@@ -63,6 +63,12 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual(model["storage_target_ft3"], 52_442)
         self.assertAlmostEqual(model["technical_length_miles"], 0.75)
         self.assertAlmostEqual(model["pothole_modifier"], 0.0)
+
+    def test_eardley_uses_approved_two_mile_technical_length(self):
+        model = self.by_id["eardley"].model
+        self.assertAlmostEqual(model["technical_length_miles"], 2.0)
+        self.assertAlmostEqual(model["pothole_modifier"], 0.9)
+        self.assertEqual(model["fill_target_ft3"], 265_706)
 
     def test_area_scaling_and_fixed_runoff_coefficient_are_not_in_canyon_model(self):
         model = self.by_id["angel-cove"].model

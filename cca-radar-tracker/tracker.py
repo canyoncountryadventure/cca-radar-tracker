@@ -120,7 +120,7 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
         "basis": "User technical-section length and higher pool-storage adjustment",
     },
     "eardley": {
-        "technical_length_miles": 1.00,
+        "technical_length_miles": 2.00,
         "pothole_modifier": 0.90,
         "basis": "User technical-section length and higher pool-storage adjustment",
     },
@@ -1408,6 +1408,7 @@ def start_event(
         "grid_bbox": analysis["grid_bbox"],
         "peak_frame_utc": utc_text(timestamp),
         "peak_frame_rain_volume_ft3": analysis["frame_rain_volume_ft3"],
+        "peak_frame_maximum_dbz": analysis["maximum_dbz"],
     }
 
 
@@ -1450,6 +1451,10 @@ def update_open_event(
     rain: np.ndarray,
 ) -> None:
     """Add one measurable-rain frame to an active event."""
+    retained_frame_peak_dbz = float(
+        event.get("peak_frame_maximum_dbz", event.get("peak_dbz", -999.0))
+        or -999.0
+    )
     event["end_utc"] = utc_text(timestamp)
     event["last_rain_utc"] = utc_text(timestamp)
     event["frames"] = int(event.get("frames") or 0) + 1
@@ -1497,20 +1502,21 @@ def update_open_event(
                 3,
             )
 
-    previous_peak = float(
-        event.get(
-            "peak_frame_rain_volume_ft3",
-            event.get("peak_frame_runoff_ft3", -1),
-        )
-    )
+    previous_peak_dbz = retained_frame_peak_dbz
+    current_peak_dbz = float(analysis.get("maximum_dbz") or -999.0)
+    previous_peak_rain = float(event.get("peak_frame_rain_volume_ft3") or -1.0)
+    current_peak_rain = float(analysis.get("frame_rain_volume_ft3") or 0.0)
     has_grid = analysis.get("grid_dbz") is not None
     if has_grid and (
         event.get("peak_grid_dbz") is None
-        or float(analysis.get("frame_rain_volume_ft3") or 0.0) >= previous_peak
+        or current_peak_dbz > previous_peak_dbz
+        or (
+            current_peak_dbz == previous_peak_dbz
+            and current_peak_rain >= previous_peak_rain
+        )
     ):
-        event["peak_frame_rain_volume_ft3"] = analysis[
-            "frame_rain_volume_ft3"
-        ]
+        event["peak_frame_rain_volume_ft3"] = analysis["frame_rain_volume_ft3"]
+        event["peak_frame_maximum_dbz"] = analysis["maximum_dbz"]
         event["peak_frame_utc"] = utc_text(timestamp)
         event["peak_grid_dbz"] = analysis["grid_dbz"]
         event["grid_bbox"] = analysis["grid_bbox"]
