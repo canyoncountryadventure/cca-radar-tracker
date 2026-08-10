@@ -33,7 +33,7 @@
             <p class="section-kicker">WATERSHEDS</p>
             <h2>Radar monitoring basins</h2>
           </div>
-          <div class="map-note"><p class="panel-note">Blue polygons define the watersheds used for radar averaging and intense-rain coverage. Colored cells show the selected event’s retained radar grid.</p><p id="radar-time" class="radar-time"></p></div>
+          <div class="map-note"><p class="panel-note">Blue polygons define the monitored watersheds. Switch between total event rainfall and the strongest five-minute radar frame.</p><p id="radar-time" class="radar-time"></p></div>
         </div>
         <div class="map-frame">
           <div id="map" aria-label="Map of monitored canyon watersheds"></div>
@@ -47,6 +47,11 @@
               <span class="map-toggle-label">Layers</span>
               <button type="button" class="map-toggle active" data-map-overlay="radar" aria-pressed="true">Radar</button>
               <button type="button" class="map-toggle active" data-map-overlay="watersheds" aria-pressed="true">Watersheds</button>
+            </div>
+            <div class="map-toggle-group" aria-label="Storm map">
+              <span class="map-toggle-label">Storm</span>
+              <button type="button" class="map-toggle active" data-radar-view="accumulation" aria-pressed="true">Total rain</button>
+              <button type="button" class="map-toggle" data-radar-view="peak" aria-pressed="false">Peak dBZ</button>
             </div>
           </div>
         </div>

@@ -22,6 +22,7 @@ const app = {
   watersheds: null,
   selectedId: null,
   selectedEvent: null,
+  radarView: "accumulation",
   map: null,
   baseLayers: {},
   activeBase: "satellite",
@@ -345,6 +346,17 @@ function radarColor(value) {
   return "#ec64cf";
 }
 
+function rainfallColor(inches) {
+  if (inches >= 2) return "#7b1fa2";
+  if (inches >= 1) return "#d32f2f";
+  if (inches >= 0.5) return "#f57c00";
+  if (inches >= 0.25) return "#fdd835";
+  if (inches >= 0.1) return "#66bb6a";
+  if (inches >= 0.05) return "#26c6da";
+  if (inches >= 0.01) return "#42a5f5";
+  return "#90caf9";
+}
+
 function setMapButtonState(selector, activeValue) {
   document.querySelectorAll(selector).forEach((button) => {
     const value = button.dataset.mapBase || button.dataset.mapOverlay;
@@ -451,12 +463,23 @@ function drawSelectedRadar() {
   app.radarLayer.clearLayers();
   const status = selectedStatus();
   const event = app.selectedEvent || status.last_rain_event || status.latest_analysis;
-  const grid = event?.peak_grid_dbz || event?.grid_dbz;
+  const hasAccumulation = Array.isArray(event?.accumulated_rain_grid_inches);
+  const showAccumulation = app.radarView === "accumulation" && hasAccumulation;
+  const grid = showAccumulation ? event.accumulated_rain_grid_inches : (event?.peak_grid_dbz || event?.grid_dbz);
   const bbox = event?.grid_bbox;
   const time = event?.peak_frame_utc || event?.timestamp_utc || event?.end_utc;
-  $("radar-time").textContent = time
-    ? `Highest basin-rainfall frame retained for this event: ${dateTime(time)}`
+  $("radar-time").textContent = showAccumulation
+    ? `Total radar-estimated rainfall across the event: ${number(event.basin_rain_inches, 3)} in watershed average`
+    : time
+    ? `Peak five-minute reflectivity frame: ${dateTime(time)}`
     : "No retained radar grid for the selected canyon";
+
+  document.querySelectorAll("[data-radar-view]").forEach((button) => {
+    const active = button.dataset.radarView === (showAccumulation ? "accumulation" : "peak");
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+    if (button.dataset.radarView === "accumulation") button.disabled = !hasAccumulation;
+  });
 
   if (!Array.isArray(grid) || !grid.length || !Array.isArray(grid[0]) || !bbox) return;
   const [left, bottom, right, top] = bbox.map(Number);
@@ -468,8 +491,8 @@ function drawSelectedRadar() {
   grid.forEach((row, rowIndex) => {
     row.forEach((rawValue, columnIndex) => {
       const value = Number(rawValue);
-      if (!Number.isFinite(value) || value < 10) return;
-      const color = radarColor(value);
+      if (!Number.isFinite(value) || (showAccumulation ? value <= 0 : value < 10)) return;
+      const color = showAccumulation ? rainfallColor(value) : radarColor(value);
       L.rectangle(
         [
           [top - (rowIndex + 1) * cellHeight, left + columnIndex * cellWidth],
@@ -485,7 +508,16 @@ function drawSelectedRadar() {
           interactive: true,
           pane: "radarPane",
         },
-      ).bindTooltip(`${number(value, 1)} dBZ`).addTo(app.radarLayer);
+      ).bindTooltip(showAccumulation ? `${number(value, 3)} in event rain` : `${number(value, 1)} dBZ`).addTo(app.radarLayer);
+    });
+  });
+}
+
+function bindRadarViews() {
+  document.querySelectorAll("[data-radar-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      app.radarView = button.dataset.radarView;
+      drawSelectedRadar();
     });
   });
 }
@@ -916,6 +948,7 @@ async function initialize() {
     const hashId = decodeURIComponent(location.hash.replace(/^#/, ""));
     app.selectedId = app.model.canyons[hashId] ? hashId : Object.keys(app.model.canyons)[0];
     initializeMap();
+    bindRadarViews();
     selectCanyon(app.selectedId, false);
   } catch (error) {
     console.error(error);

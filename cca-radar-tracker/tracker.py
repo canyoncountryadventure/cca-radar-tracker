@@ -1277,11 +1277,7 @@ def event_public(
     config: dict[str, Any],
     include_grid: bool = True,
 ) -> dict[str, Any]:
-    public = {
-        key: value
-        for key, value in event.items()
-        if key not in {"accumulated_rain_grid_inches"}
-    }
+    public = dict(event)
     apply_hydrologic_model(public, canyon, config)
     if not public.get("hydrology_available"):
         public.setdefault("direct_runoff_ft3", 0)
@@ -1344,6 +1340,7 @@ def event_public(
     )
     if not include_grid:
         public.pop("peak_grid_dbz", None)
+        public.pop("accumulated_rain_grid_inches", None)
         public.pop("grid_bbox", None)
     return public
 

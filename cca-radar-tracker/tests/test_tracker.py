@@ -174,12 +174,14 @@ class TrackerTests(unittest.TestCase):
             "frames": 3,
             "wet_frames": 3,
             "basin_rain_inches": 0.2,
+            "accumulated_rain_grid_inches": [[0.1, 0.2]],
             "spatial_gate_seen": True,
             "peak_dbz": 55.0,
         }
         public = tracker.event_public(event, canyon, self.config)
         self.assertIn("direct_runoff_ft3", public)
         self.assertIn("routed_peak_cfs_range", public)
+        self.assertEqual(public["accumulated_rain_grid_inches"], [[0.1, 0.2]])
 
     def test_zero_g_peak_is_calibrated_without_changing_runoff_volume(self):
         event = {
