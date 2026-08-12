@@ -184,8 +184,10 @@ def alert_message(
                 f"Storage-target ratio: {event.get('fill_ratio', 0):.2f}×",
                 f"Peak reflectivity: {event.get('peak_dbz', 0)} dBZ",
                 f"Atlas 14 context: {atlas_text(event)}",
-                "Historical dBZ footprint (context only): "
-                + ("reached" if tests.get("heavy_rain_footprint_observed", event.get("spatial_gate_seen")) else "not reached"),
+                "Peak intense-radar coverage (context only): "
+                f"50+ dBZ {event.get('peak_coverage_percent', {}).get('50', 0):.1f}%, "
+                f"55+ dBZ {event.get('peak_coverage_percent', {}).get('55', 0):.1f}%, "
+                f"60+ dBZ {event.get('peak_coverage_percent', {}).get('60', 0):.1f}%",
                 "Minimum wet duration: "
                 + ("passed" if tests.get("minimum_wet_duration_met") else "not reached"),
                 "",

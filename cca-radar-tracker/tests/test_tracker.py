@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import numpy as np
@@ -281,6 +282,46 @@ class TrackerTests(unittest.TestCase):
             migrated["canyons"]["zerog"]["last_qualifying_event"]["start_utc"],
             "2024-06-21T22:25:00Z",
         )
+
+    def test_changed_model_signature_invalidates_permanent_records(self):
+        status = tracker.empty_status(self.canyons)
+        zerog = status["canyons"]["zerog"]
+        zerog["model_signature"] = "obsolete-model"
+        zerog["historical_records"] = {
+            "peak_individual_event": {"fill_ratio": 99.0},
+            "peak_seven_day_evidence": {"ratio": 99.0},
+        }
+        migrated = tracker.ensure_status_defaults(status, self.canyons)
+        self.assertEqual(
+            migrated["canyons"]["zerog"]["historical_records"],
+            {"peak_individual_event": None, "peak_seven_day_evidence": None},
+        )
+        self.assertEqual(
+            migrated["canyons"]["zerog"]["model_signature"],
+            tracker.canyon_model_signature(self.by_id["zerog"]),
+        )
+
+    def test_model_signature_changes_with_polygon_or_storage(self):
+        canyon = self.by_id["zerog"]
+        original = tracker.canyon_model_signature(canyon)
+        changed_model = dict(canyon.model)
+        changed_model["fill_target_ft3"] += 1
+        changed = tracker.Canyon(
+            canyon.canyon_id, canyon.name, canyon.area_sq_mi, canyon.geometry,
+            canyon.outlet, canyon.grid, canyon.weights, canyon.atlas14, changed_model,
+        )
+        self.assertNotEqual(original, tracker.canyon_model_signature(changed))
+
+    def test_iem_timestamp_failure_uses_retained_state_and_marks_health(self):
+        status = tracker.empty_status(self.canyons)
+        status["latest_archive_confirmed_frame_utc"] = "2026-08-12T20:05:00Z"
+        with mock.patch.object(
+            tracker, "latest_iem_timestamp", side_effect=RuntimeError("closed")
+        ):
+            timestamp = tracker.latest_iem_timestamp_or_status(self.config, status)
+        self.assertEqual(tracker.utc_text(timestamp), "2026-08-12T20:05:00Z")
+        self.assertFalse(status["health"]["ok"])
+        self.assertIn("next run will retry", status["health"]["message"])
 
     def test_long_event_atlas_comparison_uses_multi_hour_duration_data(self):
         canyon = self.by_id["zerog"]

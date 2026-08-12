@@ -83,7 +83,7 @@
       <div id="condition-banner" class="condition-banner minor">
         <div id="condition-icon" class="condition-icon">○</div>
         <div>
-          <p id="condition-kicker" class="condition-kicker">LAST RAIN EVENT MODEL RESULT</p>
+          <p id="condition-kicker" class="condition-kicker">CURRENT CANYON CONDITION ESTIMATE</p>
           <h3 id="condition-title">Loading…</h3>
           <p id="condition-copy"></p>
         </div>
@@ -105,6 +105,8 @@
           <span id="calibration-badge" class="calibration-badge"></span>
         </div>
 
+        <p id="selected-storm-label" class="selected-storm-label">SELECTED STORM</p>
+
         <div class="calculation-block">
           <h3>Pool-storage target</h3>
           <div id="storage-calculation"></div>
@@ -116,15 +118,15 @@
             <div id="hydrology-calculation" class="calculation-stack"></div>
           </div>
           <div>
-            <h3>Condition decision</h3>
+            <h3>Selected storm refill decision</h3>
             <div id="decision-calculation" class="decision-list"></div>
           </div>
         </div>
 
         <div class="gate-section">
           <div>
-            <h3>dBZ footprint observations</h3>
-            <p>Historical 50/55/60 dBZ watershed comparisons are shown for context only. They do not gate the canyon condition.</p>
+            <h3>Storm intensity distribution</h3>
+            <p>Shows how much of the watershed experienced intense radar echoes during the selected storm. This helps distinguish a small intense cell from widespread heavy rain, but does not control the refill classification.</p>
           </div>
           <div id="intensity-gates" class="table-wrap"></div>
         </div>

@@ -276,6 +276,8 @@ a:hover { color: #b7dcff; }
 
 .events-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 12px 0; background: #0b1215; }
 .event-card { padding: 18px; }
+.events-grid .event-card:first-child .section-kicker { color: var(--blue-bright); }
+.events-grid .event-card:last-child .section-kicker { color: var(--magenta); }
 .event-card h3 { margin: 4px 0 5px; font-size: 1.1rem; }
 .event-card .event-result { margin: 0 0 13px; color: #b8c7cc; line-height: 1.45; }
 .event-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
@@ -290,6 +292,8 @@ a:hover { color: #b7dcff; }
 .empty-state { color: var(--muted); line-height: 1.5; }
 
 .work-card { margin: 0 12px 12px; padding-bottom: 20px; }
+.selected-storm-label { margin: 14px 20px 0; color: var(--blue-bright); font-size: .74rem; font-weight: 850; letter-spacing: .1em; }
+.decision-explainer { margin: 0 0 10px; padding: 10px 11px; border-left: 3px solid var(--blue); background: rgba(63,152,255,.08); color: #c6d9df; font-size: .76rem; line-height: 1.45; }
 .calibration-badge { max-width: 650px; padding: 7px 10px; border: 1px solid rgba(240,182,90,.35); border-radius: 999px; color: var(--sand); font-size: .65rem; font-weight: 850; text-transform: uppercase; text-align: center; }
 .calculation-block { margin: 20px; padding: 15px 16px; border-left: 3px solid var(--sand); background: rgba(240,182,90,.07); }
 .calculation-block h3, .work-grid h3, .gate-section h3 { margin: 0 0 9px; font-size: .9rem; }

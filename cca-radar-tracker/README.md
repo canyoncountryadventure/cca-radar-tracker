@@ -70,27 +70,27 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | Quandary | 1.59 | +0.00 | 111,177 | 222,354 |
 | Yankee Doodle | 0.40 | +0.00 | 27,969 | 55,938 |
 
-### 4. Intense-rain confirmation
+### 4. Radar-intensity context
 
-The same fixed coverage tests apply to every watershed. Any one passes the footprint test:
+The dashboard reports how much of each watershed reached these radar-intensity bands:
 
 - 50+ dBZ over at least 50% of the watershed
 - 55+ dBZ over at least 25%
 - 60+ dBZ over at least 10%
 
-A likely-full or strong-flush classification also requires at least two wet five-minute frames.
+These measurements describe whether intense echoes were isolated or widespread. They do not gate classification. A likely-full or strong-flush classification requires the runoff-volume threshold and at least two wet five-minute frames.
 
 ### 5. Condition language
 
 The storage-fill ratio is normal-condition watershed runoff divided by the provisional empty-storage target.
 
-- Below 0.25 and no intense-rain footprint: **No meaningful pool refill indicated**
+- Below 0.25: **No meaningful pool refill indicated**
 - 0.25-0.49: **Some pool refill possible**
 - 0.50-0.74: **Substantial partial refill possible**
 - 0.75-0.99: **Large partial refill possible; full pools uncertain**
-- At least 1.0 without both confirmation tests: **Potential major refill; confirmation incomplete**
-- At least 1.0 with footprint and duration tests: **Major refill likely; pools may be full**
-- At least 2.0 with footprint and duration tests: **Strong refill/flush potential; full pools possible**
+- At least 1.0 without the duration test: **Potential major refill; confirmation incomplete**
+- At least 1.0 with the duration test: **Major refill likely; pools may be full**
+- At least 2.0 with the duration test: **Strong refill/flush potential; full pools possible**
 
 Current pool level, channel transmission loss, bedrock fractures, disconnected drainage, radar error, and evaporation remain unknown.
 
@@ -112,13 +112,13 @@ The dashboard includes:
 - A provisional 0.8-percentage-point daily decrease, with new modeled runoff added to the current percentage and capped at 100%
 - Confidence that also declines as the supporting observation or refill event ages
 - Zero G field anchor: 98% full on August 1, 2026
-- Permanent largest-event and historical seven-day-high dates
-- Last rain event with Atlas 14 equivalent
+- Largest retained event and retained seven-day-high dates, rebuilt when polygon or storage inputs change
+- Most recent rain event with Atlas 14 equivalent
 - Retained last major-refill event
 - Estimated watershed runoff and routed peak-flow range
 - Technical-section length and pothole modifier
 - Exact storage-target equation
-- Fixed dBZ footprint tests and classification tests
+- Storm radar-intensity distribution and explicit runoff/storage classification tests
 - Full methods and limitations
 
 ## Run and verify

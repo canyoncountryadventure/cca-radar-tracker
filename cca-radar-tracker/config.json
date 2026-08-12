@@ -41,7 +41,8 @@
   "iem_current_wms_url": "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi",
   "iem_current_png_url": "https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.png",
   "event_detail_retention_days": 90,
+  "event_radar_grid_retention_days": 30,
   "recent_refill_window_days": 7,
   "condition_decay_percentage_points_per_day": 0.8,
-  "max_retained_events_per_canyon": 500
+  "max_retained_events_per_canyon": 120
 }

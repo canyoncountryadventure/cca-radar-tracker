@@ -579,16 +579,22 @@ function updateMapSelection(fit = false) {
   setTimeout(() => app.map.invalidateSize(), 0);
 }
 
-function renderCondition(model, event) {
-  const meta = eventCondition(event);
+function renderCondition(model, status) {
+  const condition = status.condition_estimate || {};
+  const percent = Number(condition.percent || 0);
+  const meta = condition.confidence === "Unknown"
+    ? conditionMeta.none
+    : percent >= 90 ? conditionMeta.likely_full
+    : percent >= 50 ? conditionMeta.moderate
+    : conditionMeta.minor;
   const banner = $("condition-banner");
   banner.className = `condition-banner ${meta.css}`;
   $("condition-icon").textContent = meta.mark;
-  $("condition-title").textContent = event?.classification_label || "No rain event recorded";
-  $("condition-kicker").textContent = event ? "LAST RAIN EVENT MODEL RESULT" : "MODEL STATUS";
-  $("condition-copy").textContent = event
-    ? `${dateTime(event.start_utc)}. ${event.classification_explanation || "Model result is provisional and has not been field verified."}`
-    : "No completed radar rain event has been retained for this canyon yet.";
+  $("condition-title").textContent = condition.current_condition || "Unknown";
+  $("condition-kicker").textContent = "CURRENT CANYON CONDITION ESTIMATE";
+  $("condition-copy").textContent = condition.basis_utc
+    ? `${condition.percent ?? 0}% modeled remaining pool storage; ${condition.confidence || "Unknown"} confidence. Basis: ${condition.basis || "modeled refill history"} (${dateTime(condition.basis_utc)}). This persists across storms and is separate from the selected storm decision below.`
+    : "No field observation or meaningful modeled refill is available. This estimate describes current canyon conditions; selecting an old storm does not replace it.";
 }
 
 function metricCard(label, value, note, help) {
@@ -675,7 +681,7 @@ function renderMetrics(model, event) {
       "Storm duration",
       event ? `${number(eventDuration(event), 0)} min` : "—",
       `${number(event?.wet_frames || 0, 0)} wet five-minute frames`,
-      "The retained event span based on consecutive five-minute radar frames. Wet frames exceeded the lower event-detection threshold; they do not necessarily pass the separate 50/55/60 dBZ footprint tests.",
+      "The retained event span based on consecutive five-minute radar frames. Wet frames exceeded the event-detection threshold.",
     ),
     metricCard(
       "Drainage area",
@@ -694,7 +700,7 @@ function eventMeta(label, value) {
 function coverageText(event) {
   if (!event?.peak_coverage_percent) return "Peak watershed coverage unavailable.";
   const p = event.peak_coverage_percent;
-  return `Peak watershed coverage: 50+ dBZ ${number(p["50"] || 0, 1)}%, 55+ ${number(p["55"] || 0, 1)}%, 60+ ${number(p["60"] || 0, 1)}%.`;
+  return `Storm intensity context: at the strongest five-minute frames, ${number(p["50"] || 0, 1)}% of the watershed reached 50+ dBZ, ${number(p["55"] || 0, 1)}% reached 55+, and ${number(p["60"] || 0, 1)}% reached 60+. These values describe how widespread intense radar echoes were; they do not determine the result.`;
 }
 
 function matchingHistoryEvent(status, historyEvent) {
@@ -725,7 +731,6 @@ function renderEventCard(event, title, emptyText) {
   }
   const runoff = directRunoff(event);
   const peak = routedPeak(event);
-  const decision = event.decision_tests || {};
   return `
     <p class="section-kicker">${escapeHtml(title)}</p>
     <h3>${escapeHtml(dateTime(event.start_utc))}</h3>
@@ -739,11 +744,10 @@ function renderEventCard(event, title, emptyText) {
       ${eventMeta("Routed peak — context", `${number(peak, 2)} cfs`)}
       ${eventMeta("Peak radar", `${number(event.peak_dbz, 1)} dBZ`)}
       ${eventMeta("Fill ratio", `${number(event.fill_ratio || 0, 2)}×`)}
-      ${eventMeta("Historical dBZ footprint", (decision.heavy_rain_footprint_observed ?? event.spatial_gate_seen) ? "Reached (context only)" : "Not reached")}
     </div>
     <p class="event-coverage">${escapeHtml(coverageText(event))}</p>
     <div class="event-actions">
-      <a class="event-link" href="https://mesonet.agron.iastate.edu/one/?lon=-110.4910&amp;lat=38.5935&amp;zoom=10&amp;rwisobs_label=tfs0" target="_blank" rel="noopener">Open archived radar animation</a>
+      <a class="event-link" href="https://mesonet.agron.iastate.edu/one/?lon=-110.4910&amp;lat=38.5935&amp;zoom=10&amp;rwisobs_label=tfs0" target="_blank" rel="noopener">Open interactive radar map</a>
       <a class="support-link" href="https://venmo.com/u/canyoncountryadventures" target="_blank" rel="noopener">Support This Tracker on Venmo</a>
     </div>
   `;
@@ -752,7 +756,7 @@ function renderEventCard(event, title, emptyText) {
 function renderEvents(status) {
   $("last-rain-event").innerHTML = renderEventCard(
     status.last_rain_event,
-    "LAST RAIN EVENT",
+    "MOST RECENT RAIN EVENT",
     "No rain event recorded"
   );
   $("last-major-event").innerHTML = renderEventCard(
@@ -832,6 +836,7 @@ function renderRefillHistory(status, model) {
       const event = matchingHistoryEvent(status, historyEvent);
       if (!event) return;
       app.selectedEvent = event;
+      renderSelectedStorm(model, event);
       drawSelectedRadar();
       $("radar-time").scrollIntoView({ behavior: "smooth", block: "center" });
     });
@@ -903,38 +908,21 @@ function renderDecision(model, event) {
   const tests = event.decision_tests || {};
   const ratio = Number(event.fill_ratio || 0);
   const minimumFrames = Number(tests.minimum_wet_frames_required || 2);
-  container.innerHTML = [
+  container.innerHTML = `
+    <p class="decision-explainer"><strong>Selected storm decision:</strong> This decides how much refill this one radar event could produce by comparing modeled watershed runoff with estimated empty-pool storage. It does not decide the current canyon condition shown above.</p>
+  ${[
     decisionRow(Boolean(tests.storage_target_met ?? ratio >= 1), "Empty-storage volume test", `${number(ratio, 2)}×; likely-full threshold is 1.00×`),
     decisionRow(Boolean(tests.flush_target_met ?? ratio >= 2), "Strong-flush volume test", `${number(ratio, 2)}×; strong-flush threshold is 2.00×`),
     decisionRow(Boolean(tests.minimum_wet_duration_met ?? Number(event.wet_frames || 0) >= minimumFrames), "Minimum wet duration", `${number(event.wet_frames || 0, 0)} wet frames; ${minimumFrames} required`),
     decisionRow(true, event.classification_label || "Model result", event.classification_explanation || "Classification explanation unavailable"),
-  ].join("");
+  ].join("")}`;
 }
 
-function renderIntensityGates(model, event) {
-  const rows = (model.spatial_rules || []).map((rule) => {
-    const key = String(Math.round(Number(rule.dbz)));
-    const coverage = Number(event?.peak_coverage_percent?.[key] || 0);
-    const area = Number(event?.peak_covered_area_sq_mi?.[key] || 0);
-    const qualified = coverage + 1e-9 >= Number(rule.minimum_coverage_percent);
-    return `
-      <tr>
-        <td>${number(rule.dbz, 0)}+ dBZ</td>
-        <td>${number(rule.minimum_coverage_percent, 0)}%</td>
-        <td>${number(rule.minimum_area_sq_mi, 3)} mi²</td>
-        <td>${number(coverage, 1)}%</td>
-        <td>${number(area, 3)} mi²</td>
-        <td class="${qualified ? "gate-pass" : "gate-fail"}">${qualified ? "REACHED" : "—"}</td>
-      </tr>
-    `;
-  }).join("");
-
-  $("intensity-gates").innerHTML = `
-    <table>
-      <thead><tr><th>Intensity</th><th>Historical %</th><th>Historical area</th><th>Event peak %</th><th>Event peak area</th><th>Comparison</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+function renderRainDistribution(event) {
+  const p = event?.peak_coverage_percent || {};
+  const a = event?.peak_covered_area_sq_mi || {};
+  const rows = [50, 55, 60].map((dbz) => `<tr><td>${dbz}+ dBZ</td><td>${number(p[String(dbz)] || 0, 1)}%</td><td>${number(a[String(dbz)] || 0, 3)} mi²</td></tr>`).join("");
+  $("intensity-gates").innerHTML = `<table><thead><tr><th>Radar intensity</th><th>Peak watershed coverage</th><th>Peak area</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function renderMethods() {
@@ -951,7 +939,7 @@ function renderMethods() {
       <li><strong>Estimated watershed runoff:</strong> ${escapeHtml(method.runoff_formula || "Not available")}. ${escapeHtml(method.direct_runoff_explanation || "")}</li>
       <li><strong>Routed peak flow — context:</strong> ${escapeHtml(method.peak_flow_formula || "Not available")}. ${escapeHtml(method.peak_flow_explanation || "")}</li>
       <li><strong>Pool-storage target:</strong> ${escapeHtml(method.target_formula || "Not available")}. ${escapeHtml(method.target_explanation || "")}</li>
-      <li><strong>Intense-rain footprint:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. ${escapeHtml(method.spatial_explanation || "")}</li>
+      <li><strong>Radar-intensity distribution:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. These values show whether intense echoes were isolated or widespread; they do not control classification.</li>
       <li><strong>Estimated fill ratio:</strong> ${escapeHtml(method.fill_ratio_explanation || "Not available")}</li>
       <li><strong>Multi-storm accumulation:</strong> ${escapeHtml(method.cumulative_refill_explanation || "Not available")}</li>
       <li><strong>Pool loss and decay:</strong> ${escapeHtml(method.pool_loss_explanation || "Not available")}</li>
@@ -973,25 +961,30 @@ function renderMethods() {
   `;
 }
 
+function renderSelectedStorm(model, event) {
+  $("selected-storm-label").textContent = event ? `SELECTED STORM: ${dateTime(event.end_utc || event.start_utc)}` : "NO STORM SELECTED";
+  renderMetrics(model, event);
+  renderHydrologyCalculation(model, event);
+  renderDecision(model, event);
+  renderRainDistribution(event);
+}
+
 function renderSelected() {
   const model = selectedModel();
   const status = selectedStatus();
   if (!model) return;
-  const event = status.last_rain_event;
+  const event = app.selectedEvent || status.last_rain_event;
 
   $("detail-heading").textContent = model.name;
   $("canyon-select").value = app.selectedId;
   $("calculation-title").textContent = `${model.name} calculation`;
   $("calibration-badge").textContent = model.calibration || "Provisional model";
 
-  renderCondition(model, event);
-  renderMetrics(model, event);
+  renderCondition(model, status);
+  renderSelectedStorm(model, event);
   renderEvents(status);
   renderRefillHistory(status, model);
   renderStorageCalculation(model);
-  renderHydrologyCalculation(model, event);
-  renderDecision(model, event);
-  renderIntensityGates(model, event);
   renderSummary();
 }
 
@@ -1029,5 +1022,18 @@ async function initialize() {
     $("health-pill").className = "health-pill bad";
   }
 }
+
+setInterval(async () => {
+  try {
+    app.status = await fetchJson(`${DATA_ROOT}/status.json`);
+    setHealth();
+    const status = selectedStatus();
+    app.selectedEvent = mostRecentStormRadar(status);
+    renderSelected();
+    drawSelectedRadar();
+  } catch (error) {
+    console.warn("Automatic tracker refresh failed; retaining current data", error);
+  }
+}, 5 * 60 * 1000);
 
 initialize();

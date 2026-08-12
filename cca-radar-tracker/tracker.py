@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import io
 import json
 import math
@@ -313,13 +314,52 @@ def latest_iem_timestamp(config: dict[str, Any]) -> datetime:
         method="HEAD",
         headers={"User-Agent": "CCA-PoolFill-Radar/3.0"},
     )
-    with urllib.request.urlopen(
-        request, timeout=int(config["request_timeout_seconds"])
-    ) as response:
-        modified = response.headers.get("Last-Modified")
+    modified = None
+    last_error: Exception | None = None
+    for attempt in range(int(config.get("request_retries", 3))):
+        try:
+            with urllib.request.urlopen(
+                request, timeout=int(config["request_timeout_seconds"])
+            ) as response:
+                modified = response.headers.get("Last-Modified")
+            break
+        except Exception as exc:  # pragma: no cover - network recovery path
+            last_error = exc
+            if attempt + 1 < int(config.get("request_retries", 3)):
+                time.sleep(2**attempt)
+    if modified is None and last_error is not None:
+        raise RuntimeError(
+            f"IEM current radar timestamp request failed after retries: {last_error}"
+        ) from last_error
     if not modified:
         raise RuntimeError("IEM current radar response did not include Last-Modified")
     return floor_five_minutes(parsedate_to_datetime(modified).astimezone(UTC))
+
+
+def latest_iem_timestamp_or_status(
+    config: dict[str, Any], status: dict[str, Any]
+) -> datetime:
+    """Keep the workflow alive and publish degraded health if IEM HEAD fails."""
+    try:
+        return latest_iem_timestamp(config)
+    except Exception as exc:
+        fallback = (
+            status.get("latest_provisional_frame_utc")
+            or status.get("latest_archive_confirmed_frame_utc")
+            or status.get("latest_frame_utc")
+        )
+        if not fallback:
+            raise
+        status["health"] = {
+            **(status.get("health") or {}),
+            "ok": False,
+            "message": (
+                "IEM current timestamp was temporarily unavailable after retries; "
+                "retained data were preserved and the next run will retry"
+            ),
+            "iem_timestamp_error": str(exc),
+        }
+        return floor_five_minutes(parse_utc(fallback))
 
 
 def radar_frame_source(
@@ -706,6 +746,7 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
     return {
         "id": canyon.canyon_id,
         "name": canyon.name,
+        "model_signature": canyon_model_signature(canyon),
         "area_sq_mi": canyon.area_sq_mi,
         "latest_analysis": None,
         "open_event": None,
@@ -779,6 +820,19 @@ def empty_status(canyons: list[Canyon] | None = None) -> dict[str, Any]:
     }
 
 
+def canyon_model_signature(canyon: Canyon) -> str:
+    """Identify the polygon and storage inputs used to calculate event records."""
+    payload = {
+        "geometry": canyon.geometry,
+        "fill_target_ft3": canyon.model.get("fill_target_ft3"),
+        "flush_target_ft3": canyon.model.get("flush_target_ft3"),
+        "technical_length_miles": canyon.model.get("technical_length_miles"),
+        "pothole_modifier": canyon.model.get("pothole_modifier"),
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()[:16]
+
+
 def legacy_event(event: dict[str, Any] | None) -> dict[str, Any] | None:
     if not event:
         return None
@@ -825,6 +879,15 @@ def ensure_status_defaults(status: dict[str, Any], canyons: list[Canyon]) -> dic
             canyon.canyon_id, empty_canyon_status(canyon)
         )
         canyon_status.setdefault("notification", {})
+        signature = canyon_model_signature(canyon)
+        if canyon_status.get("model_signature") != signature:
+            # Permanent records are derived from a specific polygon and storage
+            # model. Never compare stale records with newly recalculated events.
+            canyon_status["historical_records"] = {
+                "peak_individual_event": None,
+                "peak_seven_day_evidence": None,
+            }
+        canyon_status["model_signature"] = signature
         for key, value in empty_canyon_status(canyon).items():
             canyon_status.setdefault(key, value)
     return status
@@ -1827,9 +1890,8 @@ def cumulative_refill_evidence(
     if events and now < event_end_utc(events[-1]):
         now = event_end_utc(events[-1])
 
-    records = canyon_status.get("historical_records") or {}
-    peak_individual = records.get("peak_individual_event")
-    peak_seven_day = records.get("peak_seven_day_evidence")
+    peak_individual = None
+    peak_seven_day = None
 
     def event_record(event: dict[str, Any], ratio: float) -> dict[str, Any]:
         return {
@@ -1934,6 +1996,13 @@ def cumulative_refill_evidence(
         event
         for event in canyon_status.get("events", [])
         if event_end_utc(event) >= detail_cutoff
+    ]
+    grid_cutoff = now - timedelta(
+        days=int(config.get("event_radar_grid_retention_days", 30))
+    )
+    canyon_status["events"] = [
+        event if event_end_utc(event) >= grid_cutoff else compact_event(event)
+        for event in canyon_status["events"]
     ]
 
     balance = 0.0
@@ -2765,7 +2834,7 @@ def main() -> int:
 
     if arguments.at:
         timestamp = floor_five_minutes(parse_utc(arguments.at))
-        latest_reference = latest_iem_timestamp(config)
+        latest_reference = latest_iem_timestamp_or_status(config, status)
         note_planned_ledger_start(status, timestamp)
         record, result = analyze_timestamp_record(
             timestamp, canyons, global_grid, palette, config, latest_reference
@@ -2787,7 +2856,7 @@ def main() -> int:
             save_json(arguments.status, status)
         return 0
 
-    latest_reference = latest_iem_timestamp(config)
+    latest_reference = latest_iem_timestamp_or_status(config, status)
     restored_event_grids = restore_missing_event_grids(
         status, canyons, global_grid, palette, config, latest_reference
     )
