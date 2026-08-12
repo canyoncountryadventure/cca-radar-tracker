@@ -742,7 +742,10 @@ function renderEventCard(event, title, emptyText) {
       ${eventMeta("Historical dBZ footprint", (decision.heavy_rain_footprint_observed ?? event.spatial_gate_seen) ? "Reached (context only)" : "Not reached")}
     </div>
     <p class="event-coverage">${escapeHtml(coverageText(event))}</p>
-    <a class="event-link" href="https://mesonet.agron.iastate.edu/one/?lon=-110.4910&amp;lat=38.5935&amp;zoom=10&amp;rwisobs_label=tfs0" target="_blank" rel="noopener">Open archived radar animation</a>
+    <div class="event-actions">
+      <a class="event-link" href="https://mesonet.agron.iastate.edu/one/?lon=-110.4910&amp;lat=38.5935&amp;zoom=10&amp;rwisobs_label=tfs0" target="_blank" rel="noopener">Open archived radar animation</a>
+      <a class="support-link" href="https://venmo.com/u/canyoncountryadventures" target="_blank" rel="noopener">Support This Tracker on Venmo</a>
+    </div>
   `;
 }
 

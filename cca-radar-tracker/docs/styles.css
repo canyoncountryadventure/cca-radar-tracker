@@ -283,7 +283,10 @@ a:hover { color: #b7dcff; }
 .event-meta span { display: block; color: #9bb4bd; font-size: .62rem; text-transform: uppercase; }
 .event-meta strong { display: block; margin-top: 3px; font-size: .87rem; line-height: 1.25; }
 .event-coverage { margin: 12px 0 0; color: #a9bbc1; font-size: .78rem; line-height: 1.45; }
-.event-link { display: inline-block; margin-top: 11px; font-size: .78rem; font-weight: 750; }
+.event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 11px; }
+.event-link { display: inline-block; font-size: .78rem; font-weight: 750; }
+.support-link { display: inline-block; padding: 8px 12px; border: 1px solid rgba(61,149,206,.7); border-radius: 8px; background: rgba(61,149,206,.12); color: #8dd4ff; font-size: .78rem; font-weight: 800; text-decoration: none; }
+.support-link:hover { background: rgba(61,149,206,.22); color: #c5ebff; }
 .empty-state { color: var(--muted); line-height: 1.5; }
 
 .work-card { margin: 0 12px 12px; padding-bottom: 20px; }
