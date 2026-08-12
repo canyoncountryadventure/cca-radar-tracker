@@ -18,7 +18,7 @@ EXPECTED_POOL_TARGETS = {
     "hog-canyons": 34_087,
     "leprechaun": 6_992,
     "no-kidding": 28_528,
-    "pool-arch": 1_748,
+    "pool-arch": 5_244,
     "alcatraz": 54_540,
     "cable-canyon": 262_210,
     "constrychnine": 20_977,
@@ -70,6 +70,13 @@ class TrackerTests(unittest.TestCase):
         self.assertAlmostEqual(model["technical_length_miles"], 2.0)
         self.assertAlmostEqual(model["pothole_modifier"], 0.9)
         self.assertEqual(model["fill_target_ft3"], 265_706)
+
+    def test_pool_arch_uses_updated_length_and_storage_modifier(self):
+        model = self.by_id["pool-arch"].model
+        self.assertAlmostEqual(model["technical_length_miles"], 0.25)
+        self.assertAlmostEqual(model["pothole_modifier"], -0.70)
+        self.assertEqual(model["fill_target_ft3"], 5_244)
+        self.assertEqual(model["flush_target_ft3"], 10_488)
 
     def test_area_scaling_and_fixed_runoff_coefficient_are_not_in_canyon_model(self):
         model = self.by_id["angel-cove"].model

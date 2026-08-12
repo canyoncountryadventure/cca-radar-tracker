@@ -188,6 +188,30 @@ class EventAccumulationTests(unittest.TestCase):
         self.assertEqual(event["peak_frame_utc"], "2026-07-26T23:00:00Z")
         self.assertEqual(event["peak_grid_dbz"], [[44.0]])
 
+    def test_stored_storm_cards_recalculate_after_storage_target_change(self):
+        records = [
+            record("2026-07-26T23:00:00Z", 45.0, 0.120, True),
+            record("2026-07-26T23:05:00Z", 43.0, 0.100, True),
+        ]
+        records.extend(
+            record(f"2026-07-26T23:{minute:02d}:00Z")
+            for minute in (10, 15, 20, 25, 30, 35)
+        )
+        status = tracker.empty_status([self.canyon])
+        for item in records:
+            tracker.upsert_frame_record(status, item)
+        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        original = status["canyons"]["zerog"]["events"][0]
+
+        larger_storage = canyon_fixture(fill_target=104_884)
+        tracker.refresh_status_events(status, [larger_storage], self.config)
+        refreshed = status["canyons"]["zerog"]["events"][0]
+
+        self.assertEqual(refreshed["storage_target_ft3"], 104_884)
+        self.assertAlmostEqual(
+            refreshed["fill_ratio"], original["fill_ratio"] / 2, places=4
+        )
+
     def test_cumulative_no_loss_evidence_preserves_multiple_storms(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)

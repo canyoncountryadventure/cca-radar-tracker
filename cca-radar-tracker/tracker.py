@@ -106,9 +106,9 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
         "basis": "User technical-section length; result closely matches prior 1-meter depression estimate",
     },
     "pool-arch": {
-        "technical_length_miles": 0.10,
-        "pothole_modifier": -0.75,
-        "basis": "User technical-section length and low-storage adjustment",
+        "technical_length_miles": 0.25,
+        "pothole_modifier": -0.70,
+        "basis": "User-updated technical-section length and low-storage adjustment",
     },
     "the-squeeze": {
         "technical_length_miles": 1.25,
