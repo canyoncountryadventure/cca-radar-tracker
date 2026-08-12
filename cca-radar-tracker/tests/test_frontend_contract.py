@@ -27,6 +27,21 @@ class FrontendContractTests(unittest.TestCase):
         self.assertIn("SELECTED STORM:", self.app)
         self.assertIn("This decides how much refill this one radar event", self.app)
 
+    def test_calculation_cards_call_zero_g_the_reference_canyon(self):
+        self.assertNotIn("Zero G", self.app)
+        self.assertIn("reference canyon", self.app)
+
+    def test_event_history_and_summary_cards_show_full_timing(self):
+        self.assertIn("Storm start", self.app)
+        self.assertIn("Storm end", self.app)
+        self.assertIn("Total duration", self.app)
+        self.assertIn("<th>Duration</th>", self.app)
+
+    def test_selected_storm_distribution_uses_all_exclusive_dbz_bands(self):
+        self.assertIn("event?.peak_dbz_distribution", self.app)
+        self.assertIn("Reflectivity band", self.app)
+        self.assertIn("renderRainDistribution(event)", self.app)
+
     def test_obsolete_labels_are_removed(self):
         combined = self.app + self.page
         self.assertNotIn("LAST RAIN EVENT", combined)

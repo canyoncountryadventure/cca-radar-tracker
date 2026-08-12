@@ -68,7 +68,7 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
     "woody": {
         "technical_length_miles": 0.25,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
     "hog-canyons": {
         "technical_length_miles": 0.65,
@@ -128,12 +128,12 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
     "north-fork-iron-wash": {
         "technical_length_miles": 0.75,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
     "upper-greasewood": {
         "technical_length_miles": 1.20,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
     "wonderland-canyon": {
         "technical_length_miles": 0.37,
@@ -148,17 +148,17 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
     "neon": {
         "technical_length_miles": 1.60,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
     "quandary": {
         "technical_length_miles": 1.59,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
     "yankee-doodle": {
         "technical_length_miles": 0.40,
         "pothole_modifier": 0.00,
-        "basis": "User technical-section length and Zero G-equivalent storage rate",
+        "basis": "User technical-section length and reference-canyon-equivalent storage rate",
     },
 }
 
@@ -568,7 +568,7 @@ def canyon_model(
             float(storage["storage_rate_multiplier"]) * 100.0, 1
         ),
         "calibration": (
-            "Measured Zero G depression storage; runoff and routing remain modeled"
+            "Measured reference-canyon depression storage; runoff and routing remain modeled"
             if canyon_id == "zerog"
             else "Technical-length normalized and morphology-adjusted; field calibration needed"
         ),
@@ -645,6 +645,46 @@ def grid_list(values: np.ndarray, digits: int = 3) -> list[list[float | None]]:
         [None if not np.isfinite(value) else round(float(value), digits) for value in row]
         for row in values
     ]
+
+
+def dbz_distribution(
+    dbz: np.ndarray, weights: np.ndarray, area_sq_mi: float
+) -> list[dict[str, Any]]:
+    """Return exclusive five-dBZ bands for one watershed radar snapshot."""
+    total_weight = float(weights.sum())
+    if total_weight <= 0:
+        return []
+
+    bands: list[tuple[float | None, float | None, str]] = [
+        (None, 5.0, "No echo / <5 dBZ")
+    ]
+    bands.extend(
+        (float(lower), float(lower + 5), f"{lower}–<{lower + 5} dBZ")
+        for lower in range(5, 70, 5)
+    )
+    bands.append((70.0, None, "70+ dBZ"))
+
+    values = np.nan_to_num(dbz, nan=-999.0)
+    result = []
+    for lower, upper, label in bands:
+        if lower is None:
+            selected = values < float(upper)
+        elif upper is None:
+            selected = values >= float(lower)
+        else:
+            selected = (values >= float(lower)) & (values < float(upper))
+        selected_weight = float(weights[selected].sum())
+        percent = 100.0 * selected_weight / total_weight
+        result.append(
+            {
+                "label": label,
+                "minimum_dbz": lower,
+                "maximum_dbz_exclusive": upper,
+                "percent": round(percent, 1),
+                "area_sq_mi": round(percent / 100.0 * area_sq_mi, 3),
+            }
+        )
+    return result
 
 
 
@@ -725,6 +765,9 @@ def analyze_canyon_image(
     return (
         {
             "maximum_dbz": None if maximum is None else round(maximum, 1),
+            "dbz_distribution": dbz_distribution(
+                dbz, canyon.weights, canyon.area_sq_mi
+            ),
             "coverage_percent": coverages,
             "spatial_rules": rules,
             "spatial_gate": any(rule["qualified"] for rule in rules),
@@ -839,7 +882,7 @@ def legacy_event(event: dict[str, Any] | None) -> dict[str, Any] | None:
     return {
         **event,
         "classification": "legacy_spatial_trigger",
-        "classification_label": "Legacy Zero G radar trigger",
+        "classification_label": "Legacy reference-canyon radar trigger",
         "estimated_runoff_ft3": None,
         "fill_ratio": None,
         "basin_rain_inches": None,
@@ -1360,6 +1403,13 @@ def event_public(
     )
     public["atlas14_depth_inches"] = public.get("basin_rain_inches")
     public["rainfall_depth_source"] = "base_reflectivity_zr_screening"
+    peak_values = public.get("peak_grid_dbz")
+    if peak_values is not None:
+        peak_grid = np.asarray(peak_values, dtype=np.float32)
+        if peak_grid.shape == canyon.weights.shape:
+            public["peak_dbz_distribution"] = dbz_distribution(
+                peak_grid, canyon.weights, canyon.area_sq_mi
+            )
     accumulated_values = public.get("accumulated_rain_grid_inches")
     if accumulated_values is not None:
         accumulated = np.asarray(accumulated_values, dtype=np.float32)
@@ -1457,6 +1507,7 @@ def start_event(
         "rain_frames": 1,
         "wet_frames": 1,
         "peak_dbz": analysis["maximum_dbz"],
+        "peak_dbz_distribution": list(analysis.get("dbz_distribution") or []),
         "peak_coverage_percent": dict(analysis["coverage_percent"]),
         "peak_covered_area_sq_mi": {
             str(int(rule["dbz"])): rule["covered_area_sq_mi"]
@@ -1580,6 +1631,9 @@ def update_open_event(
     ):
         event["peak_frame_rain_volume_ft3"] = analysis["frame_rain_volume_ft3"]
         event["peak_frame_maximum_dbz"] = analysis["maximum_dbz"]
+        event["peak_dbz_distribution"] = list(
+            analysis.get("dbz_distribution") or []
+        )
         event["peak_frame_utc"] = utc_text(timestamp)
         event["peak_grid_dbz"] = analysis["grid_dbz"]
         event["grid_bbox"] = analysis["grid_bbox"]
@@ -2166,7 +2220,7 @@ def cumulative_refill_evidence(
         "last_meaningful_refill_utc": last_meaningful_utc,
         "loss_model": "provisional_linear_decay",
         "decay_percentage_points_per_day": decay_points_per_day,
-        "retention_class": "provisional Zero G field calibration",
+        "retention_class": "provisional reference-canyon field calibration",
     }
 
 
@@ -2605,12 +2659,13 @@ def model_metadata(
                 "storage density. These are provisional empty-storage targets."
             ),
             "spatial_formula": (
-                "50+ dBZ over 50% of the watershed, or 55+ dBZ over 25%, "
-                "or 60+ dBZ over 10%"
+                "Area-weighted watershed percentages in exclusive peak-frame bands: "
+                "no echo/<5 dBZ, every 5-dBZ band from 5 through 70 dBZ, and 70+ dBZ"
             ),
             "spatial_explanation": (
-                "These historical watershed-percentage comparisons are retained only as "
-                "storm context. They do not control the canyon-condition classification."
+                "The distribution is a snapshot of the selected storm's maximum-reflectivity "
+                "frame. Bands are mutually exclusive and sum to the watershed total. It is "
+                "storm context and does not control the canyon-condition classification."
             ),
             "fill_ratio_explanation": (
                 "Estimated fill ratio = normal-condition NRCS watershed direct runoff ÷ provisional "

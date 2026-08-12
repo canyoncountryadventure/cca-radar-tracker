@@ -102,6 +102,19 @@ class TrackerTests(unittest.TestCase):
         depth = tracker.rain_depth_inches(dbz, self.config["model"])
         self.assertAlmostEqual(float(depth[0, 0]), 0.208, delta=0.003)
 
+    def test_peak_frame_dbz_distribution_uses_exclusive_five_dbz_bands(self):
+        dbz = np.array([[np.nan, 7.0], [22.0, 72.0]], dtype=np.float32)
+        weights = np.ones((2, 2), dtype=np.float32)
+        distribution = tracker.dbz_distribution(dbz, weights, 1.0)
+        by_label = {band["label"]: band for band in distribution}
+        self.assertEqual(by_label["No echo / <5 dBZ"]["percent"], 25.0)
+        self.assertEqual(by_label["5–<10 dBZ"]["percent"], 25.0)
+        self.assertEqual(by_label["20–<25 dBZ"]["percent"], 25.0)
+        self.assertEqual(by_label["70+ dBZ"]["percent"], 25.0)
+        self.assertAlmostEqual(
+            sum(band["percent"] for band in distribution), 100.0
+        )
+
     def test_adjusted_nrcs_initial_abstraction(self):
         cn = self.by_id["zerog"].model["hydrology"]["curve_number"]["normal"]
         self.assertAlmostEqual(tracker.nrcs_initial_abstraction(cn), 0.089, delta=0.002)

@@ -191,8 +191,8 @@ function eventCondition(event) {
 function modifierText(model) {
   const modifier = Number(model.pothole_modifier || 0);
   const percent = Math.round(Math.abs(modifier) * 100);
-  if (modifier === 0) return "Same rate as Zero G";
-  return `${percent}% ${modifier > 0 ? "higher" : "lower"} than Zero G`;
+  if (modifier === 0) return "Same rate as the reference canyon";
+  return `${percent}% ${modifier > 0 ? "higher" : "lower"} than the reference canyon`;
 }
 
 function fetchJson(path) {
@@ -644,14 +644,14 @@ function renderMetrics(model, event) {
     metricCard(
       event?.peak_flow_status === "provisional_field_calibration" ? "Estimated canyon peak" : "Experimental routed peak",
       event ? `${number(peak, 2)} cfs` : "—",
-      event ? `${rangeText(peakRange, "cfs", 2)} dry–wet range; ${event.peak_flow_status === "provisional_field_calibration" ? "provisional 0.14 Zero G calibration" : "uncalibrated"}` : "screening flow-rate context",
-      "Peak flow is calibrated separately from runoff volume. Zero G uses a provisional 0.14 factor based on one field-estimated 3–6 cfs flash; other canyons remain experimental. Peak flow does not control refill classification.",
+      event ? `${rangeText(peakRange, "cfs", 2)} dry–wet range; ${event.peak_flow_status === "provisional_field_calibration" ? "provisional 0.14 reference-canyon calibration" : "uncalibrated"}` : "screening flow-rate context",
+      "Peak flow is calibrated separately from runoff volume. The reference canyon uses a provisional 0.14 factor based on one field-estimated 3–6 cfs flash; other canyons remain experimental. Peak flow does not control refill classification.",
     ),
     metricCard(
       "Estimated empty-pool storage",
       `${number(model.fill_target_ft3, 0)} ft³`,
       "estimated empty pool/pothole storage",
-      "The provisional volume required to fill all modeled canyon pool and pothole storage if it started empty. It is normalized from Zero G by technical-section length and the canyon-specific pothole-storage adjustment.",
+      "The provisional volume required to fill all modeled canyon pool and pothole storage if it started empty. It is normalized from the reference canyon by technical-section length and the canyon-specific pothole-storage adjustment.",
     ),
     metricCard(
       "Storage-fill ratio",
@@ -662,14 +662,14 @@ function renderMetrics(model, event) {
     metricCard(
       "Technical section",
       `${number(model.technical_length_miles, 2)} mi`,
-      `${number(model.length_ratio_to_zerog, 2)}× Zero G length`,
-      "The user-supplied length of the canyon's technical pool- and pothole-bearing section. It is compared with Zero G's 0.75-mile technical reference length.",
+      `${number(model.length_ratio_to_zerog, 2)}× reference-canyon length`,
+      "The user-supplied length of the canyon's technical pool- and pothole-bearing section. It is compared with the reference canyon's 0.75-mile technical length.",
     ),
     metricCard(
       "Pothole-storage adjustment",
       modifierValue,
       `${modifierText(model)} per technical mile`,
-      "A canyon-specific adjustment to the assumed pool-storage volume per technical mile relative to Zero G. Positive values mean more storage per mile; negative values mean less.",
+      "A canyon-specific adjustment to the assumed pool-storage volume per technical mile relative to the reference canyon. Positive values mean more storage per mile; negative values mean less.",
     ),
     metricCard(
       "Peak radar",
@@ -736,7 +736,9 @@ function renderEventCard(event, title, emptyText) {
     <h3>${escapeHtml(dateTime(event.start_utc))}</h3>
     <p class="event-result"><strong>${escapeHtml(event.classification_label || "Modeled rain event")}</strong><br>${escapeHtml(event.classification_explanation || "Model classification explanation unavailable.")}</p>
     <div class="event-meta-grid">
-      ${eventMeta("End", dateTime(event.end_utc))}
+      ${eventMeta("Storm start", dateTime(event.start_utc))}
+      ${eventMeta("Storm end", dateTime(event.end_utc))}
+      ${eventMeta("Total duration", `${number(eventDuration(event), 0)} min`)}
       ${eventMeta("Area-weighted mean rainfall", `${number(event.basin_rain_inches, 3)} in`)}
       ${eventMeta("Maximum watershed cell", event.maximum_watershed_cell_storm_inches == null ? "Not available" : `${number(event.maximum_watershed_cell_storm_inches, 3)} in`)}
       ${eventMeta("Atlas 14 context", atlasText(event))}
@@ -796,7 +798,9 @@ function renderRefillHistory(status, model) {
 
   const rows = history.map((event, index) => `
     <tr>
-      <td><button type="button" class="event-date-button" data-history-index="${index}">${escapeHtml(dateTime(event.end_utc || event.start_utc))}</button></td>
+      <td><button type="button" class="event-date-button" data-history-index="${index}">${escapeHtml(dateTime(event.start_utc))}</button></td>
+      <td>${escapeHtml(dateTime(event.end_utc || event.start_utc))}</td>
+      <td>${number(eventDuration(event), 0)} min</td>
       <td>${number(event.basin_rain_inches, 3)} in</td>
       <td>${number(event.direct_runoff_ft3, 0)} ft³</td>
       <td>${number(event.event_fill_ratio, 2)}×</td>
@@ -824,9 +828,9 @@ function renderRefillHistory(status, model) {
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Storm end</th><th>Radar rain</th><th>Modeled runoff</th><th>Storm ratio</th><th>Result</th></tr>
+          <tr><th>Storm start</th><th>Storm end</th><th>Duration</th><th>Radar rain</th><th>Modeled runoff</th><th>Storm ratio</th><th>Result</th></tr>
         </thead>
-        <tbody>${rows || `<tr><td colspan="5">No retained modeled rain events.</td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="7">No retained modeled rain events.</td></tr>`}</tbody>
       </table>
     </div>
   `;
@@ -919,10 +923,11 @@ function renderDecision(model, event) {
 }
 
 function renderRainDistribution(event) {
-  const p = event?.peak_coverage_percent || {};
-  const a = event?.peak_covered_area_sq_mi || {};
-  const rows = [50, 55, 60].map((dbz) => `<tr><td>${dbz}+ dBZ</td><td>${number(p[String(dbz)] || 0, 1)}%</td><td>${number(a[String(dbz)] || 0, 3)} mi²</td></tr>`).join("");
-  $("intensity-gates").innerHTML = `<table><thead><tr><th>Radar intensity</th><th>Peak watershed coverage</th><th>Peak area</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const distribution = Array.isArray(event?.peak_dbz_distribution)
+    ? event.peak_dbz_distribution
+    : [];
+  const rows = distribution.map((band) => `<tr><td>${escapeHtml(band.label || "Unknown")}</td><td>${number(band.percent || 0, 1)}%</td><td>${number(band.area_sq_mi || 0, 3)} mi²</td></tr>`).join("");
+  $("intensity-gates").innerHTML = `<table><thead><tr><th>Reflectivity band</th><th>Watershed snapshot</th><th>Area</th></tr></thead><tbody>${rows || `<tr><td colspan="3">A peak-frame distribution is unavailable for this legacy storm.</td></tr>`}</tbody></table>`;
 }
 
 function renderMethods() {
@@ -939,7 +944,7 @@ function renderMethods() {
       <li><strong>Estimated watershed runoff:</strong> ${escapeHtml(method.runoff_formula || "Not available")}. ${escapeHtml(method.direct_runoff_explanation || "")}</li>
       <li><strong>Routed peak flow — context:</strong> ${escapeHtml(method.peak_flow_formula || "Not available")}. ${escapeHtml(method.peak_flow_explanation || "")}</li>
       <li><strong>Pool-storage target:</strong> ${escapeHtml(method.target_formula || "Not available")}. ${escapeHtml(method.target_explanation || "")}</li>
-      <li><strong>Radar-intensity distribution:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. These values show whether intense echoes were isolated or widespread; they do not control classification.</li>
+      <li><strong>Radar-intensity distribution:</strong> ${escapeHtml(method.spatial_formula || "Not available")}. ${escapeHtml(method.spatial_explanation || "These values do not control classification.")}</li>
       <li><strong>Estimated fill ratio:</strong> ${escapeHtml(method.fill_ratio_explanation || "Not available")}</li>
       <li><strong>Multi-storm accumulation:</strong> ${escapeHtml(method.cumulative_refill_explanation || "Not available")}</li>
       <li><strong>Pool loss and decay:</strong> ${escapeHtml(method.pool_loss_explanation || "Not available")}</li>
