@@ -1,6 +1,10 @@
 name: Update pool-fill radar
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/update-radar.yml"
   schedule:
     # High-frequency GitHub schedules are often throttled. This watchdog only
     # restarts the self-dispatch chain when no recent continuation exists.

@@ -18,6 +18,7 @@ class WorkflowCadenceTests(unittest.TestCase):
             ),
         )
         self.assertIn("actions: write", text)
+        self.assertIn('paths:\n      - ".github/workflows/update-radar.yml"', text)
         self.assertIn("if: always() && needs.cadence-gate.outputs.run_update == 'true'", text)
         self.assertIn("next_epoch=\"$((CHAIN_STARTED_EPOCH + 300))\"", text)
         self.assertIn("gh workflow run update-radar.yml", text)
