@@ -2,7 +2,9 @@ name: Update pool-fill radar
 
 on:
   schedule:
-    - cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
+    # High-frequency GitHub schedules are often throttled. This watchdog only
+    # restarts the self-dispatch chain when no recent continuation exists.
+    - cron: "11,41 * * * *"
   workflow_dispatch:
     inputs:
       send_test_email:
@@ -17,6 +19,7 @@ on:
         type: string
 
 permissions:
+  actions: write
   contents: write
   pages: write
   id-token: write
@@ -26,7 +29,49 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  cadence-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run_update: ${{ steps.gate.outputs.run_update }}
+      chain_started_epoch: ${{ steps.gate.outputs.chain_started_epoch }}
+    steps:
+      - name: Decide whether this launch should update radar
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          now="$(date -u +%s)"
+          echo "chain_started_epoch=$now" >> "$GITHUB_OUTPUT"
+
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo "run_update=true" >> "$GITHUB_OUTPUT"
+            echo "Workflow dispatch accepted as a radar-chain update."
+            exit 0
+          fi
+
+          recent_dispatch="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/update-radar.yml/runs?per_page=20" \
+            --jq '.workflow_runs[] | select(.event == "workflow_dispatch") | .created_at' \
+            | head -n 1)"
+          if [[ -n "$recent_dispatch" ]]; then
+            recent_epoch="$(date -u -d "$recent_dispatch" +%s)"
+            age_seconds="$((now - recent_epoch))"
+          else
+            age_seconds=999999
+          fi
+
+          if (( age_seconds < 900 )); then
+            echo "run_update=false" >> "$GITHUB_OUTPUT"
+            echo "Five-minute dispatch chain is healthy; watchdog update skipped."
+          else
+            echo "run_update=true" >> "$GITHUB_OUTPUT"
+            echo "No continuation launch in 15 minutes; watchdog is restarting the chain."
+          fi
+
   update:
+    needs: cadence-gate
+    if: needs.cadence-gate.outputs.run_update == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -95,15 +140,20 @@ jobs:
           app = Path("cca-radar-tracker/docs/app.js").read_text(encoding="utf-8")
           index = Path("cca-radar-tracker/docs/index.html").read_text(encoding="utf-8")
 
-          cron_ok = bool(
+          watchdog_ok = bool(
               re.search(
-                  r'^\s*-\s*cron:\s*["\']2,7,12,17,22,27,32,37,42,47,52,57 \* \* \* \*["\']\s*$',
+                  r'^\s*-\s*cron:\s*["\']11,41 \* \* \* \*["\']\s*$',
                   workflow,
                   re.MULTILINE,
               )
           )
           required = {
-              "explicit five-minute cron": cron_ok,
+              "scheduled recovery watchdog": watchdog_ok,
+              "self-dispatch continuation": (
+                  "Queue the next five-minute radar update" in workflow
+                  and "actions: write" in workflow
+                  and "gh workflow run update-radar.yml" in workflow
+              ),
               "timestamp frame ledger": '"frame_ledger"' in tracker,
               "overlap reconciliation": "reconciliation_window_minutes" in tracker,
               "archive confirmation": "latest_archive_confirmed_frame_utc" in tracker,
@@ -144,7 +194,7 @@ jobs:
           failed = [name for name, passed in required.items() if not passed]
           if failed:
               raise SystemExit("Requested update is incomplete: " + ", ".join(failed))
-          print("Verified five-minute schedule, frame reconciliation, alerts, and UI.")
+          print("Verified five-minute dispatch chain, recovery watchdog, frame reconciliation, alerts, and UI.")
           PY
 
       - name: Stage authoritative watershed polygons
@@ -534,3 +584,24 @@ jobs:
       - name: Publish website
         id: deployment
         uses: actions/deploy-pages@v5
+
+  queue-next:
+    needs: [cadence-gate, update]
+    if: always() && needs.cadence-gate.outputs.run_update == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Queue the next five-minute radar update
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHAIN_STARTED_EPOCH: ${{ needs.cadence-gate.outputs.chain_started_epoch }}
+        run: |
+          set -euo pipefail
+          now="$(date -u +%s)"
+          next_epoch="$((CHAIN_STARTED_EPOCH + 300))"
+          wait_seconds="$((next_epoch - now))"
+          if (( wait_seconds > 0 )); then
+            echo "Waiting $wait_seconds seconds for the next five-minute boundary."
+            sleep "$wait_seconds"
+          fi
+          gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "Queued the next radar update."
