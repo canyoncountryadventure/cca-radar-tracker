@@ -2,9 +2,8 @@
 """Restore immutable historical storm-model evidence after live recomputation.
 
 Later hydrology-model changes must not silently erase what the tracker actually
-published for an earlier storm.  Historical event evidence is therefore built
-from multiple durable operational snapshots.  For the same exact event window,
-the strongest/richest published copy wins; distinct later events are retained.
+published for an earlier storm. Historical refill outputs are retained from
+multiple durable operational snapshots, but bulky radar grids are not duplicated.
 New storms continue to use the current model.
 """
 
@@ -27,18 +26,28 @@ import tracker
 
 UTC = timezone.utc
 EVIDENCE_KEY = "historical_model_evidence"
-EVIDENCE_SCHEMA_VERSION = 2
+EVIDENCE_SCHEMA_VERSION = 3
 BASE = (
     "https://raw.githubusercontent.com/canyoncountryadventure/cca-radar-tracker/"
     "operational-data/backups/{date}/status.json"
 )
-# Aug 24 preserves the Angel Cove Aug 23 flush before it was recalculated away.
-# Aug 31 preserves the later Neon/Woody Aug 30 storms.  Combining them avoids
-# treating any single later, partly-recomputed snapshot as ground truth.
 DEFAULT_SOURCES = [
     ("2026-08-24", BASE.format(date="2026-08-24")),
     ("2026-08-31", BASE.format(date="2026-08-31")),
 ]
+
+# Radar arrays/snippets are already retained in the normal event record. They are
+# intentionally omitted from the immutable model-evidence copy so status.json does
+# not balloon by tens of megabytes.
+BULKY_KEYS = {
+    "radar_grid",
+    "rain_grid",
+    "grid_dbz",
+    "grid_rain_inches",
+    "radar_pixels",
+    "rain_pixels",
+    "watershed_grid",
+}
 
 
 def parse_utc(value: str | None) -> datetime | None:
@@ -65,7 +74,7 @@ def fetch_json(url: str) -> dict[str, Any]:
     request = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "CCA-Historical-Evidence-Recovery/2.0",
+            "User-Agent": "CCA-Historical-Evidence-Recovery/3.0",
             "Cache-Control": "no-cache",
         },
     )
@@ -74,27 +83,51 @@ def fetch_json(url: str) -> dict[str, Any]:
 
 
 def classification_rank(event: dict[str, Any]) -> int:
-    classification = str(event.get("classification") or "").lower()
     return {
         "full_flush": 4,
         "likely_full": 3,
         "moderate": 2,
         "minor": 1,
-    }.get(classification, 0)
+    }.get(str(event.get("classification") or "").lower(), 0)
 
 
 def event_quality(event: dict[str, Any]) -> tuple[float, float, float, int]:
-    """Rank alternate published copies of the exact same storm window.
-
-    We prefer stronger modeled runoff/fill evidence over a later zeroed copy,
-    then use classification and record richness as tie-breakers.  This is not a
-    claim that the older model was physically correct; it preserves what the
-    operational tracker actually published at the time.
-    """
     runoff = float(event.get("direct_runoff_ft3") or event.get("generated_runoff_ft3") or 0.0)
     ratio = float(event.get("fill_ratio") or event.get("storage_ratio") or 0.0)
     cumulative = float(event.get("cumulative_ratio") or 0.0)
     return runoff, max(ratio, cumulative), float(classification_rank(event)), len(json.dumps(event, sort_keys=True))
+
+
+def is_bulky_key(key: str) -> bool:
+    lowered = key.lower()
+    return (
+        lowered in BULKY_KEYS
+        or lowered.endswith("_zlib")
+        or lowered.endswith("_base64")
+        or ("grid" in lowered and lowered not in {"grid_cell_count"})
+    )
+
+
+def compact_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: compact_value(item)
+            for key, item in value.items()
+            if not is_bulky_key(str(key))
+        }
+    if isinstance(value, list):
+        # Large numeric arrays are radar payloads; short semantic lists are useful.
+        if len(value) > 500:
+            return []
+        return [compact_value(item) for item in value]
+    return copy.deepcopy(value)
+
+
+def compact_event(event: dict[str, Any]) -> dict[str, Any]:
+    compacted = compact_value(event)
+    if not isinstance(compacted, dict):
+        raise TypeError("Event compaction did not return an object")
+    return compacted
 
 
 def collect_snapshot_events(canyon: dict[str, Any], cutoff: datetime) -> list[dict[str, Any]]:
@@ -150,7 +183,8 @@ def bootstrap_evidence(
 
         for canyon_id, canyon in snapshot_canyons.items():
             signature = canyon.get("model_signature")
-            for event in collect_snapshot_events(canyon, cutoff):
+            for full_event in collect_snapshot_events(canyon, cutoff):
+                event = compact_event(full_event)
                 event["historical_model_evidence"] = True
                 event["historical_model_signature"] = signature
                 event["historical_model_snapshot_utc"] = snapshot.get("last_checked_utc")
@@ -180,10 +214,9 @@ def bootstrap_evidence(
         "event_count": total_events,
         "canyons": canyon_evidence,
         "explanation": (
-            "Exact published historical model-event records retained across model revisions. "
-            "For duplicate storm windows, the strongest/richest previously published copy is "
-            "preserved rather than a later zeroed recomputation. These are historical model "
-            "outputs, not field observations. Newer storms use the current model."
+            "Previously published historical model outputs retained across model revisions. "
+            "Bulky radar grids remain only in the normal event record and are not duplicated. "
+            "These preserved values are historical model outputs, not field observations."
         ),
     }
     status[EVIDENCE_KEY] = evidence
@@ -197,10 +230,19 @@ def merge_events(
     for event in current:
         if event and event.get("start_utc"):
             merged[event_key(event)] = copy.deepcopy(event)
-    for event in historical:
-        end = event_end(event)
-        if end is not None and end <= cutoff:
-            merged[event_key(event)] = copy.deepcopy(event)
+
+    for historical_event in historical:
+        end = event_end(historical_event)
+        if end is None or end > cutoff:
+            continue
+        key = event_key(historical_event)
+        if key in merged:
+            # Overlay preserved model outputs onto the current event while retaining
+            # the current event's radar grids/snippets and any newer metadata.
+            merged[key].update(copy.deepcopy(historical_event))
+        else:
+            merged[key] = copy.deepcopy(historical_event)
+
     return sorted(
         merged.values(),
         key=lambda item: event_end(item) or datetime.min.replace(tzinfo=UTC),
@@ -262,7 +304,7 @@ def main() -> None:
         "--source-url",
         action="append",
         default=[],
-        help="Optional additional/override recovery snapshot URL. May be supplied multiple times.",
+        help="Optional override recovery snapshot URL. May be supplied multiple times.",
     )
     args = parser.parse_args()
 
@@ -278,7 +320,7 @@ def main() -> None:
     print(
         "Historical model evidence restored: "
         f"{info['restored_event_count']} events through {info['authoritative_through_utc']} "
-        f"from {', '.join(info['sources'])}"
+        f"from {', '.join(info['sources'])}; status size={args.status.stat().st_size:,} bytes"
     )
 
 
