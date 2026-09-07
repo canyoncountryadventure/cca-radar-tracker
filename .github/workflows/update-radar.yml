@@ -40,7 +40,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   cadence-gate:
@@ -278,12 +278,6 @@ jobs:
         run: |
           set -euo pipefail
           effective_rebuild_from="${{ inputs.rebuild_from_utc }}"
-          if [[ -z "$RECOVERY_BACKUP_DATE" && -f .github/recovery-request.json ]]; then
-            RECOVERY_BACKUP_DATE="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["backup_date"])')"
-            RECOVERY_BACKUP_REF="$(python -c 'import json; print(json.load(open(".github/recovery-request.json")).get("backup_ref", "operational-data"))')"
-            effective_rebuild_from="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["rebuild_from_utc"])')"
-            echo "Applying the committed one-time recovery request."
-          fi
           echo "REBUILD_FROM_UTC=$effective_rebuild_from" >> "$GITHUB_ENV"
           mkdir -p cca-radar-tracker/docs/data
           published="$(mktemp)"

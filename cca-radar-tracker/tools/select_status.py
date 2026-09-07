@@ -9,12 +9,43 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SUPPORTED_SCHEMAS = {2, 3, 4, 5}
+EXPECTED_CANYON_IDS = {
+    "alcatraz",
+    "angel-cove",
+    "black-hole-white-canyon",
+    "cable-canyon",
+    "constrychnine",
+    "eardley",
+    "entrajo",
+    "hog-canyons",
+    "hogwarts",
+    "leprechaun",
+    "neon",
+    "no-kidding",
+    "north-fork-iron-wash",
+    "poe",
+    "pool-arch",
+    "quandary",
+    "the-squeeze",
+    "upper-greasewood",
+    "wonderland-canyon",
+    "woody",
+    "yankee-doodle",
+    "zerog",
+}
 
 
 def load_candidate(path: Path) -> tuple[datetime, dict]:
     status = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(status.get("canyons"), dict) or not status["canyons"]:
         raise ValueError("missing canyon state")
+    canyon_ids = set(status["canyons"])
+    if canyon_ids != EXPECTED_CANYON_IDS:
+        missing = sorted(EXPECTED_CANYON_IDS - canyon_ids)
+        extra = sorted(canyon_ids - EXPECTED_CANYON_IDS)
+        raise ValueError(
+            f"incomplete canyon state; missing={missing}; extra={extra}"
+        )
     try:
         schema = int(status.get("schema_version"))
     except (TypeError, ValueError) as exc:
