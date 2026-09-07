@@ -26,6 +26,11 @@ on:
         required: false
         default: ""
         type: string
+      recovery_backup_ref:
+        description: Optional commit/ref containing the dated operational backup
+        required: false
+        default: "operational-data"
+        type: string
 
 permissions:
   actions: write
@@ -269,11 +274,13 @@ jobs:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
           STATUS_BACKUP_URL: https://raw.githubusercontent.com/${{ github.repository }}/operational-data/latest/status.json
           RECOVERY_BACKUP_DATE: ${{ inputs.recovery_backup_date }}
+          RECOVERY_BACKUP_REF: ${{ inputs.recovery_backup_ref }}
         run: |
           set -euo pipefail
           effective_rebuild_from="${{ inputs.rebuild_from_utc }}"
           if [[ -z "$RECOVERY_BACKUP_DATE" && -f .github/recovery-request.json ]]; then
             RECOVERY_BACKUP_DATE="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["backup_date"])')"
+            RECOVERY_BACKUP_REF="$(python -c 'import json; print(json.load(open(".github/recovery-request.json")).get("backup_ref", "operational-data"))')"
             effective_rebuild_from="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["rebuild_from_utc"])')"
             echo "Applying the committed one-time recovery request."
           fi
@@ -304,7 +311,8 @@ jobs:
               echo "A recovery backup requires rebuild_from_utc."
               exit 1
             fi
-            recovery_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/operational-data/backups/${RECOVERY_BACKUP_DATE}/status.json"
+            RECOVERY_BACKUP_REF="${RECOVERY_BACKUP_REF:-operational-data}"
+            recovery_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${RECOVERY_BACKUP_REF}/backups/${RECOVERY_BACKUP_DATE}/status.json"
             curl --fail --silent --show-error --location --max-time 60 \
               --header "Cache-Control: no-cache" \
               "${recovery_url}?${cache_buster}" \
