@@ -19,49 +19,43 @@ jobs:
       - name: Install dependencies
         working-directory: cca-radar-tracker
         run: pip install -r requirements.txt
-      - name: Audit selected known-good backups
-        run: |
-          python - <<'PY'
-          import json, urllib.request
-
-          targets = ['neon', 'no-kidding', 'woody', 'angel-cove', 'hog-canyons']
-          dates = ['2026-08-20','2026-08-24','2026-08-26','2026-08-29','2026-08-31']
-          base = 'https://raw.githubusercontent.com/canyoncountryadventure/cca-radar-tracker/operational-data/backups/{}/status.json'
-
-          for date in dates:
-              print('\nSNAPSHOT', date)
-              with urllib.request.urlopen(base.format(date), timeout=120) as r:
-                  status = json.load(r)
-              for canyon_id in targets:
-                  c = status['canyons'][canyon_id]
-                  events = c.get('events') or []
-                  strongest = max(events, key=lambda e: float(e.get('direct_runoff_ft3') or 0), default={})
-                  rec = (c.get('historical_records') or {}).get('peak_individual_event') or {}
-                  print(canyon_id,
-                        'last_checked=', status.get('last_checked_utc'),
-                        'strongest=', strongest.get('start_utc'),
-                        'runoff=', strongest.get('direct_runoff_ft3'),
-                        'class=', strongest.get('classification'),
-                        'record_ratio=', rec.get('fill_ratio'))
-          PY
       - name: Fetch current operational state
         run: |
           curl --fail --location --retry 3 \
             https://raw.githubusercontent.com/canyoncountryadventure/cca-radar-tracker/operational-data/latest/status.json \
             -o /tmp/status.json
-      - name: Restore current evidence and verify core recovery mechanism
+      - name: Restore and verify multi-snapshot historical evidence
         working-directory: cca-radar-tracker
         run: |
           python tools/restore_historical_model_evidence.py --status /tmp/status.json
           python - <<'PY'
           import json
           from pathlib import Path
+
           status = json.loads(Path('/tmp/status.json').read_text())
-          targets = ['neon', 'no-kidding', 'woody', 'angel-cove', 'hog-canyons']
-          evidence = status.get('historical_model_evidence') or {}
-          assert evidence.get('event_count', 0) > 0
-          for canyon_id in targets:
+          evidence = status['historical_model_evidence']
+          assert evidence['schema_version'] == 2
+          assert set(x['label'] for x in evidence['sources']) == {'2026-08-24','2026-08-31'}
+
+          def max_runoff(canyon_id, start_prefix):
+              matches = [
+                  e for e in status['canyons'][canyon_id].get('events') or []
+                  if str(e.get('start_utc','')).startswith(start_prefix)
+                  and e.get('historical_model_evidence')
+              ]
+              assert matches, f'{canyon_id} {start_prefix}: historical event missing'
+              best = max(matches, key=lambda e: float(e.get('direct_runoff_ft3') or 0))
+              print(canyon_id, start_prefix, best.get('direct_runoff_ft3'), best.get('classification'), best.get('historical_model_source'))
+              return float(best.get('direct_runoff_ft3') or 0)
+
+          assert max_runoff('neon','2026-08-30') >= 162775
+          assert max_runoff('woody','2026-08-30') >= 245843
+          assert max_runoff('angel-cove','2026-08-23') >= 145917
+
+          for canyon_id in ['neon','no-kidding','woody','angel-cove','hog-canyons']:
               historical = [e for e in status['canyons'][canyon_id].get('events') or [] if e.get('historical_model_evidence')]
-              assert historical, f'{canyon_id}: no recovered events'
-          print('core recovery mechanism verified for all five target canyons')
+              assert historical, f'{canyon_id}: no historical events restored'
+              strongest = max(historical, key=lambda e: float(e.get('direct_runoff_ft3') or 0))
+              print('TARGET', canyon_id, 'events', len(historical), 'strongest', strongest.get('start_utc'), strongest.get('direct_runoff_ft3'), strongest.get('classification'))
+          print('multi-snapshot recovery verified')
           PY
