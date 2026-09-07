@@ -18,36 +18,45 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install restoration step into live radar workflow
+      - name: Install restoration hook into tracker runtime
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('.github/workflows/update-radar.yml')
+          path = Path('cca-radar-tracker/tracker.py')
           text = path.read_text(encoding='utf-8')
-          marker = '      - name: Verify revised refill model\n'
-          step = '''      - name: Restore immutable historical storm evidence\n        working-directory: cca-radar-tracker\n        run: python tools/restore_historical_model_evidence.py --status docs/data/status.json\n\n'''
 
-          if step in text:
-              print('Historical restoration step already installed.')
-          else:
-              if marker not in text:
-                  raise SystemExit('Could not locate verification step in update-radar.yml')
-              text = text.replace(marker, step + marker, 1)
-              path.write_text(text, encoding='utf-8')
-              print('Installed historical restoration step.')
+          if 'import subprocess\n' not in text:
+              text = text.replace('import sys\n', 'import sys\nimport subprocess\n', 1)
+
+          original = '            save_json(arguments.status, status)\n'
+          replacement = '''            save_json(arguments.status, status)\n            subprocess.run(\n                [sys.executable, str(ROOT / "tools/restore_historical_model_evidence.py"),\n                 "--status", str(arguments.status)],\n                check=True,\n            )\n'''
+          if replacement not in text:
+              if original not in text:
+                  raise SystemExit('Could not locate one-frame status save in tracker.py')
+              text = text.replace(original, replacement, 1)
+
+          original_final = '    save_json(arguments.status, status)\n    print(\n        f"Radar reconciliation completed; {processed}/{len(timestamps)} frames "\n'
+          replacement_final = '''    save_json(arguments.status, status)\n    subprocess.run(\n        [sys.executable, str(ROOT / "tools/restore_historical_model_evidence.py"),\n         "--status", str(arguments.status)],\n        check=True,\n    )\n    print(\n        f"Radar reconciliation completed; {processed}/{len(timestamps)} frames "\n'''
+          if replacement_final not in text:
+              if original_final not in text:
+                  raise SystemExit('Could not locate scheduled-run status save in tracker.py')
+              text = text.replace(original_final, replacement_final, 1)
+
+          path.write_text(text, encoding='utf-8')
+          print('Installed runtime historical-evidence restoration hook.')
           PY
 
-      - name: Commit live workflow change
+      - name: Commit tracker runtime change
         run: |
           set -euo pipefail
-          if git diff --quiet -- .github/workflows/update-radar.yml; then
-            echo "No workflow change needed."
+          if git diff --quiet -- cca-radar-tracker/tracker.py; then
+            echo "No tracker change needed."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/update-radar.yml
-          git commit -m "Restore original canyon storm evidence after each radar update"
+          git add cca-radar-tracker/tracker.py
+          git commit -m "Preserve original canyon storm evidence on every radar run"
           git push origin HEAD:main
