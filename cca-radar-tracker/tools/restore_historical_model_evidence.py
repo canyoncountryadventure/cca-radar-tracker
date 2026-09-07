@@ -13,10 +13,15 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import sys
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import tracker
 
@@ -73,7 +78,6 @@ def collect_snapshot_events(canyon: dict[str, Any], cutoff: datetime) -> list[di
         end = event_end(event)
         if not event.get("start_utc") or end is None or end > cutoff:
             continue
-        # Prefer the richest exact published copy.
         key = event_key(event)
         prior = unique.get(key)
         if prior is None or len(json.dumps(event)) > len(json.dumps(prior)):
@@ -142,7 +146,6 @@ def merge_events(
         if event and event.get("start_utc"):
             merged[event_key(event)] = copy.deepcopy(event)
 
-    # The old snapshot is authoritative for historical event-model outputs.
     for event in historical:
         end = event_end(event)
         if end is not None and end <= cutoff:
@@ -182,7 +185,6 @@ def restore(status: dict[str, Any], source_url: str, root: Path) -> dict[str, An
         )
         restored_count += len(historical)
 
-        # Rebuild event pointers from the merged event list.
         events = canyon_status["events"]
         canyon_status["last_rain_event"] = events[0] if events else None
         canyon_status["last_qualifying_event"] = next(
@@ -194,9 +196,6 @@ def restore(status: dict[str, Any], source_url: str, root: Path) -> dict[str, An
             None,
         )
 
-        # Recompute today's condition from the restored historical outputs plus
-        # all newer current-model events. This updates refill history, records,
-        # decay, confidence, and condition estimate consistently.
         tracker.cumulative_refill_evidence(canyon_status, by_id[canyon_id], config)
 
     status["historical_model_evidence_status"] = {
@@ -215,8 +214,7 @@ def main() -> None:
     args = parser.parse_args()
 
     status = json.loads(args.status.read_text(encoding="utf-8"))
-    root = Path(__file__).resolve().parents[1]
-    restored = restore(status, args.source_url, root)
+    restored = restore(status, args.source_url, ROOT)
     args.status.write_text(json.dumps(restored, indent=2) + "\n", encoding="utf-8")
 
     info = restored["historical_model_evidence_status"]
