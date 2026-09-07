@@ -24,7 +24,8 @@ jobs:
           curl --fail --location --retry 3 \
             https://raw.githubusercontent.com/canyoncountryadventure/cca-radar-tracker/operational-data/latest/status.json \
             -o /tmp/status.json
-      - name: Restore and verify multi-snapshot historical evidence
+          stat -c 'BEFORE_SIZE=%s' /tmp/status.json
+      - name: Restore and verify compact historical evidence
         working-directory: cca-radar-tracker
         run: |
           python tools/restore_historical_model_evidence.py --status /tmp/status.json
@@ -32,10 +33,16 @@ jobs:
           import json
           from pathlib import Path
 
-          status = json.loads(Path('/tmp/status.json').read_text())
+          path = Path('/tmp/status.json')
+          status = json.loads(path.read_text())
           evidence = status['historical_model_evidence']
-          assert evidence['schema_version'] == 2
+          assert evidence['schema_version'] == 3
           assert set(x['label'] for x in evidence['sources']) == {'2026-08-24','2026-08-31'}
+          assert path.stat().st_size < 55_000_000, f'status still bloated: {path.stat().st_size}'
+
+          serialized_evidence = json.dumps(evidence)
+          assert '_zlib' not in serialized_evidence
+          assert 'grid_dbz' not in serialized_evidence
 
           def max_runoff(canyon_id, start_prefix):
               matches = [
@@ -55,7 +62,5 @@ jobs:
           for canyon_id in ['neon','no-kidding','woody','angel-cove','hog-canyons']:
               historical = [e for e in status['canyons'][canyon_id].get('events') or [] if e.get('historical_model_evidence')]
               assert historical, f'{canyon_id}: no historical events restored'
-              strongest = max(historical, key=lambda e: float(e.get('direct_runoff_ft3') or 0))
-              print('TARGET', canyon_id, 'events', len(historical), 'strongest', strongest.get('start_utc'), strongest.get('direct_runoff_ft3'), strongest.get('classification'))
-          print('multi-snapshot recovery verified')
+          print('compact multi-snapshot recovery verified; bytes=', path.stat().st_size)
           PY
