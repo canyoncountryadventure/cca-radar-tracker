@@ -38,23 +38,31 @@ jobs:
           assert evidence.get('event_count', 0) > 0, evidence
           print('evidence_count', evidence.get('event_count'))
           print('authoritative_through', evidence.get('authoritative_through_utc'))
+
           for canyon_id in targets:
               c = status['canyons'][canyon_id]
-              events = c.get('events') or []
-              historical = [e for e in events if e.get('historical_model_evidence')]
-              print(canyon_id, 'historical_events=', len(historical),
-                    'condition=', (c.get('condition_estimate') or {}).get('current_condition'),
-                    'percent=', (c.get('condition_estimate') or {}).get('current_percent_full'))
+              historical = [e for e in (c.get('events') or []) if e.get('historical_model_evidence')]
               assert historical, f'{canyon_id}: no recovered historical events'
+              strongest = max(historical, key=lambda e: float(e.get('direct_runoff_ft3') or 0))
+              print(
+                  canyon_id,
+                  'historical_events=', len(historical),
+                  'strongest_start=', strongest.get('start_utc'),
+                  'runoff_ft3=', strongest.get('direct_runoff_ft3'),
+                  'class=', strongest.get('classification'),
+                  'condition=', (c.get('condition_estimate') or {}).get('current_condition'),
+              )
 
-          def find_ratio(canyon_id, start_prefix):
-              for event in status['canyons'][canyon_id].get('events') or []:
-                  if str(event.get('start_utc', '')).startswith(start_prefix):
-                      return float(event.get('fill_ratio') or event.get('storage_ratio') or 0)
-              return 0.0
+          def event_runoff(canyon_id, start_prefix):
+              matches = [
+                  e for e in status['canyons'][canyon_id].get('events') or []
+                  if str(e.get('start_utc', '')).startswith(start_prefix)
+                  and e.get('historical_model_evidence')
+              ]
+              return max((float(e.get('direct_runoff_ft3') or 0) for e in matches), default=0.0)
 
-          assert find_ratio('neon', '2026-08-30') >= 1.26, 'Neon Aug 30 refill evidence missing'
-          assert find_ratio('woody', '2026-08-30') >= 7.44, 'Woody Aug 30 refill evidence missing'
-          assert find_ratio('angel-cove', '2026-08-23') >= 3.43, 'Angel Cove Aug 23 refill evidence missing'
+          assert event_runoff('neon', '2026-08-30') >= 140787, 'Neon Aug 30 runoff evidence missing'
+          assert event_runoff('woody', '2026-08-30') >= 245843, 'Woody Aug 30 runoff evidence missing'
+          assert event_runoff('angel-cove', '2026-08-23') >= 117010, 'Angel Cove Aug 23 runoff evidence missing'
           print('verified known refill events')
           PY
