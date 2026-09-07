@@ -1,0 +1,53 @@
+name: Install historical canyon evidence restoration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/install-history-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install restoration step into live radar workflow
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/update-radar.yml')
+          text = path.read_text(encoding='utf-8')
+          marker = '      - name: Verify revised refill model\n'
+          step = '''      - name: Restore immutable historical storm evidence\n        working-directory: cca-radar-tracker\n        run: python tools/restore_historical_model_evidence.py --status docs/data/status.json\n\n'''
+
+          if step in text:
+              print('Historical restoration step already installed.')
+          else:
+              if marker not in text:
+                  raise SystemExit('Could not locate verification step in update-radar.yml')
+              text = text.replace(marker, step + marker, 1)
+              path.write_text(text, encoding='utf-8')
+              print('Installed historical restoration step.')
+          PY
+
+      - name: Commit live workflow change
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- .github/workflows/update-radar.yml; then
+            echo "No workflow change needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/update-radar.yml
+          git commit -m "Restore original canyon storm evidence after each radar update"
+          git push origin HEAD:main
