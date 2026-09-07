@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/test-history-recovery.yml"
+      - "cca-radar-tracker/tools/restore_historical_model_evidence.py"
   workflow_dispatch:
 
 jobs:
