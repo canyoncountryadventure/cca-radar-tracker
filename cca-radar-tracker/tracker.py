@@ -2544,6 +2544,7 @@ def rewind_status(
     status: dict[str, Any],
     canyons: list[Canyon],
     rebuild_from: datetime,
+    config: dict[str, Any],
 ) -> None:
     """Remove only frames/events at or after a replay cutoff; retain full old grids."""
     cutoff = floor_five_minutes(rebuild_from)
@@ -2555,7 +2556,7 @@ def rewind_status(
     for canyon in canyons:
         canyon_status = status["canyons"][canyon.canyon_id]
         retained = preserved_events_before(canyon_status, cutoff)[
-            : int(50)
+            : int(config.get("max_retained_events_per_canyon", 50))
         ]
         canyon_status["events"] = [compact_event(event) for event in retained]
         canyon_status["open_event"] = None
@@ -2892,7 +2893,7 @@ def main() -> int:
     )
     refresh_status_events(status, canyons, config)
     if arguments.rebuild_from:
-        rewind_status(status, canyons, parse_utc(arguments.rebuild_from))
+        rewind_status(status, canyons, parse_utc(arguments.rebuild_from), config)
     save_json(arguments.model_output, model_metadata(canyons, config))
 
     if arguments.at:

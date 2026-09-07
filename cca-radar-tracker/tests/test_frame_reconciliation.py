@@ -2,7 +2,7 @@ import json
 import sys
 import unittest
 from unittest import mock
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -384,11 +384,37 @@ class FrameReconciliationTests(unittest.TestCase):
         canyon_status = status["canyons"]["zerog"]
         canyon_status["events"] = [old_event]
         canyon_status["last_rain_event"] = old_event
-        tracker.rewind_status(status, [self.canyon], dt("2026-07-26T00:00:00Z"))
+        tracker.rewind_status(
+            status, [self.canyon], dt("2026-07-26T00:00:00Z"), self.config
+        )
         self.assertEqual(
             status["canyons"]["zerog"]["last_rain_event"]["peak_grid_dbz"],
             [[42.0]],
         )
+
+    def test_rewind_uses_configured_event_limit_not_hidden_fifty(self):
+        status = tracker.empty_status([self.canyon])
+        canyon_status = status["canyons"]["zerog"]
+        start = dt("2026-07-01T00:00:00Z")
+        canyon_status["events"] = [
+            {
+                "start_utc": tracker.utc_text(start + timedelta(hours=index)),
+                "end_utc": tracker.utc_text(start + timedelta(hours=index)),
+                "fill_ratio": 1.0 if index == 0 else 0.0,
+                "classification": "likely_full" if index == 0 else "minor",
+            }
+            for index in range(81)
+        ]
+        canyon_status["last_qualifying_event"] = canyon_status["events"][0]
+        tracker.rewind_status(
+            status,
+            [self.canyon],
+            dt("2026-07-10T00:00:00Z"),
+            {**self.config, "max_retained_events_per_canyon": 120},
+        )
+        retained = status["canyons"]["zerog"]["events"]
+        self.assertEqual(len(retained), 81)
+        self.assertTrue(any(event.get("fill_ratio") == 1.0 for event in retained))
 
 
 if __name__ == "__main__":
