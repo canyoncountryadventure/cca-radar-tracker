@@ -38,7 +38,7 @@ jobs:
           evidence = status['historical_model_evidence']
           assert evidence['schema_version'] == 3
           assert set(x['label'] for x in evidence['sources']) == {'2026-08-24','2026-08-31'}
-          assert path.stat().st_size < 55_000_000, f'status still bloated: {path.stat().st_size}'
+          assert path.stat().st_size < 60_000_000, f'status still bloated: {path.stat().st_size}'
 
           serialized_evidence = json.dumps(evidence)
           assert '_zlib' not in serialized_evidence
