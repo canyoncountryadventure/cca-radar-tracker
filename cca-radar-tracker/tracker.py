@@ -17,6 +17,7 @@ import io
 import json
 import math
 import sys
+import subprocess
 import time
 import urllib.parse
 import urllib.request
@@ -2918,6 +2919,11 @@ def main() -> int:
             if arguments.run_trigger == "schedule":
                 status["last_scheduled_run_utc"] = utc_text(now)
             save_json(arguments.status, status)
+            subprocess.run(
+                [sys.executable, str(ROOT / "tools/restore_historical_model_evidence.py"),
+                 "--status", str(arguments.status)],
+                check=True,
+            )
         return 0
 
     latest_reference = latest_iem_timestamp_or_status(config, status)
@@ -3006,6 +3012,11 @@ def main() -> int:
             f"{'s' if len(failures) != 1 else ''} queued for retry"
         )
     save_json(arguments.status, status)
+    subprocess.run(
+        [sys.executable, str(ROOT / "tools/restore_historical_model_evidence.py"),
+         "--status", str(arguments.status)],
+        check=True,
+    )
     print(
         f"Radar reconciliation completed; {processed}/{len(timestamps)} frames "
         f"analyzed, {len(status.get('missing_archive_frames_utc', []))} archive "
