@@ -21,6 +21,11 @@ on:
         required: false
         default: ""
         type: string
+      recovery_backup_date:
+        description: Optional operational backup date (YYYY-MM-DD) for controlled recovery
+        required: false
+        default: ""
+        type: string
 
 permissions:
   actions: write
@@ -263,75 +268,54 @@ jobs:
         env:
           STATUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/status.json
           STATUS_BACKUP_URL: https://raw.githubusercontent.com/${{ github.repository }}/operational-data/latest/status.json
+          RECOVERY_BACKUP_DATE: ${{ inputs.recovery_backup_date }}
         run: |
           set -euo pipefail
+          effective_rebuild_from="${{ inputs.rebuild_from_utc }}"
+          if [[ -z "$RECOVERY_BACKUP_DATE" && -f .github/recovery-request.json ]]; then
+            RECOVERY_BACKUP_DATE="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["backup_date"])')"
+            effective_rebuild_from="$(python -c 'import json; print(json.load(open(".github/recovery-request.json"))["rebuild_from_utc"])')"
+            echo "Applying the committed one-time recovery request."
+          fi
+          echo "REBUILD_FROM_UTC=$effective_rebuild_from" >> "$GITHUB_ENV"
           mkdir -p cca-radar-tracker/docs/data
-          temporary="$(mktemp)"
+          published="$(mktemp)"
+          backup="$(mktemp)"
+          recovery="$(mktemp)"
+          rm -f "$published" "$backup" "$recovery"
           cache_buster="run=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$(date +%s)"
-          if curl --fail --silent --show-error --location --max-time 30 \
+          curl --fail --silent --show-error --location --max-time 30 \
             --header "Cache-Control: no-cache" \
             --header "Pragma: no-cache" \
             "${STATUS_URL}?${cache_buster}" \
-            --output "$temporary"; then
-            python - "$temporary" <<'PY'
-          import json
-          import sys
-          from pathlib import Path
+            --output "$published" || rm -f "$published"
+          curl --fail --silent --show-error --location --max-time 30 \
+            --header "Cache-Control: no-cache" \
+            "${STATUS_BACKUP_URL}?${cache_buster}" \
+            --output "$backup" || rm -f "$backup"
 
-          path = Path(sys.argv[1])
-          status = json.loads(path.read_text(encoding="utf-8"))
-          if not isinstance(status.get("canyons"), dict):
-              raise SystemExit("Published status.json does not contain canyon state")
-          raw_schema = status.get("schema_version")
-          try:
-              schema = int(raw_schema)
-          except (TypeError, ValueError):
-              raise SystemExit(
-                  "Unsupported published state schema: "
-                  f"{raw_schema!r} ({type(raw_schema).__name__})"
-              )
-          if schema not in {2, 3, 4, 5}:
-              raise SystemExit(
-                  "Unsupported published state schema: "
-                  f"{raw_schema!r} ({type(raw_schema).__name__})"
-              )
-          status["schema_version"] = schema
-          path.write_text(json.dumps(status), encoding="utf-8")
-          print(
-              "Restored published tracker state with schema",
-              schema,
+          args=(
+            --published "$published"
+            --backup "$backup"
+            --output cca-radar-tracker/docs/data/status.json
           )
-          PY
-            mv "$temporary" cca-radar-tracker/docs/data/status.json
-          else
-            echo "Published state unavailable; attempting the durable operational-data backup."
-            if curl --fail --silent --show-error --location --max-time 30 \
-              --header "Cache-Control: no-cache" \
-              "${STATUS_BACKUP_URL}?${cache_buster}" \
-              --output "$temporary"; then
-              python - "$temporary" <<'PY'
-          import json
-          import sys
-          from pathlib import Path
-
-          path = Path(sys.argv[1])
-          status = json.loads(path.read_text(encoding="utf-8"))
-          if not isinstance(status.get("canyons"), dict):
-              raise SystemExit("Backup status.json does not contain canyon state")
-          print("Restored durable operational-data backup.")
-          PY
-              mv "$temporary" cca-radar-tracker/docs/data/status.json
-            else
-              rm -f "$temporary"
-              echo "Neither published state nor the durable backup is available."
+          if [[ -n "$RECOVERY_BACKUP_DATE" ]]; then
+            if [[ -z "$effective_rebuild_from" ]]; then
+              echo "A recovery backup requires rebuild_from_utc."
               exit 1
             fi
+            recovery_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/operational-data/backups/${RECOVERY_BACKUP_DATE}/status.json"
+            curl --fail --silent --show-error --location --max-time 60 \
+              --header "Cache-Control: no-cache" \
+              "${recovery_url}?${cache_buster}" \
+              --output "$recovery"
+            args+=(--recovery "$recovery")
           fi
+          python cca-radar-tracker/tools/select_status.py "${args[@]}"
 
       - name: Analyze and reconcile radar frames
         working-directory: cca-radar-tracker
         env:
-          REBUILD_FROM_UTC: ${{ inputs.rebuild_from_utc }}
           RUN_TRIGGER: ${{ github.event_name }}
         run: |
           set -euo pipefail
@@ -606,6 +590,14 @@ jobs:
           if (( wait_seconds > 0 )); then
             echo "Waiting $wait_seconds seconds for the next five-minute boundary."
             sleep "$wait_seconds"
+          fi
+          queued_run="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/update-radar.yml/runs?status=queued&per_page=10" \
+            --jq ".workflow_runs[] | select(.id != $GITHUB_RUN_ID) | .id" \
+            | head -n 1)"
+          if [[ -n "$queued_run" ]]; then
+            echo "A radar update is already queued ($queued_run); no duplicate continuation needed."
+            exit 0
           fi
           gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
           echo "Queued the next radar update."

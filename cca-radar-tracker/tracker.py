@@ -810,7 +810,7 @@ def empty_canyon_status(canyon: Canyon) -> dict[str, Any]:
             "trend": "no recent evidence",
         },
         "condition_estimate": {
-            "percent": 0,
+            "percent": None,
             "current_condition": "unknown",
             "confidence": "Unknown",
             "basis": "No meaningful refill recorded",
@@ -2178,7 +2178,7 @@ def cumulative_refill_evidence(
         last_verified = None
     else:
         basis_time = now
-        condition_ratio = 0.0
+        condition_ratio = None
         basis = "No meaningful refill recorded"
         last_verified = None
 
@@ -2197,7 +2197,7 @@ def cumulative_refill_evidence(
     else:
         confidence = "Unknown"
 
-    if confidence == "Unknown":
+    if confidence == "Unknown" or condition_ratio is None:
         current_condition = "unknown"
     elif condition_ratio >= 0.9:
         current_condition = "likely near full"
@@ -2209,7 +2209,11 @@ def cumulative_refill_evidence(
         current_condition = "limited refill indicated"
 
     canyon_status["condition_estimate"] = {
-        "percent": min(100, round(condition_ratio * 100)),
+        "percent": (
+            min(100, round(condition_ratio * 100))
+            if condition_ratio is not None
+            else None
+        ),
         "current_condition": current_condition,
         "confidence": confidence,
         "confidence_age_days": round(age_days, 1),
@@ -2317,8 +2321,12 @@ def protected_ledger_cutoff(
     )
     gap = timedelta(minutes=int(config["model"]["event_gap_minutes"]))
     for canyon_status in status.get("canyons", {}).values():
-        for key in ("open_event", "last_rain_event"):
-            event = canyon_status.get(key)
+        candidates = list(canyon_status.get("events", []))
+        candidates.extend(
+            canyon_status.get(key)
+            for key in ("open_event", "last_rain_event", "last_qualifying_event")
+        )
+        for event in dedupe_events(candidate for candidate in candidates if candidate):
             if not event or not event.get("start_utc"):
                 continue
             start = parse_utc(event["start_utc"])

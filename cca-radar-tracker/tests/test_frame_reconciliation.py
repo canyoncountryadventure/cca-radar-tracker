@@ -135,6 +135,28 @@ class FrameReconciliationTests(unittest.TestCase):
         grid = [[None, 35.0, 50.0], [10.0, None, 60.0]]
         self.assertEqual(tracker.decode_grid(tracker.encode_grid(grid)), grid)
 
+    def test_cutoff_protects_qualifying_event_when_later_rain_is_minor(self):
+        status = tracker.empty_status([self.canyon])
+        strong = {
+            "start_utc": "2026-07-26T01:00:00Z",
+            "end_utc": "2026-07-26T01:05:00Z",
+            "fill_ratio": 2.0,
+        }
+        minor = {
+            "start_utc": "2026-07-26T01:30:00Z",
+            "end_utc": "2026-07-26T01:30:00Z",
+            "fill_ratio": 0.0,
+        }
+        canyon_status = status["canyons"]["zerog"]
+        canyon_status["events"] = [strong, minor]
+        canyon_status["last_rain_event"] = minor
+        canyon_status["last_qualifying_event"] = strong
+        config = {**self.config, "frame_ledger_retention_hours": 1}
+        cutoff = tracker.protected_ledger_cutoff(
+            status, dt("2026-07-26T02:05:00Z"), config
+        )
+        self.assertEqual(cutoff, dt("2026-07-26T01:00:00Z"))
+
     def test_confirmed_archive_record_cannot_be_replaced_by_provisional(self):
         status = tracker.empty_status([self.canyon])
         confirmed = wet_record("2026-07-26T23:20:00Z")

@@ -309,6 +309,22 @@ class EventAccumulationTests(unittest.TestCase):
         self.assertEqual(condition["loss_model"], "provisional_linear_decay")
         self.assertEqual(condition["decay_percentage_points_per_day"], 0.8)
 
+    def test_no_refill_history_is_unknown_not_zero_percent(self):
+        canyon = canyon_fixture(fill_target=100)
+        canyon.canyon_id = "unobserved"
+        canyon.name = "Unobserved"
+        status = tracker.empty_canyon_status(canyon)
+        tracker.cumulative_refill_evidence(
+            status,
+            canyon,
+            self.config,
+            now_utc=datetime(2026, 8, 4, 12, tzinfo=timezone.utc),
+        )
+        condition = status["condition_estimate"]
+        self.assertIsNone(condition["percent"])
+        self.assertEqual(condition["current_condition"], "unknown")
+        self.assertEqual(condition["confidence"], "Unknown")
+
     def test_event_after_field_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)

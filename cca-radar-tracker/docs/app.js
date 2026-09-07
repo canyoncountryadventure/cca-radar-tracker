@@ -311,7 +311,9 @@ function renderSummary() {
       condition,
       record,
       meta,
-      fill: fillVisual({ fill_ratio: Number(condition.percent || 0) / 100 }),
+      fill: condition.percent == null
+        ? fillVisual(null)
+        : fillVisual({ fill_ratio: Number(condition.percent) / 100 }),
       sortTime: eventSortTime(event),
     };
   });
@@ -581,8 +583,9 @@ function updateMapSelection(fit = false) {
 
 function renderCondition(model, status) {
   const condition = status.condition_estimate || {};
-  const percent = Number(condition.percent || 0);
-  const meta = condition.confidence === "Unknown"
+  const hasEstimate = condition.percent != null;
+  const percent = hasEstimate ? Number(condition.percent) : 0;
+  const meta = !hasEstimate || condition.confidence === "Unknown"
     ? conditionMeta.none
     : percent >= 90 ? conditionMeta.likely_full
     : percent >= 50 ? conditionMeta.moderate
@@ -592,8 +595,8 @@ function renderCondition(model, status) {
   $("condition-icon").textContent = meta.mark;
   $("condition-title").textContent = condition.current_condition || "Unknown";
   $("condition-kicker").textContent = "CURRENT CANYON CONDITION ESTIMATE";
-  $("condition-copy").textContent = condition.basis_utc
-    ? `${condition.percent ?? 0}% modeled remaining pool storage; ${condition.confidence || "Unknown"} confidence. Basis: ${condition.basis || "modeled refill history"} (${dateTime(condition.basis_utc)}). This persists across storms and is separate from the selected storm decision below.`
+  $("condition-copy").textContent = hasEstimate && condition.basis_utc
+    ? `${condition.percent}% modeled remaining pool storage; ${condition.confidence || "Unknown"} confidence. Basis: ${condition.basis || "modeled refill history"} (${dateTime(condition.basis_utc)}). This persists across storms and is separate from the selected storm decision below.`
     : "No field observation or meaningful modeled refill is available. This estimate describes current canyon conditions; selecting an old storm does not replace it.";
 }
 
