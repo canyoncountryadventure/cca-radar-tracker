@@ -18,7 +18,7 @@ cannot be separated with the available logger geometry.
 from __future__ import annotations
 
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 11.9288
@@ -70,21 +70,46 @@ def zero_g_loss_components(reference: datetime) -> dict[str, float | str]:
     }
 
 
+def _next_month_start(reference: datetime) -> datetime:
+    """Return the first instant of the next month, preserving timezone."""
+    if reference.month == 12:
+        return reference.replace(
+            year=reference.year + 1,
+            month=1,
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+    return reference.replace(
+        month=reference.month + 1,
+        day=1,
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+
+
 def zero_g_integrated_loss_ratio(start: datetime, end: datetime) -> float:
     """Integrate the seasonal Zero G loss between two datetimes.
 
-    ETo is piecewise constant within a calendar month. One-day stepping keeps
-    the implementation transparent and makes month/year transitions exact
-    enough for this empirical condition model.
+    ETo is piecewise constant within each calendar month, so integration is
+    explicitly split at month boundaries. The empirical Navajo/seepage term is
+    constant until additional field data support a seasonal or head-dependent
+    seepage function.
     """
     if end <= start:
         return 0.0
     current = start
     total_ratio = 0.0
     while current < end:
-        next_step = min(end, current + timedelta(days=1))
+        next_step = min(end, _next_month_start(current))
         elapsed_days = (next_step - current).total_seconds() / 86400.0
-        points_per_day = float(zero_g_loss_components(current)["percentage_points_per_day"])
+        points_per_day = float(
+            zero_g_loss_components(current)["percentage_points_per_day"]
+        )
         total_ratio += points_per_day / 100.0 * elapsed_days
         current = next_step
     return max(0.0, total_ratio)
