@@ -1,0 +1,212 @@
+name: Recalibrate Zero G 13-ft full stage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recalibrate-zerog-13ft.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  recalibrate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cca-radar-tracker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply field-verified Zero G calibration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+
+          def read(path):
+              return (root / path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              (root / path).write_text(text, encoding='utf-8')
+
+          def replace_required(text, old, new, label):
+              if new in text:
+                  return text
+              count = text.count(old)
+              if count != 1:
+                  raise RuntimeError(f'{label}: expected exactly one old match, found {count}')
+              return text.replace(old, new, 1)
+
+          # 1) Core loss model: physical in/day recession is unchanged; the
+          # percent conversion now uses the field-supported operational full stage.
+          path = 'loss_model.py'
+          text = read(path)
+          text = text.replace('initial 11.9288-ft water column', '13.0-ft operational full-stage reference')
+          text = text.replace('initial\n11.9288-ft water column', '13.0-ft operational full-stage reference')
+          text = text.replace('ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 11.9288', 'ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 13.0')
+          text = text.replace(
+              "Percentage-point conversion uses the stable lower logger's initial\n    11.9288-ft water column as the field reference depth.",
+              "Percentage-point conversion uses the 13.0-ft operational full-stage\n    reference. Field observations bracket full stage: about 12 ft was nearly full\n    and 13.66 ft was actively spilling."
+          )
+          if 'ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 13.0' not in text:
+              raise RuntimeError('loss_model.py did not receive 13.0-ft reference')
+          write(path, text)
+
+          # 2) Zero G current-condition field anchor: latest lower logger measurement.
+          path = 'tracker.py'
+          text = read(path)
+          old_anchor = '''FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
+    "zerog": {
+        "observed_utc": "2026-08-01T12:00:00Z",
+        "percent": 98,
+        "description": "Field verified throughout the technical section",
+        "notes": "Two water-level loggers installed: one persistent half-shaded pool and one fast-drying full-sun pool.",
+    },
+}'''
+          new_anchor = '''FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
+    "zerog": {
+        "observed_utc": "2026-09-07T20:43:00Z",
+        "percent": 72.5,
+        "observed_depth_ft": 9.43,
+        "operational_full_depth_ft": 13.0,
+        "spill_observed_depth_ft": 13.66,
+        "description": "Lower MX2001 field calibration: 9.43 ft observed; 13.0 ft operational full stage",
+        "notes": "Field observations bracket full stage: the logger was installed near 12 ft when the pool was nearly full, while 13.66 ft was actively spilling. Use 13.0 ft as the operational 100% reference until the spill crest is surveyed.",
+    },
+}'''
+          text = replace_required(text, old_anchor, new_anchor, 'Zero G field anchor')
+          text = text.replace(
+              "the lower logger's initial 11.9288-ft water column.",
+              "the 13.0-ft operational full-stage reference, bracketed by field observations of about 12 ft nearly full and 13.66 ft actively spilling."
+          )
+          if '"percent": 72.5' not in text or '13.66 ft actively spilling' not in text:
+              raise RuntimeError('tracker.py field calibration incomplete')
+          write(path, text)
+
+          # 3) Front-end Methods/readme disclosure.
+          path = 'docs/app.js'
+          text = read(path)
+          old = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
+          new = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss now uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
+          text = replace_required(text, old, new, 'front-end Methods calibration')
+          write(path, text)
+
+          # 4) README: exact field basis and recalculated recession numbers.
+          path = 'README.md'
+          text = read(path)
+          text = replace_required(
+              text,
+              "The percentage-point conversion uses the stable lower Zero G logger's initial **11.9288-ft water column**:",
+              "The percentage-point conversion uses a field-calibrated **13.0-ft operational full-stage reference** for the lower Zero G pool. The user observed the pool near 12 ft when it was nearly full and personally observed **13.66 ft actively spilling**, so 13.0 ft is used as the operational 100% reference until the spill crest is surveyed:",
+              'README full-stage basis'
+          )
+          text = text.replace('÷ (11.9288 ft × 12 in/ft)', '÷ (13.0 ft × 12 in/ft)')
+          text = text.replace('decay ≈ **1.07 percentage points/day**.', 'decay ≈ **0.981 percentage points/day**.')
+          text = text.replace('decay ≈ **1.03 percentage points/day**.', 'decay ≈ **0.943 percentage points/day**.')
+          text = text.replace(
+              'the 11.9288-ft reference water column, USU Moab ETo normals,',
+              'the 13.0-ft operational full-stage reference (12 ft nearly full; 13.66 ft spilling), USU Moab ETo normals,'
+          )
+          text = text.replace(
+              '- Zero G field anchor: 98% full on August 1, 2026',
+              '- Zero G field anchor: lower MX2001 about 9.43 ft on September 7, 2026 = 72.5% of the 13.0-ft operational full-stage reference; 13.66 ft is recorded as observed spill stage'
+          )
+          if '**0.981 percentage points/day**' not in text or '**0.943 percentage points/day**' not in text:
+              raise RuntimeError('README recession examples were not updated')
+          write(path, text)
+
+          # 5) Keep installer/finalizer text from reintroducing the superseded reference.
+          path = 'tools/finalize_all_canyon_loss.py'
+          text = read(path)
+          text = text.replace('11.9288-ft', '13.0-ft')
+          text = text.replace("lower logger's initial 13.0-ft water column", '13.0-ft operational full-stage reference')
+          text = text.replace('initial 13.0-ft water column', '13.0-ft operational full-stage reference')
+          write(path, text)
+
+          # 6) Tests lock the recalculated numbers and Methods disclosure.
+          path = 'tests/test_loss_model.py'
+          text = read(path)
+          text = text.replace(
+              'self.assertAlmostEqual(values["percentage_points_per_day"], 1.07, delta=0.05)',
+              'self.assertAlmostEqual(values["percentage_points_per_day"], 0.98139, places=5)\n        self.assertEqual(values["reference_pool_depth_ft"], 13.0)'
+          )
+          if '0.98139' not in text:
+              raise RuntimeError('test_loss_model.py August expectation not updated')
+          write(path, text)
+
+          path = 'tests/test_frontend_contract.py'
+          text = read(path).replace('self.assertIn("11.9288-ft", self.app)', 'self.assertIn("13.0-ft operational full-stage reference", self.app)')
+          write(path, text)
+
+          path = 'tests/test_tracker.py'
+          text = read(path)
+          needle = '        self.assertIn("1.28 in/day", method["pool_loss_explanation"])\n'
+          addition = needle + '        self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])\n        self.assertIn("13.66 ft actively spilling", method["pool_loss_explanation"])\n'
+          if 'self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])' not in text:
+              if needle not in text:
+                  raise RuntimeError('tracker metadata test insertion point missing')
+              text = text.replace(needle, addition, 1)
+          write(path, text)
+
+          # Repository guard: no active code/docs should retain the old 11.9288-ft reference.
+          offenders = []
+          for pattern in ('*.py', '*.md', '*.js'):
+              for candidate in root.rglob(pattern):
+                  if '11.9288' in candidate.read_text(encoding='utf-8', errors='ignore'):
+                      offenders.append(str(candidate))
+          if offenders:
+              raise RuntimeError(f'Old 11.9288 reference remains in: {offenders}')
+
+          print('Applied Zero G 13.0-ft operational full stage and recalculated all-canyon recession')
+          PY
+
+      - name: Verify exact recession rates
+        run: |
+          python - <<'PY'
+          from datetime import datetime, timezone
+          from loss_model import zero_g_loss_components
+          aug = zero_g_loss_components(datetime(2026, 8, 15, tzinfo=timezone.utc))
+          sep = zero_g_loss_components(datetime(2026, 9, 15, tzinfo=timezone.utc))
+          assert abs(aug['percentage_points_per_day'] - 0.9813895782) < 1e-8, aug
+          assert abs(sep['percentage_points_per_day'] - 0.9427350427) < 1e-8, sep
+          assert aug['reference_pool_depth_ft'] == 13.0
+          assert sep['reference_pool_depth_ft'] == 13.0
+          print(f"August: {aug['percentage_points_per_day']:.6f} pp/day")
+          print(f"September: {sep['percentage_points_per_day']:.6f} pp/day")
+          PY
+
+      - name: Run backend tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Check front-end JavaScript
+        run: node --check docs/app.js
+
+      - name: Commit recalibration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add loss_model.py tracker.py docs/app.js README.md tools/finalize_all_canyon_loss.py tests/test_loss_model.py tests/test_tracker.py tests/test_frontend_contract.py
+          if git diff --cached --quiet; then
+            echo "No recalibration changes to commit"
+          else
+            git commit -m "Calibrate Zero G to 13-ft operational full stage"
+            git push origin main
+          fi
+
+      - name: Dispatch radar refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-radar.yml --ref main
