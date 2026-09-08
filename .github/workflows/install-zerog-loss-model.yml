@@ -7,6 +7,7 @@ on:
       - '.github/workflows/install-zerog-loss-model.yml'
       - 'cca-radar-tracker/tools/finalize_all_canyon_loss.py'
       - 'cca-radar-tracker/tools/update_zero_g_calibration_tests.py'
+      - 'cca-radar-tracker/tools/apply_per_canyon_recession.py'
       - 'cca-radar-tracker/loss_model.py'
       - 'cca-radar-tracker/README.md'
       - 'cca-radar-tracker/tests/test_loss_model.py'
@@ -41,6 +42,9 @@ jobs:
       - name: Apply field-calibrated all-canyon recession model
         run: python tools/finalize_all_canyon_loss.py
 
+      - name: Apply per-canyon recession clocks and monthly rates
+        run: python tools/apply_per_canyon_recession.py
+
       - name: Run backend tests
         run: python -m unittest discover -s tests -v
 
@@ -51,10 +55,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add loss_model.py tracker.py docs/app.js README.md tools/finalize_all_canyon_loss.py tools/update_zero_g_calibration_tests.py tests/test_loss_model.py tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
+          git add loss_model.py tracker.py docs/app.js README.md tools/finalize_all_canyon_loss.py tools/update_zero_g_calibration_tests.py tools/apply_per_canyon_recession.py tests/test_loss_model.py tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Apply calibrated all-canyon recession model"
+            git commit -m "Apply per-canyon monthly recession model"
             git push origin main
           fi
