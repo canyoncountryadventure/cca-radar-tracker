@@ -1,4 +1,4 @@
-name: Install Zero G logger loss model
+name: Install all-canyon logger loss model
 
 on:
   push:
@@ -7,7 +7,9 @@ on:
       - '.github/workflows/install-zerog-loss-model.yml'
       - 'cca-radar-tracker/tools/install_zerog_loss_model.py'
       - 'cca-radar-tracker/loss_model.py'
+      - 'cca-radar-tracker/README.md'
       - 'cca-radar-tracker/tests/test_loss_model.py'
+      - 'cca-radar-tracker/tests/test_frontend_contract.py'
   workflow_dispatch:
 
 permissions:
@@ -31,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Apply logger-calibrated loss model
+      - name: Apply transferred Zero G logger loss model to every canyon
         run: python tools/install_zerog_loss_model.py
 
       - name: Run backend tests
@@ -40,14 +42,14 @@ jobs:
       - name: Check front-end JavaScript
         run: node --check docs/app.js
 
-      - name: Commit calibrated model
+      - name: Commit all-canyon calibrated model
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker.py docs/app.js tests/test_tracker.py tests/test_event_accumulation.py
+          git add tracker.py docs/app.js tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Apply Zero G MX2001 ET plus Navajo loss calibration"
+            git commit -m "Apply transferred Zero G loss reference to all canyons"
             git push origin main
           fi
