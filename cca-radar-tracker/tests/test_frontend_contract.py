@@ -27,9 +27,12 @@ class FrontendContractTests(unittest.TestCase):
         self.assertIn("SELECTED STORM:", self.app)
         self.assertIn("This decides how much refill this one radar event", self.app)
 
-    def test_calculation_cards_call_zero_g_the_reference_canyon(self):
-        self.assertNotIn("Zero G", self.app)
+    def test_reference_canyon_language_is_generic_except_loss_method_disclosure(self):
         self.assertIn("reference canyon", self.app)
+        self.assertIn("transferred Zero G", self.app)
+        self.assertIn("stable-lower-MX2001", self.app)
+        self.assertIn("11.9288-ft", self.app)
+        self.assertIn("applied to every canyon", self.app)
 
     def test_event_history_and_summary_cards_show_full_timing(self):
         self.assertIn("Storm start", self.app)
