@@ -1,0 +1,39 @@
+name: Install Aug 12 recovery pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cca-radar-tracker/tools/install_aug12_recovery_pipeline.py'
+      - '.github/workflows/install-aug12-recovery-pipeline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install recovery hook
+        working-directory: cca-radar-tracker
+        run: python tools/install_aug12_recovery_pipeline.py
+      - name: Verify workflow syntax markers
+        run: |
+          grep -q 'Recover field-observed Zero G Aug 12 event' .github/workflows/update-radar.yml
+          grep -q 'backfill_zerog_aug12.py' .github/workflows/update-radar.yml
+      - name: Commit recovery hook
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/update-radar.yml
+          if git diff --cached --quiet; then
+            echo 'Recovery hook already installed'
+          else
+            git commit -m 'Recover Zero G Aug 12 during radar state refresh'
+            git push
+          fi
