@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Finalize transferred Zero G recession across every canyon balance and disclosure."""
 
+# Kept as an idempotent installer so the full model and documentation can be revalidated.
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
