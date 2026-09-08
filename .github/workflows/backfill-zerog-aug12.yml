@@ -1,0 +1,80 @@
+name: Backfill Zero G Aug 12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cca-radar-tracker/tools/backfill_zerog_aug12.py'
+      - '.github/workflows/backfill-zerog-aug12.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: cca-radar-tracker
+        run: python -m pip install -r requirements.txt
+      - name: Fetch durable operational state
+        run: |
+          mkdir -p cca-radar-tracker/docs/data
+          curl --fail --silent --show-error --location --max-time 90 \
+            --header 'Cache-Control: no-cache' \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/operational-data/latest/status.json?run=${GITHUB_RUN_ID}" \
+            --output cca-radar-tracker/docs/data/status.json
+      - name: Rebuild and merge Aug 12
+        working-directory: cca-radar-tracker
+        run: python tools/backfill_zerog_aug12.py --status docs/data/status.json
+      - name: Verify recovered event
+        working-directory: cca-radar-tracker
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          status = json.loads(Path('docs/data/status.json').read_text())
+          recovery = status.get('field_history_recovery', {}).get('zerog_aug12_2026')
+          if not recovery or not recovery.get('ok'):
+              raise SystemExit('Aug 12 recovery marker missing')
+          if recovery.get('classification') != 'likely_full':
+              raise SystemExit(f"Unexpected Aug 12 class: {recovery}")
+          if float(recovery.get('maximum_in_basin_storm_inches') or 0) < 0.20:
+              raise SystemExit(f"Aug 12 core was not recovered: {recovery}")
+          print('Verified durable Zero G Aug 12 major-refill reconstruction:', recovery)
+          PY
+      - name: Write recovered state to operational-data
+        env:
+          DATA_BRANCH: operational-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          worktree="$(mktemp -d)"
+          git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
+          git worktree add "$worktree" "$DATA_BRANCH"
+          mkdir -p "$worktree/latest" "$worktree/backups/$(date -u +%F)"
+          cp cca-radar-tracker/docs/data/status.json "$worktree/latest/status.json"
+          cp cca-radar-tracker/docs/data/status.json "$worktree/backups/$(date -u +%F)/status.json"
+          git -C "$worktree" add latest/status.json "backups/$(date -u +%F)/status.json"
+          if git -C "$worktree" diff --cached --quiet; then
+            echo 'Operational state already contains recovery'
+          else
+            git -C "$worktree" commit -m 'Recover Zero G Aug 12 field-observed storm'
+            git -C "$worktree" push origin "$DATA_BRANCH"
+          fi
+          git worktree remove "$worktree"
+      - name: Queue production refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
