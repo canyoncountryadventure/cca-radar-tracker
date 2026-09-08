@@ -33,6 +33,57 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Restore canonical event tests and update only the obsolete no-loss case
+        run: |
+          git show 841f361f2f674f1042f483698d3c00656667dd53:cca-radar-tracker/tests/test_event_accumulation.py > tests/test_event_accumulation.py
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('tests/test_event_accumulation.py')
+          text = path.read_text()
+          replacement = '''    def test_cumulative_loss_evidence_applies_transferred_recession_between_storms(self):
+              canyon = canyon_fixture(fill_target=100)
+              status = tracker.empty_canyon_status(canyon)
+              status["events"] = [
+                  {
+                      "start_utc": "2026-07-27T18:00:00Z",
+                      "end_utc": "2026-07-27T18:10:00Z",
+                      "direct_runoff_ft3": 40,
+                      "fill_ratio": 0.4,
+                  },
+                  {
+                      "start_utc": "2026-07-28T18:00:00Z",
+                      "end_utc": "2026-07-28T18:10:00Z",
+                      "direct_runoff_ft3": 80,
+                      "fill_ratio": 0.8,
+                  },
+              ]
+              evaluation_time = datetime(2026, 7, 28, 18, 10, tzinfo=timezone.utc)
+              tracker.cumulative_refill_evidence(
+                  status, canyon, self.config, now_utc=evaluation_time
+              )
+              evidence = status["cumulative_refill_evidence"]
+              self.assertEqual(evidence["event_count"], 2)
+              self.assertLess(evidence["balance_ft3"], 100)
+              self.assertGreater(evidence["balance_ft3"], 80)
+              self.assertEqual(evidence["loss_model"], "zero_g_mx2001_et_plus_navajo")
+              self.assertGreater(evidence["modeled_loss_ft3"], 0)
+              self.assertEqual(
+                  evidence["milestones_utc"]["25"],
+                  "2026-07-27T18:10:00Z",
+              )
+              self.assertIsNone(evidence["milestones_utc"]["100"])
+              self.assertEqual(len(status["refill_history"]), 2)
+
+          '''
+          pattern = r'    def test_cumulative_no_loss_evidence_preserves_multiple_storms\(self\):\n.*?(?=    def test_recent_evidence_does_not_reset_when_new_event_has_zero_runoff)'
+          text, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'Expected one obsolete cumulative-loss test, replaced {count}')
+          path.write_text(text)
+          PY
+
       - name: Apply transferred Zero G logger loss model to every canyon balance
         run: python tools/finalize_all_canyon_loss.py
 
@@ -46,7 +97,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker.py docs/app.js README.md tests/test_tracker.py tests/test_frontend_contract.py
+          git add tracker.py docs/app.js README.md tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
