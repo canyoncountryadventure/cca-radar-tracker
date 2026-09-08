@@ -1,0 +1,208 @@
+{
+  "generated_utc": "2026-09-08T03:36:21Z",
+  "purpose": "Field-event audit using exact historical IEM N0Q frames and a 0.15-degree radar neighborhood around Zero G.",
+  "field_calibration_anchors": {
+    "2026-08-21": {
+      "basin_rain_inches": 0.0632,
+      "field_response": "small but real",
+      "upper_rise_ft": 0.37,
+      "lower_rise_ft": 0.15
+    },
+    "2026-08-29": {
+      "basin_rain_inches": 0.2727,
+      "field_response": "major refill",
+      "upper_rise_ft": 3.16,
+      "lower_rise_ft": 2.85
+    },
+    "2026-08-30": {
+      "basin_rain_inches": 0.7407,
+      "field_response": "strong flush",
+      "upper_rise_ft": 2.64,
+      "modeled_runoff_ft3": 552264
+    }
+  },
+  "windows": {
+    "2026-08-12_major_field_rise": {
+      "name": "2026-08-12_major_field_rise",
+      "start": "2026-08-12T20:30:00Z",
+      "end": "2026-08-12T22:45:00Z",
+      "field_rise_mdt": "2026-08-12 16:02 MDT",
+      "upper_rise_ft": 3.1781,
+      "lower_rise_ft": 3.06,
+      "purpose": "Find the storm that preceded the ~3.1 ft dual-logger rise.",
+      "modeled_basin_area_sq_mi": 1.359,
+      "scan_grid_bbox": [
+        -110.6975,
+        38.6025,
+        -110.3325,
+        38.9475
+      ],
+      "scan_padding_cells": 30,
+      "scan_padding_degrees": 0.15,
+      "basin_rain_total_inches": 0.086,
+      "basin_peak_dbz": 46.0,
+      "basin_peak_dbz_utc": "2026-08-12T21:55:00Z",
+      "peak_basin_5min_rain_inches": 0.0334,
+      "peak_basin_5min_rain_utc": "2026-08-12T21:55:00Z",
+      "max_accumulated_pixel_inside_basin_inches": 0.2123,
+      "max_nearby_accumulated_pixel_inches": 0.3513,
+      "max_nearby_core_lat": 38.795,
+      "max_nearby_core_lon": -110.555,
+      "max_nearby_core_distance_from_basin_miles": 1.75,
+      "nearby_core_to_basin_average_ratio": 4.09,
+      "strongest_basin_frames": [
+        {
+          "utc": "2026-08-12T21:55:00Z",
+          "basin_rain_in": 0.0334,
+          "basin_max_dbz": 46.0
+        },
+        {
+          "utc": "2026-08-12T21:50:00Z",
+          "basin_rain_in": 0.0148,
+          "basin_max_dbz": 43.0
+        },
+        {
+          "utc": "2026-08-12T22:00:00Z",
+          "basin_rain_in": 0.008,
+          "basin_max_dbz": 34.0
+        },
+        {
+          "utc": "2026-08-12T22:05:00Z",
+          "basin_rain_in": 0.008,
+          "basin_max_dbz": 34.0
+        },
+        {
+          "utc": "2026-08-12T22:10:00Z",
+          "basin_rain_in": 0.0036,
+          "basin_max_dbz": 33.0
+        },
+        {
+          "utc": "2026-08-12T22:15:00Z",
+          "basin_rain_in": 0.0033,
+          "basin_max_dbz": 27.0
+        },
+        {
+          "utc": "2026-08-12T22:20:00Z",
+          "basin_rain_in": 0.0028,
+          "basin_max_dbz": 28.5
+        },
+        {
+          "utc": "2026-08-12T22:25:00Z",
+          "basin_rain_in": 0.0028,
+          "basin_max_dbz": 28.0
+        },
+        {
+          "utc": "2026-08-12T21:35:00Z",
+          "basin_rain_in": 0.0017,
+          "basin_max_dbz": 28.5
+        },
+        {
+          "utc": "2026-08-12T22:40:00Z",
+          "basin_rain_in": 0.0016,
+          "basin_max_dbz": 25.5
+        },
+        {
+          "utc": "2026-08-12T21:40:00Z",
+          "basin_rain_in": 0.0013,
+          "basin_max_dbz": 31.5
+        },
+        {
+          "utc": "2026-08-12T21:45:00Z",
+          "basin_rain_in": 0.0013,
+          "basin_max_dbz": 30.5
+        }
+      ]
+    },
+    "2026-08-31_evening_field_rise": {
+      "name": "2026-08-31_evening_field_rise",
+      "start": "2026-08-31T23:30:00Z",
+      "end": "2026-09-01T01:30:00Z",
+      "field_rise_mdt": "2026-08-31 18:32-19:13 MDT",
+      "upper_rise_ft": 0.96,
+      "lower_rise_ft": 1.57,
+      "purpose": "Explain the large field response despite only ~0.011 in basin-average tracked rain.",
+      "modeled_basin_area_sq_mi": 1.359,
+      "scan_grid_bbox": [
+        -110.6975,
+        38.6025,
+        -110.3325,
+        38.9475
+      ],
+      "scan_padding_cells": 30,
+      "scan_padding_degrees": 0.15,
+      "basin_rain_total_inches": 0.0154,
+      "basin_peak_dbz": 35.0,
+      "basin_peak_dbz_utc": "2026-09-01T00:15:00Z",
+      "peak_basin_5min_rain_inches": 0.004,
+      "peak_basin_5min_rain_utc": "2026-09-01T00:20:00Z",
+      "max_accumulated_pixel_inside_basin_inches": 0.0574,
+      "max_nearby_accumulated_pixel_inches": 0.7002,
+      "max_nearby_core_lat": 38.615,
+      "max_nearby_core_lon": -110.535,
+      "max_nearby_core_distance_from_basin_miles": 10.49,
+      "nearby_core_to_basin_average_ratio": 45.47,
+      "strongest_basin_frames": [
+        {
+          "utc": "2026-09-01T00:20:00Z",
+          "basin_rain_in": 0.004,
+          "basin_max_dbz": 33.5
+        },
+        {
+          "utc": "2026-09-01T00:15:00Z",
+          "basin_rain_in": 0.0029,
+          "basin_max_dbz": 35.0
+        },
+        {
+          "utc": "2026-09-01T00:40:00Z",
+          "basin_rain_in": 0.0018,
+          "basin_max_dbz": 33.5
+        },
+        {
+          "utc": "2026-09-01T00:45:00Z",
+          "basin_rain_in": 0.0017,
+          "basin_max_dbz": 33.5
+        },
+        {
+          "utc": "2026-09-01T00:35:00Z",
+          "basin_rain_in": 0.0016,
+          "basin_max_dbz": 23.5
+        },
+        {
+          "utc": "2026-09-01T00:30:00Z",
+          "basin_rain_in": 0.0014,
+          "basin_max_dbz": 22.0
+        },
+        {
+          "utc": "2026-09-01T00:25:00Z",
+          "basin_rain_in": 0.0013,
+          "basin_max_dbz": 26.5
+        },
+        {
+          "utc": "2026-09-01T00:50:00Z",
+          "basin_rain_in": 0.0007,
+          "basin_max_dbz": 24.5
+        },
+        {
+          "utc": "2026-08-31T23:30:00Z",
+          "basin_rain_in": 0.0,
+          "basin_max_dbz": null
+        },
+        {
+          "utc": "2026-08-31T23:35:00Z",
+          "basin_rain_in": 0.0,
+          "basin_max_dbz": null
+        },
+        {
+          "utc": "2026-08-31T23:40:00Z",
+          "basin_rain_in": 0.0,
+          "basin_max_dbz": null
+        },
+        {
+          "utc": "2026-08-31T23:45:00Z",
+          "basin_rain_in": 0.0,
+          "basin_max_dbz": null
+        }
+      ]
+    }
+  }
+}
