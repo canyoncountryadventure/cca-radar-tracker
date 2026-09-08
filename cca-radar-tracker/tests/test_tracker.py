@@ -275,6 +275,7 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("25 dBZ", method["rain_event_explanation"])
         self.assertIn("30 consecutive minutes", method["rain_event_explanation"])
         self.assertIn("All canyon", method["cumulative_refill_explanation"])
+        self.assertIn("cumulative refill balances", method["cumulative_refill_explanation"])
         self.assertIn("1.28 in/day", method["pool_loss_explanation"])
         self.assertIn("all 22 modeled canyons", method["pool_loss_explanation"])
         self.assertIn("August 8", method["pool_loss_explanation"])

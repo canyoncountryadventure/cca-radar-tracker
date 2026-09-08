@@ -104,7 +104,7 @@ Examples:
 
 That same seasonal stage-equivalent percentage loss is now applied to **every canyon**. This is a deliberate reference-transfer assumption, not a claim that all canyons have identical pool depth, surface-area-to-volume ratio, bedrock fractures, seepage, shade, or local evaporation. Canyon-specific recession data should replace the transferred rate whenever defensible field measurements become available.
 
-New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%.
+New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%. The same loss integration is also used in the cumulative refill balance: loss is deducted between retained storms and again from the most recent storm through the current model time before the displayed balance is calculated. Individual historical storm runoff/fill ratios are preserved as the storm results that were modeled for those events; the transferred recession changes the evolving storage balance, not the stored storm evidence.
 
 ### 5. Radar-intensity context
 

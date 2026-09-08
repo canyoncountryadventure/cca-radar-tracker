@@ -33,6 +33,10 @@ class FrontendContractTests(unittest.TestCase):
         self.assertIn("stable-lower-MX2001", self.app)
         self.assertIn("11.9288-ft", self.app)
         self.assertIn("applied to every canyon", self.app)
+        self.assertIn("All-canyon pool-loss reference", self.app)
+        self.assertIn("all 22 canyons", self.app)
+        self.assertIn("Utah State University Moab monthly reference ETo normals", self.app)
+        self.assertIn("cumulative balances between storms", self.app)
 
     def test_event_history_and_summary_cards_show_full_timing(self):
         self.assertIn("Storm start", self.app)

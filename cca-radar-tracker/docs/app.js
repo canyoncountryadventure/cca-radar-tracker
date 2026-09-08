@@ -958,6 +958,11 @@ function renderMethods() {
       <li><strong>Why drainage area is still present:</strong> ${escapeHtml(method.scaling_basis || "Not available")}</li>
     </ul>
 
+    <h3>All-canyon pool-loss reference</h3>
+    <p><strong>What is used:</strong> the stable lower HOBO MX2001 recession measured in Zero G from Aug. 1-Sept. 7, 2026. The upper logger is not used in the central calibration because it physically relocated on Aug. 8.</p>
+    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>
+    <p><strong>Interpretation:</strong> this is a reference-transfer assumption for operations, not evidence that every canyon has the same fractures, pool geometry, shade, evaporation, or seepage. Replace it canyon-by-canyon when better recession data become available.</p>
+
     <h3>Classification language</h3>
     <ul>
       ${Object.entries(classifications).map(([key, value]) => `<li><strong>${escapeHtml(key.replaceAll("_", " "))}:</strong> ${escapeHtml(value)}</li>`).join("")}

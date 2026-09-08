@@ -2077,7 +2077,17 @@ def cumulative_refill_evidence(
     }
     history: list[dict[str, Any]] = []
 
+    balance_time: datetime | None = None
+    cumulative_loss_total = 0.0
     for event in events:
+        event_time = event_end_utc(event)
+        loss_before = 0.0
+        if balance_time is not None and balance > 0.0:
+            loss_ratio = zero_g_integrated_loss_ratio(balance_time, event_time)
+            loss_before = min(balance, target * loss_ratio)
+            balance = max(0.0, balance - loss_before)
+            cumulative_loss_total += loss_before
+
         runoff = float(
             event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))
             or 0.0
@@ -2089,6 +2099,7 @@ def cumulative_refill_evidence(
         overflow_total += overflow
         ratio = balance / target if target > 0 else 0.0
         timestamp = event.get("end_utc") or event.get("start_utc")
+        balance_time = event_time
 
         for percent in (25, 50, 75, 100):
             key = str(percent)
@@ -2104,6 +2115,7 @@ def cumulative_refill_evidence(
                 "basin_rain_inches": event.get("basin_rain_inches"),
                 "direct_runoff_ft3": round(runoff),
                 "event_fill_ratio": event.get("fill_ratio"),
+                "modeled_loss_since_prior_event_ft3": round(loss_before),
                 "balance_before_ft3": round(before),
                 "cumulative_balance_ft3": round(balance),
                 "cumulative_ratio": round(ratio, 2),
@@ -2112,6 +2124,14 @@ def cumulative_refill_evidence(
             }
         )
 
+    loss_since_latest_event = 0.0
+    if balance_time is not None and balance > 0.0:
+        loss_ratio = zero_g_integrated_loss_ratio(balance_time, now)
+        loss_since_latest_event = min(balance, target * loss_ratio)
+        balance = max(0.0, balance - loss_since_latest_event)
+        cumulative_loss_total += loss_since_latest_event
+
+    current_cumulative_loss = zero_g_loss_components(now)
     canyon_status["refill_history"] = [
         item
         for item in reversed(history)
@@ -2120,16 +2140,33 @@ def cumulative_refill_evidence(
     canyon_status["cumulative_refill_evidence"] = {
         "event_count": len(history),
         "period_start_utc": history[0]["start_utc"] if history else None,
-        "through_utc": history[-1]["end_utc"] if history else None,
+        "through_utc": utc_text(now) if history else None,
         "balance_ft3": round(balance),
         "ratio": round(balance / target, 2) if target > 0 else 0.0,
         "percent": min(100, round(balance / target * 100)) if target > 0 else 0,
         "overflow_ft3": round(overflow_total),
+        "modeled_loss_ft3": round(cumulative_loss_total),
+        "loss_since_latest_event_ft3": round(loss_since_latest_event),
         "milestones_utc": milestones,
-        "loss_model": "not_modeled",
+        "loss_model": "zero_g_mx2001_et_plus_navajo",
+        "decay_percentage_points_per_day": round(
+            float(current_cumulative_loss["percentage_points_per_day"]), 3
+        ),
+        "eto_inches_per_day": round(
+            float(current_cumulative_loss["eto_inches_per_day"]), 3
+        ),
+        "navajo_seepage_inches_per_day": round(
+            float(current_cumulative_loss["navajo_seepage_inches_per_day"]), 3
+        ),
+        "total_loss_inches_per_day": round(
+            float(current_cumulative_loss["total_loss_inches_per_day"]), 3
+        ),
+        "reference_pool_depth_ft": ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,
         "assumption": (
-            "Starts at zero storage at the first retained modeled event and "
-            "subtracts no evaporation, seepage, drainage, or other losses."
+            "Starts at zero storage at the first retained modeled event, subtracts "
+            "the transferred Zero G stable-lower-MX2001 + seasonal Moab ETo loss "
+            "between storms and through the present, then adds modeled runoff and "
+            "caps storage at 100%."
         ),
     }
 
@@ -2709,11 +2746,12 @@ def model_metadata(
                 "not explicitly subtract channel transmission losses."
             ),
             "cumulative_refill_explanation": (
-                "All canyon condition balances now use the same transferred Zero G reference "
-                "recession between storms. The reference combines 1.28 inches/day of empirical "
+                "All canyon condition balances and cumulative refill balances use the same "
+                "transferred Zero G reference recession between storms and from the most recent "
+                "storm through the present. The reference combines 1.28 inches/day of empirical "
                 "Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. "
-                "New modeled runoff is added after time-integrated loss and the condition is "
-                "capped at 100%."
+                "New modeled runoff is added after time-integrated loss and storage is capped "
+                "at 100%."
             ),
             "pool_loss_explanation": (
                 "The loss reference comes from the stable lower HOBO MX2001 logger in Zero G, "
