@@ -208,8 +208,10 @@ class EventAccumulationTests(unittest.TestCase):
         refreshed = status["canyons"]["zerog"]["events"][0]
 
         self.assertEqual(refreshed["storage_target_ft3"], 104_884)
-        self.assertAlmostEqual(
-            refreshed["fill_ratio"], original["fill_ratio"] / 2, places=4
+        self.assertEqual(refreshed["direct_runoff_ft3"], original["direct_runoff_ft3"])
+        self.assertEqual(
+            refreshed["fill_ratio"],
+            round(refreshed["direct_runoff_ft3"] / 104_884, 2),
         )
 
     def test_cumulative_loss_evidence_applies_transferred_recession_between_storms(self):

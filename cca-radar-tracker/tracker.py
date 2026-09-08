@@ -181,6 +181,17 @@ SUBSTANTIAL_REFILL_RATIO = 0.50
 LARGE_REFILL_RATIO = 0.75
 STATUS_SCHEMA_VERSION = 5
 
+# Zero G field calibration from paired MX2001 logger responses, August 2026.
+# These are rainfall-core response anchors, independent of the NRCS volume test.
+ZERO_G_FIELD_CORE_MAJOR_INCHES = 0.20
+ZERO_G_FIELD_CORE_FLUSH_INCHES = 1.00
+ZERO_G_FIELD_CALIBRATION_BASIS = (
+    "Paired Zero G MX2001 logger anchors: Aug 21 small response at 0.0779 in "
+    "maximum in-basin accumulated radar rain; Aug 12 major refill at 0.2123 in; "
+    "Aug 29 major refill at 0.5101 in; Aug 30 strong flush at 1.1051 in; "
+    "Aug 31 secondary rise at 0.0574 in is not treated as a new-rain refill."
+)
+
 # Rare field checks are calibration anchors, not recurring workflow inputs.
 FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
     "zerog": {
@@ -1181,6 +1192,71 @@ def nrcs_runoff_depth(rain_inches: float, curve_number: float) -> float:
 
 
 
+def spatial_nrcs_runoff_depth(
+    event: dict[str, Any], canyon: Canyon, curve_number: float
+) -> float | None:
+    """Area-weight NRCS runoff after applying the nonlinear equation cell by cell.
+
+    This preserves localized slickrock storm cores that can exceed initial
+    abstraction even when watershed-average rainfall does not. The field-validated
+    production use is currently limited to Zero G; other canyons retain the lumped
+    calculation until they have comparable observations.
+    """
+    values = event.get("accumulated_rain_grid_inches")
+    if values is None:
+        return None
+    rainfall = np.asarray(values, dtype=np.float64)
+    if rainfall.shape != canyon.weights.shape:
+        return None
+    valid = np.isfinite(rainfall)
+    weights = np.where(valid, canyon.weights, 0.0)
+    denominator = float(weights.sum())
+    if denominator <= 0:
+        return None
+    runoff = np.zeros(rainfall.shape, dtype=np.float64)
+    for row, column in zip(*np.where(valid & (canyon.weights > 0))):
+        runoff[row, column] = nrcs_runoff_depth(
+            float(rainfall[row, column]), curve_number
+        )
+    return float((runoff * weights).sum() / denominator)
+
+
+def zero_g_field_core_evidence(
+    event: dict[str, Any], canyon: Canyon
+) -> dict[str, Any]:
+    """Return the independent logger-calibrated Zero G storm-core evidence."""
+    result = {
+        "available": False,
+        "maximum_in_basin_storm_inches": None,
+        "major_threshold_inches": ZERO_G_FIELD_CORE_MAJOR_INCHES,
+        "flush_threshold_inches": ZERO_G_FIELD_CORE_FLUSH_INCHES,
+        "major_threshold_met": False,
+        "flush_threshold_met": False,
+        "basis": ZERO_G_FIELD_CALIBRATION_BASIS,
+    }
+    if canyon.canyon_id != "zerog":
+        return result
+    values = event.get("accumulated_rain_grid_inches")
+    if values is None:
+        return result
+    rainfall = np.asarray(values, dtype=np.float64)
+    if rainfall.shape != canyon.weights.shape:
+        return result
+    mask = np.isfinite(rainfall) & (canyon.weights > 0)
+    if not np.any(mask):
+        return result
+    maximum = float(np.max(rainfall[mask]))
+    result.update(
+        {
+            "available": True,
+            "maximum_in_basin_storm_inches": round(maximum, 4),
+            "major_threshold_met": maximum >= ZERO_G_FIELD_CORE_MAJOR_INCHES,
+            "flush_threshold_met": maximum >= ZERO_G_FIELD_CORE_FLUSH_INCHES,
+        }
+    )
+    return result
+
+
 def apply_hydrologic_model(
     event: dict[str, Any], canyon: Canyon, config: dict[str, Any]
 ) -> None:
@@ -1212,7 +1288,13 @@ def apply_hydrologic_model(
         curve_number = float(hydrology["curve_number"][state])
         retention_s05[state] = round(nrcs_retention_s05(curve_number), 4)
         initial_abstraction[state] = round(nrcs_initial_abstraction(curve_number), 4)
-        depth = nrcs_runoff_depth(rain, curve_number)
+        lumped_depth = nrcs_runoff_depth(rain, curve_number)
+        spatial_depth = (
+            spatial_nrcs_runoff_depth(event, canyon, curve_number)
+            if canyon.canyon_id == "zerog"
+            else None
+        )
+        depth = spatial_depth if spatial_depth is not None else lumped_depth
         volume = depth / 12.0 * area_ft2
         base_seconds = max(
             300.0, (duration_hr + 2.0 * lag_hr) * 3600.0
@@ -1220,6 +1302,18 @@ def apply_hydrologic_model(
         runoff_depths[state] = round(depth, 4)
         volumes[state] = round(volume)
         peaks[state] = round(2.0 * volume / base_seconds, 2)
+        event.setdefault("lumped_runoff_depth_inches", {})[state] = round(lumped_depth, 4)
+        event.setdefault("lumped_direct_runoff_ft3_range", {})[state] = round(
+            lumped_depth / 12.0 * area_ft2
+        )
+        event.setdefault("spatial_runoff_depth_inches", {})[state] = (
+            None if spatial_depth is None else round(spatial_depth, 4)
+        )
+        event.setdefault("spatial_direct_runoff_ft3_range", {})[state] = (
+            None
+            if spatial_depth is None
+            else round(spatial_depth / 12.0 * area_ft2)
+        )
 
     event["hydrology_available"] = True
     event["retention_s05_inches"] = retention_s05
@@ -1245,6 +1339,15 @@ def apply_hydrologic_model(
         event["peak_flow_status"] = "uncalibrated_experimental"
     event["generated_runoff_ft3"] = volumes["normal"]
     event["generated_runoff_ft3_range"] = volumes
+    event["runoff_spatialization_applied"] = bool(
+        canyon.canyon_id == "zerog"
+        and any(value is not None for value in event.get("spatial_runoff_depth_inches", {}).values())
+    )
+    event["runoff_spatialization_basis"] = (
+        "Zero G field-calibrated: NRCS runoff applied cell-by-cell to accumulated radar rainfall before watershed weighting"
+        if event["runoff_spatialization_applied"]
+        else "Basin-average NRCS fallback"
+    )
     event["delivered_runoff_ft3"] = None
     event["delivery_status"] = "not_calibrated"
     event["delivery_explanation"] = (
@@ -1311,6 +1414,10 @@ def classify_event(
     footprint_observed = bool(event.get("spatial_gate_seen"))
     storage_met = ratio >= 1.0
     flush_met = ratio >= float(config["model"]["flush_ratio"])
+    field_core = zero_g_field_core_evidence(event, canyon)
+    field_major_met = bool(field_core["major_threshold_met"] and enough_frames)
+    field_flush_met = bool(field_core["flush_threshold_met"] and enough_frames)
+    event["zero_g_field_core_evidence"] = field_core
 
     event["decision_tests"] = {
         "storage_target_met": storage_met,
@@ -1318,22 +1425,32 @@ def classify_event(
         "heavy_rain_footprint_observed": footprint_observed,
         "minimum_wet_duration_met": enough_frames,
         "minimum_wet_frames_required": required_frames,
+        "zero_g_field_core_major_met": field_major_met,
+        "zero_g_field_core_flush_met": field_flush_met,
     }
 
-    if flush_met and enough_frames:
+    if (flush_met or field_flush_met) and enough_frames:
         label = "Strong refill/flush potential — full pools possible"
         reason = (
-            "Estimated watershed runoff was at least twice the provisional empty-storage "
-            "target and the minimum wet-duration check passed. "
-            "This indicates a strong refill/flush event, not a direct field observation."
+            "Strong flush evidence passed the duration check. This is supported by "
+            + (
+                f"the Zero G field-calibrated in-basin storm core ({field_core['maximum_in_basin_storm_inches']:.3f} in)"
+                if field_flush_met
+                else "estimated watershed runoff at least twice the provisional empty-storage target"
+            )
+            + ". The logger-derived core threshold is provisional field calibration, not a direct observation of every pool."
         )
         code = "full_flush"
-    elif storage_met and enough_frames:
+    elif (storage_met or field_major_met) and enough_frames:
         label = "Major refill likely — pools may be full"
         reason = (
-            "Estimated watershed runoff met the provisional empty-storage target, and both "
-            "the minimum wet-duration check passed. Existing pool "
-            "levels and channel losses remain unknown."
+            "Major refill evidence passed the duration check. This is supported by "
+            + (
+                f"the Zero G field-calibrated in-basin storm core ({field_core['maximum_in_basin_storm_inches']:.3f} in)"
+                if field_major_met
+                else "estimated watershed runoff meeting the provisional empty-storage target"
+            )
+            + ". Existing pool level and delivery losses remain uncertain."
         )
         code = "likely_full"
     elif storage_met:
@@ -2704,13 +2821,16 @@ def model_metadata(
                 "Q = (P − Ia)²/(P + 0.95S0.05) when P > Ia"
             ),
             "direct_runoff_explanation": (
-                "No fixed runoff coefficient is used. Accumulated basin-average radar "
-                "rainfall is converted to dry, normal, and wet direct-runoff estimates "
-                "with canyon-specific composite curve numbers from SSURGO soils and "
-                "2021 NLCD land cover. Traditional table CNs are converted to the "
-                "Ia/S = 0.05 retention basis before runoff is calculated. Pixels "
-                "without a usable SSURGO group are conservatively assigned to HSG D. "
-                "The central display uses the normal condition."
+                "No fixed runoff coefficient is used. Zero G now applies the adjusted "
+                "NRCS equation to each accumulated radar-rainfall cell before area weighting, "
+                "because paired logger events showed that basin averaging can erase localized "
+                "slickrock runoff. Other canyons retain the basin-average calculation pending "
+                "field calibration. Dry, normal, and wet estimates use canyon-specific composite "
+                "curve numbers from SSURGO soils and 2021 NLCD land cover. Pixels without a "
+                "usable SSURGO hydrologic soil group are conservatively assigned to HSG D. "
+                "The central display uses normal conditions. Zero G also carries an independent "
+                "field-calibrated storm-core response test: 0.20 in for major refill evidence "
+                "and 1.00 in for strong-flush evidence, each requiring the normal duration check."
             ),
             "peak_flow_formula": (
                 "Screening peak CFS = 2 × direct-runoff volume ÷ triangular hydrograph "
