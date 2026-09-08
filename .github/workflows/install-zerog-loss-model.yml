@@ -46,7 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker.py docs/app.js tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
+          git add tracker.py docs/app.js README.md tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
