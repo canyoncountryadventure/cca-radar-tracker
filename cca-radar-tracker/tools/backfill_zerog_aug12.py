@@ -9,12 +9,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import tracker
 
-ROOT = Path(__file__).resolve().parents[1]
 UTC = timezone.utc
 START = tracker.parse_utc("2026-08-12T20:30:00Z")
 END = tracker.parse_utc("2026-08-12T23:30:00Z")
