@@ -181,6 +181,7 @@ MINOR_REFILL_RATIO = 0.25
 SUBSTANTIAL_REFILL_RATIO = 0.50
 LARGE_REFILL_RATIO = 0.75
 STATUS_SCHEMA_VERSION = 5
+RUNOFF_METHOD_VERSION = "spatial_nrcs_all_canyons_v1"
 
 # Zero G field calibration from paired MX2001 logger responses, August 2026.
 # These are rainfall-core response anchors, independent of the NRCS volume test.
@@ -894,6 +895,7 @@ def canyon_model_signature(canyon: Canyon) -> str:
         "flush_target_ft3": canyon.model.get("flush_target_ft3"),
         "technical_length_miles": canyon.model.get("technical_length_miles"),
         "pothole_modifier": canyon.model.get("pothole_modifier"),
+        "runoff_method_version": RUNOFF_METHOD_VERSION,
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()[:16]
@@ -1201,10 +1203,10 @@ def spatial_nrcs_runoff_depth(
 ) -> float | None:
     """Area-weight NRCS runoff after applying the nonlinear equation cell by cell.
 
-    This preserves localized slickrock storm cores that can exceed initial
-    abstraction even when watershed-average rainfall does not. The field-validated
-    production use is currently limited to Zero G; other canyons retain the lumped
-    calculation until they have comparable observations.
+    This preserves localized storm cores that can exceed initial abstraction even
+    when watershed-average rainfall does not. The same spatial calculation is used
+    for every modeled canyon whenever the retained event has a compatible rainfall
+    grid; basin-average runoff is retained only as a transparent historical fallback.
     """
     values = event.get("accumulated_rain_grid_inches")
     if values is None:
@@ -1293,11 +1295,7 @@ def apply_hydrologic_model(
         retention_s05[state] = round(nrcs_retention_s05(curve_number), 4)
         initial_abstraction[state] = round(nrcs_initial_abstraction(curve_number), 4)
         lumped_depth = nrcs_runoff_depth(rain, curve_number)
-        spatial_depth = (
-            spatial_nrcs_runoff_depth(event, canyon, curve_number)
-            if canyon.canyon_id == "zerog"
-            else None
-        )
+        spatial_depth = spatial_nrcs_runoff_depth(event, canyon, curve_number)
         depth = spatial_depth if spatial_depth is not None else lumped_depth
         volume = depth / 12.0 * area_ft2
         base_seconds = max(
@@ -1343,14 +1341,17 @@ def apply_hydrologic_model(
         event["peak_flow_status"] = "uncalibrated_experimental"
     event["generated_runoff_ft3"] = volumes["normal"]
     event["generated_runoff_ft3_range"] = volumes
+    event["runoff_method_version"] = RUNOFF_METHOD_VERSION
     event["runoff_spatialization_applied"] = bool(
-        canyon.canyon_id == "zerog"
-        and any(value is not None for value in event.get("spatial_runoff_depth_inches", {}).values())
+        any(
+            value is not None
+            for value in event.get("spatial_runoff_depth_inches", {}).values()
+        )
     )
     event["runoff_spatialization_basis"] = (
-        "Zero G field-calibrated: NRCS runoff applied cell-by-cell to accumulated radar rainfall before watershed weighting"
+        "Spatial NRCS: runoff applied cell-by-cell to accumulated radar rainfall before watershed weighting"
         if event["runoff_spatialization_applied"]
-        else "Basin-average NRCS fallback"
+        else "Basin-average NRCS fallback because no compatible accumulated rainfall grid is retained for this event"
     )
     event["delivered_runoff_ft3"] = None
     event["delivery_status"] = "not_calibrated"
@@ -2825,9 +2826,9 @@ def model_metadata(
             ),
             "experimental_comparison_explanation": (
                 "Weak-echo persistence, connected-core area, watershed-size scaling, "
-                "MRMS QPE, and spatial curve-number runoff are reserved as disabled "
-                "comparison modes until historical and field calibration show that they "
-                "outperform the fixed baseline."
+                "and MRMS QPE remain comparison modes. Spatial curve-number runoff is "
+                "the production runoff method for all 22 canyons whenever a retained "
+                "accumulated-rainfall grid is available."
             ),
             "runoff_formula": (
                 "Adjusted NRCS direct runoff: S0.20 = 1000/CN − 10; "
@@ -2835,14 +2836,14 @@ def model_metadata(
                 "Q = (P − Ia)²/(P + 0.95S0.05) when P > Ia"
             ),
             "direct_runoff_explanation": (
-                "No fixed runoff coefficient is used. Zero G now applies the adjusted "
+                "No fixed runoff coefficient is used. All 22 modeled canyons apply the adjusted "
                 "NRCS equation to each accumulated radar-rainfall cell before area weighting, "
-                "because paired logger events showed that basin averaging can erase localized "
-                "slickrock runoff. Other canyons retain the basin-average calculation pending "
-                "field calibration. Dry, normal, and wet estimates use canyon-specific composite "
-                "curve numbers from SSURGO soils and 2021 NLCD land cover. Pixels without a "
-                "usable SSURGO hydrologic soil group are conservatively assigned to HSG D. "
-                "The central display uses normal conditions. Zero G also carries an independent "
+                "so a localized convective core is not erased by watershed averaging. Dry, "
+                "normal, and wet estimates use canyon-specific composite curve numbers from "
+                "SSURGO soils and 2021 NLCD land cover. Pixels without a usable SSURGO hydrologic "
+                "soil group are conservatively assigned to HSG D. The central display uses normal "
+                "conditions. A gridless retained historical event is explicitly tagged and uses "
+                "the basin-average NRCS fallback. Zero G separately carries an independent "
                 "field-calibrated storm-core response test: 0.20 in for major refill evidence "
                 "and 1.00 in for strong-flush evidence, each requiring the normal duration check."
             ),
@@ -2922,8 +2923,9 @@ def model_metadata(
             "condition_language": (
                 "Condition statements combine modeled refill with the provisional daily loss while "
                 "confidence ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' "
-                "requires the storage-volume and minimum wet-duration tests; dBZ footprints are "
-                "context only."
+                "normally requires the storage-volume and minimum wet-duration tests; a canyon-specific "
+                "field calibration may provide an additional independent decision test where observations exist. "
+                "dBZ footprints alone remain context only."
             ),
             "sources": [
                 {
