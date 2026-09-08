@@ -10,14 +10,18 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import tracker
 
-ROOT = Path(__file__).resolve().parents[1]
 UTC = timezone.utc
 
 WINDOWS = {
@@ -128,7 +132,6 @@ def scan_window(name: str, spec: dict, canyon: tracker.Canyon, config: dict, pal
     basin_mask = canyon.weights > 0.05
     max_inside = float(np.max(inside_crop[basin_mask])) if np.any(basin_mask) else 0.0
 
-    # Rank the largest basin-rain frames so the causal pulse can be inspected quickly.
     strongest_frames = sorted(frames, key=lambda item: item["basin_rain_in"], reverse=True)[:12]
 
     return {
