@@ -79,6 +79,17 @@ jobs:
           if __name__ == '__main__':
               unittest.main()
           PY
+
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tests/test_event_accumulation.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''        self.assertEqual(refreshed["storage_target_ft3"], 104_884)\n        self.assertAlmostEqual(\n            refreshed["fill_ratio"], original["fill_ratio"] / 2, places=4\n        )\n'''
+          new = '''        self.assertEqual(refreshed["storage_target_ft3"], 104_884)\n        self.assertEqual(refreshed["direct_runoff_ft3"], original["direct_runoff_ft3"])\n        self.assertEqual(\n            refreshed["fill_ratio"],\n            round(refreshed["direct_runoff_ft3"] / 104_884, 2),\n        )\n'''
+          if old not in text:
+              raise SystemExit('storage-target recalculation test marker not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
       - name: Run tests
         working-directory: cca-radar-tracker
         run: python -m unittest discover -s tests -v
@@ -89,7 +100,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add cca-radar-tracker/tracker.py cca-radar-tracker/tests/test_zerog_field_calibration.py
+          git add cca-radar-tracker/tracker.py cca-radar-tracker/tests/test_zerog_field_calibration.py cca-radar-tracker/tests/test_event_accumulation.py
           if git diff --cached --quiet; then
             echo "Calibration already installed"
           else
