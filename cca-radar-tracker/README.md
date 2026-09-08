@@ -70,7 +70,43 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | Quandary | 1.59 | +0.00 | 111,177 | 222,354 |
 | Yankee Doodle | 0.40 | +0.00 | 27,969 | 55,938 |
 
-### 4. Radar-intensity context
+### 4. Pool loss between storms — applied to all canyons
+
+All 22 canyon condition balances now use the same **transferred Zero G field reference** instead of the old fixed 0.8-percentage-point/day placeholder.
+
+The reference is based on the stable lower **HOBO MX2001** logger in Zero G from August 1 through September 7, 2026. The upper logger is not used in the central calibration because it physically relocated on August 8 and afterward behaved as a shallower, more exposed high-loss comparison.
+
+The operational loss model is:
+
+```text
+stage-equivalent daily loss
+  = 1.28 in/day empirical Navajo/seepage-equivalent residual
+  + monthly Moab reference ETo
+```
+
+The **1.28 in/day** residual is the stable-lower-logger recession remaining after subtracting seasonal reference evapotranspiration. It is intentionally described as a Navajo/seepage-equivalent residual because the available logger geometry cannot separate Navajo Sandstone matrix/fracture seepage, wetted-rock drainage, and other quiet-pool losses.
+
+Seasonal ETo comes from **Utah State University Moab monthly reference ETo normals (2000–2022)** from *Evapotranspiration and Precipitation Data for Calculating Irrigation Water Requirements in Utah*. Monthly totals are converted to daily rates and integrated across month boundaries.
+
+The percentage-point conversion uses the stable lower Zero G logger's initial **11.9288-ft water column**:
+
+```text
+percentage-point loss/day
+  = (1.28 in/day + monthly ETo in/day)
+    ÷ (11.9288 ft × 12 in/ft)
+    × 100
+```
+
+Examples:
+
+- August ETo ≈ 7.78/31 = 0.251 in/day; total loss ≈ 1.531 in/day; decay ≈ **1.07 percentage points/day**.
+- September ETo ≈ 5.72/30 = 0.191 in/day; total loss ≈ 1.471 in/day; decay ≈ **1.03 percentage points/day**.
+
+That same seasonal stage-equivalent percentage loss is now applied to **every canyon**. This is a deliberate reference-transfer assumption, not a claim that all canyons have identical pool depth, surface-area-to-volume ratio, bedrock fractures, seepage, shade, or local evaporation. Canyon-specific recession data should replace the transferred rate whenever defensible field measurements become available.
+
+New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%.
+
+### 5. Radar-intensity context
 
 The dashboard reports how much of each watershed reached these radar-intensity bands:
 
@@ -80,7 +116,7 @@ The dashboard reports how much of each watershed reached these radar-intensity b
 
 These measurements describe whether intense echoes were isolated or widespread. They do not gate classification. A likely-full or strong-flush classification requires the runoff-volume threshold and at least two wet five-minute frames.
 
-### 5. Condition language
+### 6. Condition language
 
 The storage-fill ratio is normal-condition watershed runoff divided by the provisional empty-storage target.
 
@@ -92,13 +128,13 @@ The storage-fill ratio is normal-condition watershed runoff divided by the provi
 - At least 1.0 with the duration test: **Major refill likely; pools may be full**
 - At least 2.0 with the duration test: **Strong refill/flush potential; full pools possible**
 
-Current pool level, channel transmission loss, bedrock fractures, disconnected drainage, radar error, and evaporation remain unknown.
+Current pool level, channel transmission loss, bedrock fractures, disconnected drainage, radar error, and canyon-to-canyon differences in actual recession remain uncertain. Seasonal atmospheric loss is modeled through Moab ETo; the non-atmospheric loss term is transferred from Zero G rather than independently measured in each canyon.
 
 ## Atlas 14 and peak flow
 
-Atlas 14 equivalent and peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag. Zero G applies a provisional 0.14 peak-flow factor based on one field-estimated 3–6 cfs flash; other canyons remain explicitly uncalibrated.
+Atlas 14 equivalent and peak CFS are context only. They do not independently determine pool condition. Atlas 14 compares watershed-average event rain with point-frequency depths at the canyon outlet. If no Atlas duration is available for a longer event, the comparison is suppressed instead of using the 60-minute depth. Peak flow uses a volume-conserving triangular hydrograph based on event duration and estimated watershed lag. Zero G applies a provisional 0.14 peak-flow factor based on one field-estimated 3–6 cfs flash; other canyons remain explicitly uncalibrated for peak-flow routing.
 
-The NRCS estimate represents watershed-generated runoff only. No canyon-delivery volume is calculated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon and remain uncalibrated. The existing Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
+The NRCS estimate represents watershed-generated runoff only. No canyon-delivery volume is calculated because channel infiltration, fractured-bedrock seepage, upstream storage, routing, and attenuation vary by canyon and remain uncalibrated. The Zero G storage normalization remains the operational baseline; visible storage, hidden storage, and uncertainty are separate output fields.
 
 Weak-echo persistence, connected-core area, watershed-size scaling, MRMS QPE, spatial curve-number response units, and delivery factors are configured as disabled comparison work. They do not replace the fixed baseline until known events and field observations show a measurable improvement.
 
@@ -109,7 +145,9 @@ The dashboard includes:
 - Blue watershed polygons and retained peak-event radar pixels
 - Clickable 90-day storm dates that redraw the map with the selected event
 - Persistent current-condition estimate that is not reset by a dry or weak storm
-- A provisional 0.8-percentage-point daily decrease, with new modeled runoff added to the current percentage and capped at 100%
+- **All-canyon transferred Zero G MX2001 + seasonal ETo recession**, integrated through time and across month boundaries
+- Current loss components shown on the front end: empirical 1.28 in/day residual, current monthly ETo, total in/day, and stage-equivalent percentage points/day
+- Explicit front-end methods language identifying the stable lower logger, the August 8 upper-logger relocation, the 11.9288-ft reference water column, USU Moab ETo normals, and the fact that the rate is transferred to all canyons
 - Confidence that also declines as the supporting observation or refill event ages
 - Zero G field anchor: 98% full on August 1, 2026
 - Largest retained event and retained seven-day-high dates, rebuilt when polygon or storage inputs change
@@ -138,11 +176,12 @@ python tracker.py --at 2024-06-21T22:25:00Z --dry-run
 
 ## Main files
 
-- `tracker.py` — radar, rainfall, runoff, event, classification, and generated model data
+- `tracker.py` — radar, rainfall, runoff, event, classification, transferred pool-loss calculation, and generated model data
+- `loss_model.py` — Zero G stable-lower-MX2001 + USU Moab ETo reference recession transferred to all modeled canyons
 - `config.json` — active scheduling and radar constants; obsolete area-scaling fields removed
 - `hydrology.json` — curve numbers, terrain, lag, and federal basin inventory
 - `watersheds.geojson` — 22 watershed polygons and outlets
 - `atlas14.json` — precipitation-frequency depths at canyon outlets
 - `send_alert.py` — duplicate-suppressed Gmail alerts for newly retained major-refill events
-- `docs/` — GitHub Pages dashboard
-- `tests/` — storage-target, hydrology, classification, migration, and frontend-contract checks
+- `docs/` — GitHub Pages dashboard; the expandable Methods panel is the front-end methodology/readme
+- `tests/` — storage-target, hydrology, classification, loss-transfer, migration, and frontend-contract checks
