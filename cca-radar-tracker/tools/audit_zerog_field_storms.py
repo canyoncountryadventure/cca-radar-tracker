@@ -5,6 +5,8 @@ This is deliberately a calibration/QA tool, not part of the operational classifi
 It scans the two anomalous field events (2026-08-12 and 2026-08-31) over a much
 larger radar neighborhood than the current watershed polygon, then reports where
 the strongest accumulated rain core actually fell relative to the modeled basin.
+It also compares the current lumped NRCS runoff calculation with a spatial-rainfall
+version that applies the same composite curve number cell-by-cell before averaging.
 """
 from __future__ import annotations
 
@@ -84,6 +86,30 @@ def nearest_basin_distance_miles(canyon: tracker.Canyon, lat: float, lon: float)
     return min(haversine_miles(lat, lon, plat, plon) for plat, plon in points)
 
 
+def spatial_runoff_diagnostics(canyon: tracker.Canyon, basin_rain_grid: np.ndarray, basin_mean: float) -> dict:
+    hydrology = canyon.model["hydrology"]
+    weights = np.asarray(canyon.weights, dtype=np.float64)
+    finite = np.isfinite(basin_rain_grid)
+    valid_weights = np.where(finite, weights, 0.0)
+    denominator = float(valid_weights.sum())
+    area_ft2 = canyon.area_sq_mi * tracker.SQUARE_FEET_PER_SQUARE_MILE
+    output = {}
+    for state in ("dry", "normal", "wet"):
+        cn = float(hydrology["curve_number"][state])
+        lumped_depth = tracker.nrcs_runoff_depth(basin_mean, cn)
+        spatial_depth_grid = np.vectorize(lambda value: tracker.nrcs_runoff_depth(float(value), cn))(np.nan_to_num(basin_rain_grid, nan=0.0))
+        spatial_depth = 0.0 if denominator <= 0 else float((spatial_depth_grid * valid_weights).sum() / denominator)
+        output[state] = {
+            "curve_number": cn,
+            "initial_abstraction_inches": round(tracker.nrcs_initial_abstraction(cn), 4),
+            "lumped_runoff_depth_inches": round(lumped_depth, 4),
+            "lumped_runoff_ft3": round(lumped_depth / 12.0 * area_ft2),
+            "spatial_runoff_depth_inches": round(spatial_depth, 4),
+            "spatial_runoff_ft3": round(spatial_depth / 12.0 * area_ft2),
+        }
+    return output
+
+
 def scan_window(name: str, spec: dict, canyon: tracker.Canyon, config: dict, palette: dict) -> dict:
     grid = expanded_grid(canyon.grid, 30)
     start = parse(spec["start"])
@@ -125,12 +151,10 @@ def scan_window(name: str, spec: dict, canyon: tracker.Canyon, config: dict, pal
     core_lat, core_lon = pixel_center(grid, int(row), int(col))
     distance = nearest_basin_distance_miles(canyon, core_lat, core_lon)
 
-    inside_crop = accumulated[
-        30:30 + canyon.grid.height,
-        30:30 + canyon.grid.width,
-    ]
+    inside_crop = accumulated[30:30 + canyon.grid.height, 30:30 + canyon.grid.width]
     basin_mask = canyon.weights > 0.05
     max_inside = float(np.max(inside_crop[basin_mask])) if np.any(basin_mask) else 0.0
+    runoff = spatial_runoff_diagnostics(canyon, inside_crop, basin_total)
 
     strongest_frames = sorted(frames, key=lambda item: item["basin_rain_in"], reverse=True)[:12]
 
@@ -152,6 +176,7 @@ def scan_window(name: str, spec: dict, canyon: tracker.Canyon, config: dict, pal
         "max_nearby_core_lon": round(core_lon, 5),
         "max_nearby_core_distance_from_basin_miles": round(distance, 2),
         "nearby_core_to_basin_average_ratio": None if basin_total <= 0 else round(core_inches / basin_total, 2),
+        "runoff_comparison": runoff,
         "strongest_basin_frames": strongest_frames,
     }
 
@@ -189,6 +214,8 @@ def main() -> None:
         "",
     ]
     for item in results["windows"].values():
+        normal = item["runoff_comparison"]["normal"]
+        wet = item["runoff_comparison"]["wet"]
         lines.extend([
             f"## {item['name']}",
             "",
@@ -197,7 +224,9 @@ def main() -> None:
             f"- Maximum accumulated pixel inside basin: **{item['max_accumulated_pixel_inside_basin_inches']:.4f} in**",
             f"- Strongest nearby accumulated pixel: **{item['max_nearby_accumulated_pixel_inches']:.4f} in**",
             f"- Nearby core distance from modeled basin: **{item['max_nearby_core_distance_from_basin_miles']:.2f} mi**",
-            f"- Nearby-core / basin-average ratio: **{item['nearby_core_to_basin_average_ratio']}**",
+            f"- Current lumped normal runoff: **{normal['lumped_runoff_ft3']:,} ft3**",
+            f"- Spatial-rain normal runoff: **{normal['spatial_runoff_ft3']:,} ft3**",
+            f"- Spatial-rain wet runoff: **{wet['spatial_runoff_ft3']:,} ft3**",
             f"- Peak basin dBZ: **{item['basin_peak_dbz']}** at {item['basin_peak_dbz_utc']}",
             "",
         ])
