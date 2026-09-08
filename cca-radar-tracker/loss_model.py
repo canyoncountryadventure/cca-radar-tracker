@@ -83,6 +83,32 @@ def zero_g_loss_components(reference: datetime) -> dict[str, float | str]:
     }
 
 
+def zero_g_monthly_recession_table(year: int = 2026) -> list[dict[str, float | int | str]]:
+    """Return the 12-month transferred recession reference for ``year``.
+
+    The 1.28 in/day field residual is held constant because the paired logger
+    record does not support a defensible temperature-only seepage coefficient.
+    Seasonality is represented by monthly Moab reference ETo, which captures
+    the atmospheric effects of temperature, solar loading, day length, and
+    seasonal evaporative demand. February is recomputed for leap years.
+    """
+    rows: list[dict[str, float | int | str]] = []
+    for month in range(1, 13):
+        reference = datetime(year, month, 15)
+        values = zero_g_loss_components(reference)
+        rows.append(
+            {
+                "month": month,
+                "month_name": calendar.month_name[month],
+                "eto_inches_per_month": MOAB_MONTHLY_ETO_INCHES[month],
+                "eto_inches_per_day": round(float(values["eto_inches_per_day"]), 4),
+                "total_loss_inches_per_day": round(float(values["total_loss_inches_per_day"]), 4),
+                "percentage_points_per_day": round(float(values["percentage_points_per_day"]), 4),
+            }
+        )
+    return rows
+
+
 def _next_month_start(reference: datetime) -> datetime:
     """Return the first instant of the next month, preserving timezone."""
     if reference.month == 12:

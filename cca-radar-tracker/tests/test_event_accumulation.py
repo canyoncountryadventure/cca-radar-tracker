@@ -345,6 +345,39 @@ class EventAccumulationTests(unittest.TestCase):
         )
         self.assertEqual(status["condition_estimate"]["percent"], 100)
 
+
+    def test_small_positive_runoff_event_advances_recession_clock(self):
+        canyon = canyon_fixture(fill_target=100)
+        canyon.canyon_id = "unobserved"
+        canyon.name = "Unobserved"
+        status = tracker.empty_canyon_status(canyon)
+        first = datetime(2026, 9, 1, 12, tzinfo=timezone.utc)
+        latest = datetime(2026, 9, 5, 12, tzinfo=timezone.utc)
+        now = datetime(2026, 9, 8, 12, tzinfo=timezone.utc)
+        status["events"] = [
+            {
+                "start_utc": tracker.utc_text(first),
+                "end_utc": tracker.utc_text(first),
+                "direct_runoff_ft3": 60,
+                "fill_ratio": 0.60,
+            },
+            {
+                "start_utc": tracker.utc_text(latest),
+                "end_utc": tracker.utc_text(latest),
+                "direct_runoff_ft3": 5,
+                "fill_ratio": 0.05,
+            },
+        ]
+        tracker.cumulative_refill_evidence(status, canyon, self.config, now_utc=now)
+        condition = status["condition_estimate"]
+        self.assertEqual(condition["basis"], "Modeled refill history")
+        self.assertEqual(condition["basis_utc"], tracker.utc_text(latest))
+        self.assertEqual(condition["last_refill_utc"], tracker.utc_text(latest))
+        self.assertEqual(condition["last_meaningful_refill_utc"], tracker.utc_text(latest))
+        self.assertIsNotNone(condition["percent"])
+        self.assertLess(condition["percent"], 65)
+        self.assertGreater(condition["percent"], 50)
+
     def test_moving_storm_core_accumulates_at_its_actual_pixels(self):
         canyon = spatial_canyon_fixture()
         status = tracker.empty_status([canyon])

@@ -102,6 +102,28 @@ Examples:
 - August ETo ≈ 7.78/31 = 0.251 in/day; total loss ≈ 1.531 in/day; decay ≈ **0.981 percentage points/day**.
 - September ETo ≈ 5.72/30 = 0.191 in/day; total loss ≈ 1.471 in/day; decay ≈ **0.943 percentage points/day**.
 
+
+The current **12-month transferred recession reference** is:
+
+| Month | Moab ETo (in/day) | Total stage-equivalent loss (in/day) | Recession (percentage points/day) |
+|---|---:|---:|---:|
+| January | 0.0374 | 1.3174 | 0.8445 |
+| February | 0.0643 | 1.3443 | 0.8617 |
+| March | 0.1145 | 1.3945 | 0.8939 |
+| April | 0.1700 | 1.4500 | 0.9295 |
+| May | 0.2310 | 1.5110 | 0.9686 |
+| June | 0.2833 | 1.5633 | 1.0021 |
+| July | 0.2913 | 1.5713 | 1.0072 |
+| August | 0.2510 | 1.5310 | 0.9814 |
+| September | 0.1907 | 1.4707 | 0.9427 |
+| October | 0.1132 | 1.3932 | 0.8931 |
+| November | 0.0600 | 1.3400 | 0.8590 |
+| December | 0.0342 | 1.3142 | 0.8424 |
+
+These are the 2026 daily reference values from the active equation. The code recomputes the daily monthly-normal rate from the actual number of days in each month, including leap-year February. The **1.28 in/day residual is held constant** because the logger record does not support a defensible temperature-only seepage coefficient. Season/temperature, solar loading, day length, and atmospheric demand are represented through monthly Moab ETo. This follows the field result that temperature alone could not explain the recession differences observed after logger/geometry changes.
+
+For each canyon, **any retained rain event with positive modeled runoff resets the recession clock to that event time**. Its runoff is added to the pre-event balance after loss to that time; recession then resumes from that new balance. The 25% refill threshold remains a classification band only and no longer blocks the current-condition clock from advancing.
+
 That same seasonal stage-equivalent percentage loss is now applied to **every canyon**. This is a deliberate reference-transfer assumption, not a claim that all canyons have identical pool depth, surface-area-to-volume ratio, bedrock fractures, seepage, shade, or local evaporation. Canyon-specific recession data should replace the transferred rate whenever defensible field measurements become available.
 
 New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%. The same loss integration is also used in the cumulative refill balance: loss is deducted between retained storms and again from the most recent storm through the current model time before the displayed balance is calculated. Individual historical storm runoff/fill ratios are preserved as the storm results that were modeled for those events; the transferred recession changes the evolving storage balance, not the stored storm evidence.

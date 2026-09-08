@@ -336,7 +336,7 @@ function renderSummary() {
         <span class="summary-condition">${escapeHtml(condition.current_condition || "unknown")} · ${escapeHtml(condition.confidence || "Unknown")} confidence</span>
         <span class="summary-record">${record ? `Peak event: ${number(record.percent || 0, 0)}% — ${escapeHtml(dateOnly(record.end_utc || record.start_utc))}` : "No historical peak yet"}</span>
       </span>
-      <span class="summary-date">${condition.last_meaningful_refill_utc ? `Last meaningful: ${summaryDateTime(condition.last_meaningful_refill_utc)}` : "No meaningful refill"}</span>
+      <span class="summary-date">${(condition.last_refill_utc || condition.last_meaningful_refill_utc) ? `Last modeled refill: ${summaryDateTime(condition.last_refill_utc || condition.last_meaningful_refill_utc)}` : "No modeled refill"}</span>
     </button>
   `).join("");
 
@@ -597,7 +597,7 @@ function renderCondition(model, status) {
   $("condition-kicker").textContent = "CURRENT CANYON CONDITION ESTIMATE";
   $("condition-copy").textContent = hasEstimate && condition.basis_utc
     ? `${condition.percent}% modeled remaining pool storage; ${condition.confidence || "Unknown"} confidence. Basis: ${condition.basis || "modeled refill history"} (${dateTime(condition.basis_utc)}). This persists across storms and is separate from the selected storm decision below.`
-    : "No field observation or meaningful modeled refill is available. This estimate describes current canyon conditions; selecting an old storm does not replace it.";
+    : "No field observation or positive modeled-runoff rain event is available. This estimate describes current canyon conditions; selecting an old storm does not replace it.";
 }
 
 function metricCard(label, value, note, help) {
@@ -824,7 +824,7 @@ function renderRefillHistory(status, model) {
       ${eventMeta("Last verified", condition.last_verified ? `${number(condition.last_verified.percent, 0)}% — ${dateOnly(condition.last_verified.observed_utc)}` : "No field verification")}
       ${eventMeta("Condition basis", condition.basis_utc ? `${condition.basis} — ${dateOnly(condition.basis_utc)}` : condition.basis || "None")}
       ${eventMeta("Detailed history", `${history.length} event${history.length === 1 ? "" : "s"} retained for 90 days`)}
-      ${eventMeta("Last meaningful refill", condition.last_meaningful_refill_utc ? dateTime(condition.last_meaningful_refill_utc) : "None")}
+      ${eventMeta("Last modeled refill", (condition.last_refill_utc || condition.last_meaningful_refill_utc) ? dateTime(condition.last_refill_utc || condition.last_meaningful_refill_utc) : "None")}
       ${eventMeta("Largest individual event", peakEvent ? `${number(peakEvent.percent || 0, 0)}% — ${dateOnly(peakEvent.end_utc || peakEvent.start_utc)}` : "None")}
       ${eventMeta("Historic seven-day high", peakWindow ? `${number(peakWindow.percent || 0, 0)}% — ${dateOnly(peakWindow.through_utc)}` : "None")}
     </div>
@@ -941,6 +941,17 @@ function renderMethods() {
   const classifications = method.classification || {};
   const sources = method.sources || [];
   const limitations = method.limitations || [];
+  const monthlyRecession = Array.isArray(method.monthly_recession_reference)
+    ? method.monthly_recession_reference
+    : [];
+  const monthlyRecessionRows = monthlyRecession.map((row) => `
+    <tr>
+      <td>${escapeHtml(row.month_name || String(row.month || ""))}</td>
+      <td>${number(row.eto_inches_per_day, 4)}</td>
+      <td>${number(row.total_loss_inches_per_day, 4)}</td>
+      <td>${number(row.percentage_points_per_day, 4)}</td>
+    </tr>
+  `).join("");
   $("methods-content").innerHTML = `
     <h3>Equations and decision inputs</h3>
     <ul>
@@ -960,8 +971,16 @@ function renderMethods() {
 
     <h3>All-canyon pool-loss reference</h3>
     <p><strong>What is used:</strong> the stable lower HOBO MX2001 recession measured in Zero G from Aug. 1-Sept. 7, 2026. The upper logger is not used in the central calibration because it physically relocated on Aug. 8.</p>
-    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss now uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>
-    <p><strong>Interpretation:</strong> this is a reference-transfer assumption for operations, not evidence that every canyon has the same fractures, pool geometry, shade, evaporation, or seepage. Replace it canyon-by-canyon when better recession data become available.</p>
+    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage.</p>
+    <p><strong>Per-canyon clock:</strong> every retained rain event with <strong>positive modeled runoff</strong> advances that canyon's recession clock, even if the refill is below 25%. Loss is applied to the pre-storm balance through that event, the modeled refill is added, and recession resumes from the storm time. The same time-integrated loss is used for cumulative balances between storms and from the latest refill through the present. The 25% threshold remains a condition/classification band only.</p>
+    <p><strong>Seasonal logic:</strong> temperature alone is not used because the paired logger record showed materially different recession rates at similar temperatures when logger position/geometry changed. The 1.28 in/day lower-pool residual is therefore held constant with current evidence, while monthly Moab ETo supplies the seasonal atmospheric response to temperature, solar loading, day length, and evaporative demand.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Month</th><th>ETo in/day</th><th>Total loss in/day</th><th>Recession pp/day</th></tr></thead>
+        <tbody>${monthlyRecessionRows || `<tr><td colspan="4">Monthly recession reference unavailable.</td></tr>`}</tbody>
+      </table>
+    </div>
+    <p><strong>Interpretation:</strong> this seasonal recession reference is transferred to all 22 canyons as an operational assumption, not evidence that every canyon has the same fractures, pool geometry, shade, evaporation, or seepage. Replace it canyon-by-canyon when better recession data become available.</p>
 
     <h3>Classification language</h3>
     <ul>

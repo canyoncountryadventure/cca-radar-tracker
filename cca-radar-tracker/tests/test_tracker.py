@@ -280,6 +280,8 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])
         self.assertIn("13.66 ft actively spilling", method["pool_loss_explanation"])
         self.assertIn("all 22 modeled canyons", method["pool_loss_explanation"])
+        self.assertEqual(len(method["monthly_recession_reference"]), 12)
+        self.assertIn("positive modeled runoff", method["cumulative_refill_explanation"])
         self.assertIn("August 8", method["pool_loss_explanation"])
         self.assertIn("0.14 factor", method["peak_flow_explanation"])
         self.assertEqual(self.config["model"]["storm_dbz_threshold"], 25)

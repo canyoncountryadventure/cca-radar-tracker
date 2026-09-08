@@ -27,6 +27,16 @@ class ZeroGLossModelTests(unittest.TestCase):
             august["percentage_points_per_day"],
         )
 
+
+    def test_monthly_recession_reference_has_all_twelve_months(self):
+        rows = loss_model.zero_g_monthly_recession_table(2026)
+        self.assertEqual(len(rows), 12)
+        by_month = {row["month"]: row for row in rows}
+        self.assertAlmostEqual(by_month[1]["percentage_points_per_day"], 0.8445, places=4)
+        self.assertAlmostEqual(by_month[7]["percentage_points_per_day"], 1.0072, places=4)
+        self.assertAlmostEqual(by_month[9]["percentage_points_per_day"], 0.9427, places=4)
+        self.assertGreater(by_month[7]["percentage_points_per_day"], by_month[1]["percentage_points_per_day"])
+
     def test_integrated_loss_crosses_month_boundary(self):
         start = datetime(2026, 8, 31, 12, tzinfo=timezone.utc)
         end = datetime(2026, 9, 1, 12, tzinfo=timezone.utc)

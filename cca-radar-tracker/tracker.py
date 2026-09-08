@@ -36,6 +36,7 @@ from loss_model import (
     ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,
     zero_g_integrated_loss_ratio,
     zero_g_loss_components,
+    zero_g_monthly_recession_table,
 )
 
 ROOT = Path(__file__).resolve().parent
@@ -2291,13 +2292,21 @@ def cumulative_refill_evidence(
     }
 
     anchor = FIELD_CONDITION_ANCHORS.get(canyon.canyon_id)
-    meaningful_events = [
-        event for event in events if float(event.get("fill_ratio") or 0.0) >= 0.25
+    # Current-condition recession is reset by any event that actually adds
+    # modeled water. The 25% threshold remains a classification/display band;
+    # it is not a gate on the recession clock.
+    refill_events = [
+        event
+        for event in events
+        if float(
+            event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))
+            or 0.0
+        ) > 0.0
     ]
-    last_meaningful = meaningful_events[-1] if meaningful_events else None
-    last_meaningful_utc = (
-        last_meaningful.get("end_utc") or last_meaningful.get("start_utc")
-        if last_meaningful
+    last_refill = refill_events[-1] if refill_events else None
+    last_refill_utc = (
+        last_refill.get("end_utc") or last_refill.get("start_utc")
+        if last_refill
         else None
     )
 
@@ -2326,8 +2335,8 @@ def cumulative_refill_evidence(
         condition_ratio = apply_decay(condition_ratio, condition_time, now)
         basis = "Field verified"
         last_verified = dict(anchor)
-    elif last_meaningful:
-        basis_time = event_end_utc(last_meaningful)
+    elif last_refill:
+        basis_time = event_end_utc(last_refill)
         condition_ratio = 0.0
         condition_time = event_end_utc(events[0])
         for event in events:
@@ -2348,10 +2357,10 @@ def cumulative_refill_evidence(
         last_verified = None
 
     confidence_time = basis_time
-    if last_meaningful:
-        confidence_time = max(confidence_time, event_end_utc(last_meaningful))
+    if last_refill:
+        confidence_time = max(confidence_time, event_end_utc(last_refill))
     age_days = max(0.0, (now - confidence_time).total_seconds() / 86400.0)
-    if not anchor and not last_meaningful:
+    if not anchor and not last_refill:
         confidence = "Unknown"
     elif age_days <= 14:
         confidence = "High"
@@ -2407,7 +2416,9 @@ def cumulative_refill_evidence(
         "basis": basis,
         "basis_utc": utc_text(basis_time),
         "last_verified": last_verified,
-        "last_meaningful_refill_utc": last_meaningful_utc,
+        "last_refill_utc": last_refill_utc,
+        # Backward-compatible alias for older front ends.
+        "last_meaningful_refill_utc": last_refill_utc,
         **loss_fields,
     }
 
@@ -2870,11 +2881,13 @@ def model_metadata(
             ),
             "cumulative_refill_explanation": (
                 "All canyon condition balances and cumulative refill balances use the same "
-                "transferred Zero G reference recession between storms and from the most recent "
-                "storm through the present. The reference combines 1.28 inches/day of empirical "
-                "Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. "
-                "New modeled runoff is added after time-integrated loss and storage is capped "
-                "at 100%."
+                "transferred Zero G reference recession. Every retained rain event with positive "
+                "modeled runoff advances that canyon's recession clock, even when the refill is "
+                "below the 25% classification threshold. Loss is integrated between successive "
+                "refill events and from the latest refill through the present. The reference "
+                "combines a 1.28 inches/day empirical Navajo sandstone/seepage-equivalent residual "
+                "with monthly Moab reference ETo; new modeled runoff is then added and storage is "
+                "capped at 100%."
             ),
             "pool_loss_explanation": (
                 "The loss reference comes from the stable lower HOBO MX2001 logger in Zero G, "
@@ -2887,8 +2900,13 @@ def model_metadata(
                 "seasonal stage-equivalent percentage-point loss is transferred to all 22 "
                 "modeled canyons until canyon-specific recession data are available. This is an "
                 "explicit transfer assumption, not a claim that every canyon has identical pool "
-                "geometry, evaporation, fractures, or seepage."
+                "geometry, evaporation, fractures, or seepage. Temperature alone is not used as "
+                "a recession predictor because the logger record showed large rate differences at "
+                "similar temperatures when geometry/logger position changed; monthly ETo is the "
+                "seasonal atmospheric term, while the 1.28 in/day residual remains constant until "
+                "field data support a seasonal seepage function."
             ),
+            "monthly_recession_reference": zero_g_monthly_recession_table(),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "
                 "with duration-interpolated NOAA Atlas 14 point-frequency depths at the "
