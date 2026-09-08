@@ -1,59 +1,172 @@
 #!/usr/bin/env python3
-"""Finalize transferred Zero G recession across every canyon balance and disclosure."""
+"""Finalize the field-calibrated Zero G reference used by all canyon balances.
 
-# Kept as an idempotent installer so the full model and documentation can be revalidated.
+Zero G lower-pool field observations bracket operational full stage:
+- about 12 ft: nearly full
+- 13.66 ft: actively spilling
+
+Until the spill crest is surveyed, 13.0 ft is the operational 100% reference.
+The latest lower MX2001 observation on 2026-09-07 is about 9.43 ft, or 72.5%
+of that reference. The physical recession terms remain 1.28 in/day empirical
+Navajo/seepage-equivalent loss plus monthly Moab reference ETo; only the
+stage-to-percent conversion changes. That seasonal percentage recession is
+transferred to all 22 modeled canyons.
+"""
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TRACKER = ROOT / "tracker.py"
-APP = ROOT / "docs" / "app.js"
-README = ROOT / "README.md"
-TEST = ROOT / "tests" / "test_tracker.py"
-FRONTEND_TEST = ROOT / "tests" / "test_frontend_contract.py"
 
 
-def replace_once(text: str, old: str, new: str, label: str) -> str:
+def read(relative: str) -> str:
+    return (ROOT / relative).read_text(encoding="utf-8")
+
+
+def write(relative: str, text: str) -> None:
+    (ROOT / relative).write_text(text, encoding="utf-8")
+
+
+def replace_required(text: str, old: str, new: str, label: str) -> str:
+    """Replace exactly once, while remaining idempotent after installation."""
     if new in text:
         return text
     count = text.count(old)
     if count != 1:
-        raise RuntimeError(f"{label}: expected exactly one match, found {count}")
+        raise RuntimeError(f"{label}: expected exactly one old match, found {count}")
     return text.replace(old, new, 1)
 
 
-tracker = TRACKER.read_text(encoding="utf-8")
+# Core recession model.
+loss = read("loss_model.py")
+loss = loss.replace(
+    "the stable lower Zero G logger's\ninitial 11.9288-ft water column",
+    "the 13.0-ft operational full-stage reference for the lower Zero G pool",
+)
+loss = loss.replace(
+    "ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 11.9288",
+    "ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 13.0",
+)
+loss = loss.replace(
+    "Percentage-point conversion uses the stable lower logger's initial\n    11.9288-ft water column as the field reference depth.",
+    "Percentage-point conversion uses the 13.0-ft operational full-stage\n    reference. Field observations bracket full stage: about 12 ft was nearly full\n    and 13.66 ft was actively spilling.",
+)
+if "ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 13.0" not in loss:
+    raise RuntimeError("loss_model.py did not receive the 13.0-ft reference")
+if "11.9288" in loss:
+    raise RuntimeError("loss_model.py still contains the superseded 11.9288-ft reference")
+write("loss_model.py", loss)
 
-old_metadata = '''            "cumulative_refill_explanation": (\n                "All canyon condition balances now use the same transferred Zero G reference "\n                "recession between storms. The reference combines 1.28 inches/day of empirical "\n                "Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. "\n                "New modeled runoff is added after time-integrated loss and the condition is "\n                "capped at 100%."\n            ),'''
-new_metadata = '''            "cumulative_refill_explanation": (\n                "All canyon condition balances and cumulative refill balances use the same "\n                "transferred Zero G reference recession between storms and from the most recent "\n                "storm through the present. The reference combines 1.28 inches/day of empirical "\n                "Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. "\n                "New modeled runoff is added after time-integrated loss and storage is capped "\n                "at 100%."\n            ),'''
-tracker = replace_once(tracker, old_metadata, new_metadata, "method metadata")
 
-old_cumulative = '''    for event in events:\n        runoff = float(\n            event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))\n            or 0.0\n        )\n        before = balance\n        raw_after = before + max(0.0, runoff)\n        balance = min(target, raw_after)\n        overflow = max(0.0, raw_after - target)\n        overflow_total += overflow\n        ratio = balance / target if target > 0 else 0.0\n        timestamp = event.get("end_utc") or event.get("start_utc")\n\n        for percent in (25, 50, 75, 100):\n            key = str(percent)\n            if milestones[key] is None and ratio + 1e-9 >= percent / 100.0:\n                milestones[key] = timestamp\n\n        history.append(\n            {\n                "start_utc": event.get("start_utc"),\n                "end_utc": event.get("end_utc"),\n                "classification": event.get("classification"),\n                "classification_label": event.get("classification_label"),\n                "basin_rain_inches": event.get("basin_rain_inches"),\n                "direct_runoff_ft3": round(runoff),\n                "event_fill_ratio": event.get("fill_ratio"),\n                "balance_before_ft3": round(before),\n                "cumulative_balance_ft3": round(balance),\n                "cumulative_ratio": round(ratio, 2),\n                "cumulative_percent": min(100, round(ratio * 100)),\n                "overflow_ft3": round(overflow),\n            }\n        )\n\n    canyon_status["refill_history"] = [\n        item\n        for item in reversed(history)\n        if parse_utc(item.get("end_utc") or item["start_utc"]) >= detail_cutoff\n    ]\n    canyon_status["cumulative_refill_evidence"] = {\n        "event_count": len(history),\n        "period_start_utc": history[0]["start_utc"] if history else None,\n        "through_utc": history[-1]["end_utc"] if history else None,\n        "balance_ft3": round(balance),\n        "ratio": round(balance / target, 2) if target > 0 else 0.0,\n        "percent": min(100, round(balance / target * 100)) if target > 0 else 0,\n        "overflow_ft3": round(overflow_total),\n        "milestones_utc": milestones,\n        "loss_model": "not_modeled",\n        "assumption": (\n            "Starts at zero storage at the first retained modeled event and "\n            "subtracts no evaporation, seepage, drainage, or other losses."\n        ),\n    }\n'''
-new_cumulative = '''    balance_time: datetime | None = None\n    cumulative_loss_total = 0.0\n    for event in events:\n        event_time = event_end_utc(event)\n        loss_before = 0.0\n        if balance_time is not None and balance > 0.0:\n            loss_ratio = zero_g_integrated_loss_ratio(balance_time, event_time)\n            loss_before = min(balance, target * loss_ratio)\n            balance = max(0.0, balance - loss_before)\n            cumulative_loss_total += loss_before\n\n        runoff = float(\n            event.get("direct_runoff_ft3", event.get("estimated_runoff_ft3", 0.0))\n            or 0.0\n        )\n        before = balance\n        raw_after = before + max(0.0, runoff)\n        balance = min(target, raw_after)\n        overflow = max(0.0, raw_after - target)\n        overflow_total += overflow\n        ratio = balance / target if target > 0 else 0.0\n        timestamp = event.get("end_utc") or event.get("start_utc")\n        balance_time = event_time\n\n        for percent in (25, 50, 75, 100):\n            key = str(percent)\n            if milestones[key] is None and ratio + 1e-9 >= percent / 100.0:\n                milestones[key] = timestamp\n\n        history.append(\n            {\n                "start_utc": event.get("start_utc"),\n                "end_utc": event.get("end_utc"),\n                "classification": event.get("classification"),\n                "classification_label": event.get("classification_label"),\n                "basin_rain_inches": event.get("basin_rain_inches"),\n                "direct_runoff_ft3": round(runoff),\n                "event_fill_ratio": event.get("fill_ratio"),\n                "modeled_loss_since_prior_event_ft3": round(loss_before),\n                "balance_before_ft3": round(before),\n                "cumulative_balance_ft3": round(balance),\n                "cumulative_ratio": round(ratio, 2),\n                "cumulative_percent": min(100, round(ratio * 100)),\n                "overflow_ft3": round(overflow),\n            }\n        )\n\n    loss_since_latest_event = 0.0\n    if balance_time is not None and balance > 0.0:\n        loss_ratio = zero_g_integrated_loss_ratio(balance_time, now)\n        loss_since_latest_event = min(balance, target * loss_ratio)\n        balance = max(0.0, balance - loss_since_latest_event)\n        cumulative_loss_total += loss_since_latest_event\n\n    current_cumulative_loss = zero_g_loss_components(now)\n    canyon_status["refill_history"] = [\n        item\n        for item in reversed(history)\n        if parse_utc(item.get("end_utc") or item["start_utc"]) >= detail_cutoff\n    ]\n    canyon_status["cumulative_refill_evidence"] = {\n        "event_count": len(history),\n        "period_start_utc": history[0]["start_utc"] if history else None,\n        "through_utc": utc_text(now) if history else None,\n        "balance_ft3": round(balance),\n        "ratio": round(balance / target, 2) if target > 0 else 0.0,\n        "percent": min(100, round(balance / target * 100)) if target > 0 else 0,\n        "overflow_ft3": round(overflow_total),\n        "modeled_loss_ft3": round(cumulative_loss_total),\n        "loss_since_latest_event_ft3": round(loss_since_latest_event),\n        "milestones_utc": milestones,\n        "loss_model": "zero_g_mx2001_et_plus_navajo",\n        "decay_percentage_points_per_day": round(\n            float(current_cumulative_loss["percentage_points_per_day"]), 3\n        ),\n        "eto_inches_per_day": round(\n            float(current_cumulative_loss["eto_inches_per_day"]), 3\n        ),\n        "navajo_seepage_inches_per_day": round(\n            float(current_cumulative_loss["navajo_seepage_inches_per_day"]), 3\n        ),\n        "total_loss_inches_per_day": round(\n            float(current_cumulative_loss["total_loss_inches_per_day"]), 3\n        ),\n        "reference_pool_depth_ft": ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,\n        "assumption": (\n            "Starts at zero storage at the first retained modeled event, subtracts "\n            "the transferred Zero G stable-lower-MX2001 + seasonal Moab ETo loss "\n            "between storms and through the present, then adds modeled runoff and "\n            "caps storage at 100%."\n        ),\n    }\n'''
-tracker = replace_once(tracker, old_cumulative, new_cumulative, "cumulative all-canyon loss")
-TRACKER.write_text(tracker, encoding="utf-8")
+# Zero G current condition: replace the original Aug. 1 anchor with the latest
+# lower logger observation. Radar/recession can evolve condition after this time.
+tracker = read("tracker.py")
+old_anchor = '''FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
+    "zerog": {
+        "observed_utc": "2026-08-01T12:00:00Z",
+        "percent": 98,
+        "description": "Field verified throughout the technical section",
+        "notes": "Two water-level loggers installed: one persistent half-shaded pool and one fast-drying full-sun pool.",
+    },
+}'''
+new_anchor = '''FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
+    "zerog": {
+        "observed_utc": "2026-09-07T20:43:00Z",
+        "percent": 72.5,
+        "observed_depth_ft": 9.43,
+        "operational_full_depth_ft": 13.0,
+        "spill_observed_depth_ft": 13.66,
+        "description": "Lower MX2001 field calibration: 9.43 ft observed; 13.0 ft operational full stage",
+        "notes": "Field observations bracket full stage: the logger was installed near 12 ft when the pool was nearly full, while 13.66 ft was actively spilling. Use 13.0 ft as the operational 100% reference until the spill crest is surveyed.",
+    },
+}'''
+tracker = replace_required(tracker, old_anchor, new_anchor, "Zero G field anchor")
+tracker = tracker.replace(
+    "the lower logger's initial 11.9288-ft water column.",
+    "the 13.0-ft operational full-stage reference, bracketed by field observations of about 12 ft nearly full and 13.66 ft actively spilling.",
+)
+if '"percent": 72.5' not in tracker:
+    raise RuntimeError("tracker.py does not contain the Sept. 7 Zero G field anchor")
+if "11.9288" in tracker:
+    raise RuntimeError("tracker.py still contains the superseded 11.9288-ft reference")
+write("tracker.py", tracker)
 
-app = APP.read_text(encoding="utf-8")
-old_methods = '''    <h3>Classification language</h3>\n'''
-new_methods = '''    <h3>All-canyon pool-loss reference</h3>\n    <p><strong>What is used:</strong> the stable lower HOBO MX2001 recession measured in Zero G from Aug. 1-Sept. 7, 2026. The upper logger is not used in the central calibration because it physically relocated on Aug. 8.</p>\n    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>\n    <p><strong>Interpretation:</strong> this is a reference-transfer assumption for operations, not evidence that every canyon has the same fractures, pool geometry, shade, evaporation, or seepage. Replace it canyon-by-canyon when better recession data become available.</p>\n\n    <h3>Classification language</h3>\n'''
-app = replace_once(app, old_methods, new_methods, "front-end readme")
-APP.write_text(app, encoding="utf-8")
 
-readme = README.read_text(encoding="utf-8")
-old_readme = '''New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%.\n'''
-new_readme = '''New modeled runoff is added after the time-integrated loss and the condition balance is capped at 100%. The same loss integration is also used in the cumulative refill balance: loss is deducted between retained storms and again from the most recent storm through the current model time before the displayed balance is calculated. Individual historical storm runoff/fill ratios are preserved as the storm results that were modeled for those events; the transferred recession changes the evolving storage balance, not the stored storm evidence.\n'''
-readme = replace_once(readme, old_readme, new_readme, "README disclosure")
-README.write_text(readme, encoding="utf-8")
+# Front-end Methods panel.
+app = read("docs/app.js")
+old_methods = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
+new_methods = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss now uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
+app = replace_required(app, old_methods, new_methods, "front-end Methods calibration")
+if "11.9288" in app:
+    raise RuntimeError("docs/app.js still contains the superseded 11.9288-ft reference")
+write("docs/app.js", app)
 
-test = TEST.read_text(encoding="utf-8")
-old_test = '''        self.assertIn("All canyon", method["cumulative_refill_explanation"])\n        self.assertIn("1.28 in/day", method["pool_loss_explanation"])\n'''
-new_test = '''        self.assertIn("All canyon", method["cumulative_refill_explanation"])\n        self.assertIn("cumulative refill balances", method["cumulative_refill_explanation"])\n        self.assertIn("1.28 in/day", method["pool_loss_explanation"])\n'''
-test = replace_once(test, old_test, new_test, "tracker documentation test")
-TEST.write_text(test, encoding="utf-8")
 
-frontend = FRONTEND_TEST.read_text(encoding="utf-8")
-old_frontend = '''        self.assertIn("applied to every canyon", self.app)\n'''
-new_frontend = '''        self.assertIn("applied to every canyon", self.app)\n        self.assertIn("All-canyon pool-loss reference", self.app)\n        self.assertIn("all 22 canyons", self.app)\n        self.assertIn("Utah State University Moab monthly reference ETo normals", self.app)\n        self.assertIn("cumulative balances between storms", self.app)\n'''
-frontend = replace_once(frontend, old_frontend, new_frontend, "front-end disclosure test")
-FRONTEND_TEST.write_text(frontend, encoding="utf-8")
+# Repository README.
+readme = read("README.md")
+readme = replace_required(
+    readme,
+    "The percentage-point conversion uses the stable lower Zero G logger's initial **11.9288-ft water column**:",
+    "The percentage-point conversion uses a field-calibrated **13.0-ft operational full-stage reference** for the lower Zero G pool. The user observed the pool near 12 ft when it was nearly full and personally observed **13.66 ft actively spilling**, so 13.0 ft is used as the operational 100% reference until the spill crest is surveyed:",
+    "README full-stage basis",
+)
+readme = readme.replace("÷ (11.9288 ft × 12 in/ft)", "÷ (13.0 ft × 12 in/ft)")
+readme = readme.replace(
+    "decay ≈ **1.07 percentage points/day**.",
+    "decay ≈ **0.981 percentage points/day**.",
+)
+readme = readme.replace(
+    "decay ≈ **1.03 percentage points/day**.",
+    "decay ≈ **0.943 percentage points/day**.",
+)
+readme = readme.replace(
+    "the 11.9288-ft reference water column, USU Moab ETo normals,",
+    "the 13.0-ft operational full-stage reference (12 ft nearly full; 13.66 ft spilling), USU Moab ETo normals,",
+)
+readme = readme.replace(
+    "- Zero G field anchor: 98% full on August 1, 2026",
+    "- Zero G field anchor: lower MX2001 about 9.43 ft on September 7, 2026 = 72.5% of the 13.0-ft operational full-stage reference; 13.66 ft is recorded as observed spill stage",
+)
+if "**0.981 percentage points/day**" not in readme:
+    raise RuntimeError("README August recession example not updated")
+if "**0.943 percentage points/day**" not in readme:
+    raise RuntimeError("README September recession example not updated")
+if "11.9288" in readme:
+    raise RuntimeError("README still contains the superseded 11.9288-ft reference")
+write("README.md", readme)
 
-print("Finalized transferred Zero G recession for every canyon balance and both READMEs")
+
+# Tests lock the new reference and exact recalculated rates.
+test_loss = read("tests/test_loss_model.py")
+test_loss = test_loss.replace(
+    'self.assertAlmostEqual(values["percentage_points_per_day"], 1.07, delta=0.05)',
+    'self.assertAlmostEqual(values["percentage_points_per_day"], 0.98139, places=5)\n        self.assertEqual(values["reference_pool_depth_ft"], 13.0)',
+)
+if "0.98139" not in test_loss:
+    raise RuntimeError("test_loss_model.py was not updated")
+write("tests/test_loss_model.py", test_loss)
+
+frontend = read("tests/test_frontend_contract.py")
+frontend = frontend.replace(
+    'self.assertIn("11.9288-ft", self.app)',
+    'self.assertIn("13.0-ft operational full-stage reference", self.app)',
+)
+write("tests/test_frontend_contract.py", frontend)
+
+tracker_test = read("tests/test_tracker.py")
+needle = '        self.assertIn("1.28 in/day", method["pool_loss_explanation"])\n'
+addition = (
+    needle
+    + '        self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])\n'
+    + '        self.assertIn("13.66 ft actively spilling", method["pool_loss_explanation"])\n'
+)
+if 'self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])' not in tracker_test:
+    if needle not in tracker_test:
+        raise RuntimeError("test_tracker.py insertion point missing")
+    tracker_test = tracker_test.replace(needle, addition, 1)
+write("tests/test_tracker.py", tracker_test)
+
+
+print(
+    "Zero G recalibrated: 13.0-ft operational full stage, Sept. 7 lower logger "
+    "anchor 9.43 ft = 72.5%; transferred recession remains 1.28 in/day + Moab ETo."
+)
