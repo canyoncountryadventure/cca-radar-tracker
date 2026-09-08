@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/install-zerog-loss-model.yml'
-      - 'cca-radar-tracker/tools/install_zerog_loss_model.py'
+      - 'cca-radar-tracker/tools/finalize_all_canyon_loss.py'
       - 'cca-radar-tracker/loss_model.py'
       - 'cca-radar-tracker/README.md'
       - 'cca-radar-tracker/tests/test_loss_model.py'
@@ -33,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Apply transferred Zero G logger loss model to every canyon
-        run: python tools/install_zerog_loss_model.py
+      - name: Apply transferred Zero G logger loss model to every canyon balance
+        run: python tools/finalize_all_canyon_loss.py
 
       - name: Run backend tests
         run: python -m unittest discover -s tests -v
@@ -42,14 +42,14 @@ jobs:
       - name: Check front-end JavaScript
         run: node --check docs/app.js
 
-      - name: Commit all-canyon calibrated model
+      - name: Commit all-canyon calibrated model and documentation
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker.py docs/app.js README.md tests/test_tracker.py tests/test_event_accumulation.py tests/test_frontend_contract.py
+          git add tracker.py docs/app.js README.md tests/test_tracker.py tests/test_frontend_contract.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Apply transferred Zero G loss reference to all canyons"
+            git commit -m "Apply all-canyon recession to cumulative balances"
             git push origin main
           fi
