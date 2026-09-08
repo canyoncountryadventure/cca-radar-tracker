@@ -31,7 +31,7 @@ class FrontendContractTests(unittest.TestCase):
         self.assertIn("reference canyon", self.app)
         self.assertIn("transferred Zero G", self.app)
         self.assertIn("stable-lower-MX2001", self.app)
-        self.assertIn("11.9288-ft", self.app)
+        self.assertIn("13.0-ft operational full-stage reference", self.app)
         self.assertIn("applied to every canyon", self.app)
         self.assertIn("All-canyon pool-loss reference", self.app)
         self.assertIn("all 22 canyons", self.app)

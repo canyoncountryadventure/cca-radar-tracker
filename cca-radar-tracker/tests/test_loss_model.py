@@ -12,7 +12,8 @@ class ZeroGLossModelTests(unittest.TestCase):
         self.assertAlmostEqual(values["eto_inches_per_day"], 7.78 / 31, places=6)
         self.assertAlmostEqual(values["navajo_seepage_inches_per_day"], 1.28, places=6)
         self.assertAlmostEqual(values["total_loss_inches_per_day"], 1.28 + 7.78 / 31, places=6)
-        self.assertAlmostEqual(values["percentage_points_per_day"], 1.07, delta=0.05)
+        self.assertAlmostEqual(values["percentage_points_per_day"], 0.98139, places=5)
+        self.assertEqual(values["reference_pool_depth_ft"], 13.0)
 
     def test_september_loss_is_lower_than_august(self):
         august = loss_model.zero_g_loss_components(

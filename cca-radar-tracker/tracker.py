@@ -195,10 +195,13 @@ ZERO_G_FIELD_CALIBRATION_BASIS = (
 # Rare field checks are calibration anchors, not recurring workflow inputs.
 FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
     "zerog": {
-        "observed_utc": "2026-08-01T12:00:00Z",
-        "percent": 98,
-        "description": "Field verified throughout the technical section",
-        "notes": "Two water-level loggers installed: one persistent half-shaded pool and one fast-drying full-sun pool.",
+        "observed_utc": "2026-09-07T20:43:00Z",
+        "percent": 72.5,
+        "observed_depth_ft": 9.43,
+        "operational_full_depth_ft": 13.0,
+        "spill_observed_depth_ft": 13.66,
+        "description": "Lower MX2001 field calibration: 9.43 ft observed; 13.0 ft operational full stage",
+        "notes": "Field observations bracket full stage: the logger was installed near 12 ft when the pool was nearly full, while 13.66 ft was actively spilling. Use 13.0 ft as the operational 100% reference until the spill crest is surveyed.",
     },
 }
 
@@ -2880,7 +2883,7 @@ def model_metadata(
                 "shallower, more exposed high-loss comparison. After subtracting USU Moab "
                 "monthly reference ETo normals (2000-2022), the stable lower logger supports a "
                 "1.28 in/day empirical Navajo/seepage-equivalent residual. The percentage "
-                "conversion uses the lower logger's initial 11.9288-ft water column. That same "
+                "conversion uses the 13.0-ft operational full-stage reference, bracketed by field observations of about 12 ft nearly full and 13.66 ft actively spilling. That same "
                 "seasonal stage-equivalent percentage-point loss is transferred to all 22 "
                 "modeled canyons until canyon-specific recession data are available. This is an "
                 "explicit transfer assumption, not a claim that every canyon has identical pool "

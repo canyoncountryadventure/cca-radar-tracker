@@ -18,8 +18,7 @@ drainage that cannot be separated with the available logger geometry.
 
 For operational consistency, this Zero G reference recession is transferred to
 all 22 modeled canyons until canyon-specific logger or field recession data are
-available. The percentage conversion uses the stable lower Zero G logger's
-initial 11.9288-ft water column, so every canyon currently uses the same
+available. The percentage conversion uses the 13.0-ft operational full-stage reference for the lower Zero G pool, so every canyon currently uses the same
 stage-equivalent percentage-point loss rate for a given month. This transfer is
 an explicit model assumption; it is not a claim that every canyon has identical
 pool geometry, seepage, or evaporation.
@@ -31,7 +30,7 @@ import calendar
 from datetime import datetime
 
 
-ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 11.9288
+ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT = 13.0
 ZERO_G_NAVAJO_SEEPAGE_INCHES_PER_DAY = 1.28
 
 # Utah State University Moab monthly reference ETo normals (2000-2022), inches.
@@ -62,8 +61,9 @@ def zero_g_eto_inches_per_day(reference: datetime) -> float:
 def zero_g_loss_components(reference: datetime) -> dict[str, float | str]:
     """Return the transferred Zero G reference loss components.
 
-    Percentage-point conversion uses the stable lower logger's initial
-    11.9288-ft water column as the field reference depth. The tracker applies
+    Percentage-point conversion uses the 13.0-ft operational full-stage
+    reference. Field observations bracket full stage: about 12 ft was nearly full
+    and 13.66 ft was actively spilling. The tracker applies
     this same reference recession to every canyon as an explicit transfer
     assumption until canyon-specific recession data are available. It remains a
     stage-equivalent condition model, not a surveyed stage-volume curve.

@@ -277,6 +277,8 @@ class TrackerTests(unittest.TestCase):
         self.assertIn("All canyon", method["cumulative_refill_explanation"])
         self.assertIn("cumulative refill balances", method["cumulative_refill_explanation"])
         self.assertIn("1.28 in/day", method["pool_loss_explanation"])
+        self.assertIn("13.0-ft operational full-stage reference", method["pool_loss_explanation"])
+        self.assertIn("13.66 ft actively spilling", method["pool_loss_explanation"])
         self.assertIn("all 22 modeled canyons", method["pool_loss_explanation"])
         self.assertIn("August 8", method["pool_loss_explanation"])
         self.assertIn("0.14 factor", method["peak_flow_explanation"])

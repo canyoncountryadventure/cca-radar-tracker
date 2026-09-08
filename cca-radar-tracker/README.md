@@ -88,19 +88,19 @@ The **1.28 in/day** residual is the stable-lower-logger recession remaining afte
 
 Seasonal ETo comes from **Utah State University Moab monthly reference ETo normals (2000–2022)** from *Evapotranspiration and Precipitation Data for Calculating Irrigation Water Requirements in Utah*. Monthly totals are converted to daily rates and integrated across month boundaries.
 
-The percentage-point conversion uses the stable lower Zero G logger's initial **11.9288-ft water column**:
+The percentage-point conversion uses a field-calibrated **13.0-ft operational full-stage reference** for the lower Zero G pool. The user observed the pool near 12 ft when it was nearly full and personally observed **13.66 ft actively spilling**, so 13.0 ft is used as the operational 100% reference until the spill crest is surveyed:
 
 ```text
 percentage-point loss/day
   = (1.28 in/day + monthly ETo in/day)
-    ÷ (11.9288 ft × 12 in/ft)
+    ÷ (13.0 ft × 12 in/ft)
     × 100
 ```
 
 Examples:
 
-- August ETo ≈ 7.78/31 = 0.251 in/day; total loss ≈ 1.531 in/day; decay ≈ **1.07 percentage points/day**.
-- September ETo ≈ 5.72/30 = 0.191 in/day; total loss ≈ 1.471 in/day; decay ≈ **1.03 percentage points/day**.
+- August ETo ≈ 7.78/31 = 0.251 in/day; total loss ≈ 1.531 in/day; decay ≈ **0.981 percentage points/day**.
+- September ETo ≈ 5.72/30 = 0.191 in/day; total loss ≈ 1.471 in/day; decay ≈ **0.943 percentage points/day**.
 
 That same seasonal stage-equivalent percentage loss is now applied to **every canyon**. This is a deliberate reference-transfer assumption, not a claim that all canyons have identical pool depth, surface-area-to-volume ratio, bedrock fractures, seepage, shade, or local evaporation. Canyon-specific recession data should replace the transferred rate whenever defensible field measurements become available.
 
@@ -147,9 +147,9 @@ The dashboard includes:
 - Persistent current-condition estimate that is not reset by a dry or weak storm
 - **All-canyon transferred Zero G MX2001 + seasonal ETo recession**, integrated through time and across month boundaries
 - Current loss components shown on the front end: empirical 1.28 in/day residual, current monthly ETo, total in/day, and stage-equivalent percentage points/day
-- Explicit front-end methods language identifying the stable lower logger, the August 8 upper-logger relocation, the 11.9288-ft reference water column, USU Moab ETo normals, and the fact that the rate is transferred to all canyons
+- Explicit front-end methods language identifying the stable lower logger, the August 8 upper-logger relocation, the 13.0-ft operational full-stage reference (12 ft nearly full; 13.66 ft spilling), USU Moab ETo normals, and the fact that the rate is transferred to all canyons
 - Confidence that also declines as the supporting observation or refill event ages
-- Zero G field anchor: 98% full on August 1, 2026
+- Zero G field anchor: lower MX2001 about 9.43 ft on September 7, 2026 = 72.5% of the 13.0-ft operational full-stage reference; 13.66 ft is recorded as observed spill stage
 - Largest retained event and retained seven-day-high dates, rebuilt when polygon or storage inputs change
 - Most recent rain event with Atlas 14 equivalent
 - Retained last major-refill event

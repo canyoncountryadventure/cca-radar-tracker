@@ -816,7 +816,7 @@ function renderRefillHistory(status, model) {
     <h3>Current condition: ${escapeHtml(condition.current_condition || "unknown")} — ${escapeHtml(condition.confidence || "Unknown")} confidence</h3>
     <p class="event-summary">
       ${condition.loss_model === "zero_g_mx2001_et_plus_navajo"
-        ? `All-canyon loss uses the transferred Zero G stable-lower-MX2001 reference: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day empirical Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal Moab ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day). The Zero G reference uses an 11.9288-ft lower-logger water column and is applied to every canyon until canyon-specific recession data exist.`
+        ? `All-canyon loss uses the transferred Zero G stable-lower-MX2001 reference: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day empirical Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal Moab ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day). The Zero G reference uses a 13.0-ft operational full stage (about 12 ft was nearly full; 13.66 ft was observed spilling) and is applied to every canyon until canyon-specific recession data exist.`
         : `Pool-loss calibration unavailable.`}
       New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
     </p>
@@ -960,7 +960,7 @@ function renderMethods() {
 
     <h3>All-canyon pool-loss reference</h3>
     <p><strong>What is used:</strong> the stable lower HOBO MX2001 recession measured in Zero G from Aug. 1-Sept. 7, 2026. The upper logger is not used in the central calibration because it physically relocated on Aug. 8.</p>
-    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>
+    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss now uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>
     <p><strong>Interpretation:</strong> this is a reference-transfer assumption for operations, not evidence that every canyon has the same fractures, pool geometry, shade, evaporation, or seepage. Replace it canyon-by-canyon when better recession data become available.</p>
 
     <h3>Classification language</h3>
