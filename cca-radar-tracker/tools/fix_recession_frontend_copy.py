@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Finish front-end wording for positive-runoff recession clocks."""
+"""Finish wording for positive-runoff recession clocks."""
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-path = ROOT / "docs" / "app.js"
-text = path.read_text(encoding="utf-8")
+
+app_path = ROOT / "docs" / "app.js"
+text = app_path.read_text(encoding="utf-8")
 
 old_summary = '''      <span class="summary-date">${condition.last_meaningful_refill_utc ? `Last meaningful: ${summaryDateTime(condition.last_meaningful_refill_utc)}` : "No meaningful refill"}</span>'''
 new_summary = '''      <span class="summary-date">${(condition.last_refill_utc || condition.last_meaningful_refill_utc) ? `Last modeled refill: ${summaryDateTime(condition.last_refill_utc || condition.last_meaningful_refill_utc)}` : "No modeled refill"}</span>'''
@@ -28,5 +29,16 @@ if old_interpretation in text:
 elif new_interpretation not in text:
     raise RuntimeError("Methods all-22-canyons wording insertion point missing")
 
-path.write_text(text, encoding="utf-8")
-print("Updated positive-runoff timing, cumulative-balance wording, and all-22-canyons Methods disclosure.")
+app_path.write_text(text, encoding="utf-8")
+
+tracker_path = ROOT / "tracker.py"
+tracker = tracker_path.read_text(encoding="utf-8")
+old_basis = '        basis = "No meaningful refill recorded"\n'
+new_basis = '        basis = "No positive modeled runoff recorded"\n'
+if old_basis in tracker:
+    tracker = tracker.replace(old_basis, new_basis, 1)
+elif new_basis not in tracker:
+    raise RuntimeError("tracker no-refill basis wording insertion point missing")
+tracker_path.write_text(tracker, encoding="utf-8")
+
+print("Updated positive-runoff timing, cumulative-balance wording, and no-runoff condition label.")
