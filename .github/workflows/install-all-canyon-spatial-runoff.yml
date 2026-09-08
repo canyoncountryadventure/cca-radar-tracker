@@ -1,0 +1,71 @@
+name: Install all-canyon spatial runoff
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cca-radar-tracker/tools/install_all_canyon_spatial_runoff.py'
+      - '.github/workflows/install-all-canyon-spatial-runoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: cca-radar-tracker
+        run: python -m pip install -r requirements.txt
+      - name: Install all-canyon spatial runoff
+        working-directory: cca-radar-tracker
+        run: python tools/install_all_canyon_spatial_runoff.py
+      - name: Run backend tests
+        working-directory: cca-radar-tracker
+        run: python -m unittest discover -s tests -v
+      - name: Check front-end JavaScript
+        run: node --check cca-radar-tracker/docs/app.js
+      - name: Verify consistency markers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          tracker = Path('cca-radar-tracker/tracker.py').read_text(encoding='utf-8')
+          readme = Path('cca-radar-tracker/README.md').read_text(encoding='utf-8')
+          required = [
+              'RUNOFF_METHOD_VERSION = "spatial_nrcs_all_canyons_v1"',
+              'spatial_depth = spatial_nrcs_runoff_depth(event, canyon, curve_number)',
+              'All 22 modeled canyons apply the adjusted',
+              'runoff_method_version',
+          ]
+          missing = [item for item in required if item not in tracker]
+          if missing:
+              raise SystemExit('Tracker consistency markers missing: ' + ', '.join(missing))
+          stale = [
+              'production use is currently limited to Zero G',
+              'Other canyons retain the basin-average calculation',
+              'spatial curve-number response units, and delivery factors are configured as disabled',
+          ]
+          found = [item for item in stale if item in tracker or item in readme]
+          if found:
+              raise SystemExit('Stale mixed-method wording remains: ' + ', '.join(found))
+          print('Verified one spatial NRCS runoff method across all modeled canyons.')
+          PY
+      - name: Commit standardized model
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            cca-radar-tracker/tracker.py \
+            cca-radar-tracker/README.md \
+            cca-radar-tracker/tests/test_all_canyon_spatial_runoff.py
+          if git diff --cached --quiet; then
+            echo 'All-canyon spatial runoff already installed'
+          else
+            git commit -m 'Standardize spatial NRCS runoff across all canyons'
+            git push
+          fi
