@@ -48,8 +48,13 @@ jobs:
             echo "13.0-ft Zero G field calibration already installed; skipping legacy one-time finalizer."
           fi
 
-      - name: Apply per-canyon recession clocks and monthly rates
-        run: python tools/apply_per_canyon_recession.py
+      - name: Apply per-canyon recession clocks and monthly rates when needed
+        run: |
+          if grep -q 'def zero_g_monthly_recession_table' loss_model.py && grep -q '"last_refill_utc"' tracker.py && grep -q 'monthlyRecessionRows' docs/app.js; then
+            echo "Positive-runoff per-canyon clocks and 12-month recession model already installed; skipping one-time structural patch."
+          else
+            python tools/apply_per_canyon_recession.py
+          fi
 
       - name: Finish recession front-end copy
         run: python tools/fix_recession_frontend_copy.py
