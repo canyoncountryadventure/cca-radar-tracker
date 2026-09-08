@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-09-08T03:36:21Z",
+  "generated_utc": "2026-09-08T03:38:01Z",
   "purpose": "Field-event audit using exact historical IEM N0Q frames and a 0.15-degree radar neighborhood around Zero G.",
   "field_calibration_anchors": {
     "2026-08-21": {
@@ -50,6 +50,32 @@
       "max_nearby_core_lon": -110.555,
       "max_nearby_core_distance_from_basin_miles": 1.75,
       "nearby_core_to_basin_average_ratio": 4.09,
+      "runoff_comparison": {
+        "dry": {
+          "curve_number": 77.3,
+          "initial_abstraction_inches": 0.2295,
+          "lumped_runoff_depth_inches": 0.0,
+          "lumped_runoff_ft3": 0,
+          "spatial_runoff_depth_inches": 0.0,
+          "spatial_runoff_ft3": 0
+        },
+        "normal": {
+          "curve_number": 88.6,
+          "initial_abstraction_inches": 0.0889,
+          "lumped_runoff_depth_inches": 0.0,
+          "lumped_runoff_ft3": 0,
+          "spatial_runoff_depth_inches": 0.0004,
+          "spatial_runoff_ft3": 1206
+        },
+        "wet": {
+          "curve_number": 94.8,
+          "initial_abstraction_inches": 0.0333,
+          "lumped_runoff_depth_inches": 0.0039,
+          "lumped_runoff_ft3": 12173,
+          "spatial_runoff_depth_inches": 0.0053,
+          "spatial_runoff_ft3": 16747
+        }
+      },
       "strongest_basin_frames": [
         {
           "utc": "2026-08-12T21:55:00Z",
@@ -141,6 +167,32 @@
       "max_nearby_core_lon": -110.535,
       "max_nearby_core_distance_from_basin_miles": 10.49,
       "nearby_core_to_basin_average_ratio": 45.47,
+      "runoff_comparison": {
+        "dry": {
+          "curve_number": 77.3,
+          "initial_abstraction_inches": 0.2295,
+          "lumped_runoff_depth_inches": 0.0,
+          "lumped_runoff_ft3": 0,
+          "spatial_runoff_depth_inches": 0.0,
+          "spatial_runoff_ft3": 0
+        },
+        "normal": {
+          "curve_number": 88.6,
+          "initial_abstraction_inches": 0.0889,
+          "lumped_runoff_depth_inches": 0.0,
+          "lumped_runoff_ft3": 0,
+          "spatial_runoff_depth_inches": 0.0,
+          "spatial_runoff_ft3": 0
+        },
+        "wet": {
+          "curve_number": 94.8,
+          "initial_abstraction_inches": 0.0333,
+          "lumped_runoff_depth_inches": 0.0,
+          "lumped_runoff_ft3": 0,
+          "spatial_runoff_depth_inches": 0.0,
+          "spatial_runoff_ft3": 83
+        }
+      },
       "strongest_basin_frames": [
         {
           "utc": "2026-09-01T00:20:00Z",

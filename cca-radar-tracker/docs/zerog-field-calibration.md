@@ -9,7 +9,9 @@ This report compares field-observed stage rises with exact historical IEM N0Q ra
 - Maximum accumulated pixel inside basin: **0.2123 in**
 - Strongest nearby accumulated pixel: **0.3513 in**
 - Nearby core distance from modeled basin: **1.75 mi**
-- Nearby-core / basin-average ratio: **4.09**
+- Current lumped normal runoff: **0 ft3**
+- Spatial-rain normal runoff: **1,206 ft3**
+- Spatial-rain wet runoff: **16,747 ft3**
 - Peak basin dBZ: **46.0** at 2026-08-12T21:55:00Z
 
 ## 2026-08-31_evening_field_rise
@@ -19,6 +21,8 @@ This report compares field-observed stage rises with exact historical IEM N0Q ra
 - Maximum accumulated pixel inside basin: **0.0574 in**
 - Strongest nearby accumulated pixel: **0.7002 in**
 - Nearby core distance from modeled basin: **10.49 mi**
-- Nearby-core / basin-average ratio: **45.47**
+- Current lumped normal runoff: **0 ft3**
+- Spatial-rain normal runoff: **0 ft3**
+- Spatial-rain wet runoff: **83 ft3**
 - Peak basin dBZ: **35.0** at 2026-09-01T00:15:00Z
 
