@@ -91,8 +91,11 @@ if "11.9288" in tracker:
 write("tracker.py", tracker)
 
 
-# Front-end Methods panel.
+# Front-end current-condition copy and Methods panel.
 app = read("docs/app.js")
+old_condition_copy = "The Zero G reference uses an 11.9288-ft lower-logger water column and is applied to every canyon until canyon-specific recession data exist."
+new_condition_copy = "The Zero G reference uses a 13.0-ft operational full stage (about 12 ft was nearly full; 13.66 ft was observed spilling) and is applied to every canyon until canyon-specific recession data exist."
+app = replace_required(app, old_condition_copy, new_condition_copy, "front-end condition calibration")
 old_methods = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss uses the lower logger's initial 11.9288-ft water column. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
 new_methods = '''    <p><strong>Operational equation:</strong> 1.28 in/day empirical Navajo/seepage-equivalent residual + Utah State University Moab monthly reference ETo normals (2000-2022). The conversion to condition loss now uses a <strong>13.0-ft operational full-stage reference</strong> for the lower Zero G pool. Field observations bracket that reference: about 12 ft was nearly full and 13.66 ft was actively spilling. The Sept. 7 lower-logger reading of about 9.43 ft is therefore 72.5% of operational full stage. The resulting seasonal percentage-point loss is transferred to all 22 canyons, including cumulative balances between storms and loss after the latest storm.</p>'''
 app = replace_required(app, old_methods, new_methods, "front-end Methods calibration")
