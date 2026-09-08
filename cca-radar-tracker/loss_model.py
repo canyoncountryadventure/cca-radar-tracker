@@ -1,18 +1,28 @@
-"""Field-calibrated pool-loss models for slot-canyon condition estimates.
+"""Field-calibrated pool-loss reference used by all slot-canyon condition estimates.
 
-Zero G calibration is based on the stable lower HOBO MX2001 logger deployed
-2026-08-01 through 2026-09-07. The upper logger physically relocated and is
-retained as an exposed/high-loss comparison rather than the central calibration.
+The loss calibration comes from Zero G because it is the canyon with usable
+instrumented recession data. The stable lower HOBO MX2001 logger was deployed
+2026-08-01 through 2026-09-07. The upper logger physically relocated on
+2026-08-08 and is retained only as an exposed/high-loss comparison, not in the
+central calibration.
 
-The Zero G model intentionally separates a seasonal atmospheric term from a
-site-calibrated residual term:
+The operational reference separates a seasonal atmospheric term from a
+field-calibrated residual term:
 
     total stage-equivalent loss = Moab reference ETo + Navajo/seepage residual
 
-The residual is an empirical equivalent stage-loss term. It is not asserted to
-be intrinsic Navajo Sandstone hydraulic conductivity; it also subsumes local
-fractures, wetted-rock seepage, and any persistent closed-pool drainage that
-cannot be separated with the available logger geometry.
+The residual is 1.28 inches/day. It is an empirical stage-equivalent loss term,
+not an assertion of intrinsic Navajo Sandstone hydraulic conductivity. It also
+subsumes local fractures, wetted-rock seepage, and any persistent quiet-pool
+drainage that cannot be separated with the available logger geometry.
+
+For operational consistency, this Zero G reference recession is transferred to
+all 22 modeled canyons until canyon-specific logger or field recession data are
+available. The percentage conversion uses the stable lower Zero G logger's
+initial 11.9288-ft water column, so every canyon currently uses the same
+stage-equivalent percentage-point loss rate for a given month. This transfer is
+an explicit model assumption; it is not a claim that every canyon has identical
+pool geometry, seepage, or evaporation.
 """
 
 from __future__ import annotations
@@ -50,10 +60,12 @@ def zero_g_eto_inches_per_day(reference: datetime) -> float:
 
 
 def zero_g_loss_components(reference: datetime) -> dict[str, float | str]:
-    """Return the current Zero G field-calibrated loss components.
+    """Return the transferred Zero G reference loss components.
 
     Percentage-point conversion uses the stable lower logger's initial
-    11.9288-ft water column as the field reference depth. This remains a
+    11.9288-ft water column as the field reference depth. The tracker applies
+    this same reference recession to every canyon as an explicit transfer
+    assumption until canyon-specific recession data are available. It remains a
     stage-equivalent condition model, not a surveyed stage-volume curve.
     """
     eto = zero_g_eto_inches_per_day(reference)
@@ -67,6 +79,7 @@ def zero_g_loss_components(reference: datetime) -> dict[str, float | str]:
         "total_loss_inches_per_day": total,
         "reference_pool_depth_ft": ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,
         "percentage_points_per_day": points_per_day,
+        "transfer_scope": "all_modeled_canyons",
     }
 
 
@@ -93,12 +106,12 @@ def _next_month_start(reference: datetime) -> datetime:
 
 
 def zero_g_integrated_loss_ratio(start: datetime, end: datetime) -> float:
-    """Integrate the seasonal Zero G loss between two datetimes.
+    """Integrate the transferred reference loss between two datetimes.
 
     ETo is piecewise constant within each calendar month, so integration is
     explicitly split at month boundaries. The empirical Navajo/seepage term is
     constant until additional field data support a seasonal or head-dependent
-    seepage function.
+    seepage function. This integrated ratio is applied to every modeled canyon.
     """
     if end <= start:
         return 0.0
