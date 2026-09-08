@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TRACKER = ROOT / "tracker.py"
 APP = ROOT / "docs" / "app.js"
 TEST = ROOT / "tests" / "test_tracker.py"
+EVENT_TEST = ROOT / "tests" / "test_event_accumulation.py"
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -44,7 +45,7 @@ TRACKER.write_text(tracker, encoding="utf-8")
 
 app = APP.read_text(encoding="utf-8")
 old_app = '''    <p class="event-summary">\n      The percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day. New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.\n    </p>'''
-new_app = '''    <p class="event-summary">\n      ${condition.loss_model === "zero_g_mx2001_et_plus_navajo"\n        ? `Zero G loss is field-calibrated from the stable lower MX2001 logger: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day).`\n        : `The provisional condition percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day.`}\n      New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.\n    </p>'''
+new_app = '''    <p class="event-summary">\n      ${condition.loss_model === "zero_g_mx2001_et_plus_navajo"\n        ? `Reference-canyon loss is field-calibrated from the stable lower MX2001 logger: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day).`\n        : `The provisional condition percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day.`}\n      New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.\n    </p>'''
 app = replace_once(app, old_app, new_app, "frontend condition explanation")
 APP.write_text(app, encoding="utf-8")
 
@@ -56,5 +57,20 @@ test = replace_once(
     "metadata tests",
 )
 TEST.write_text(test, encoding="utf-8")
+
+event_test = EVENT_TEST.read_text(encoding="utf-8")
+event_test = replace_once(
+    event_test,
+    '        self.assertEqual(condition["percent"], 96)\n',
+    '        self.assertEqual(condition["percent"], 95)\n',
+    "Zero G anchor percent test",
+)
+event_test = replace_once(
+    event_test,
+    '        self.assertEqual(condition["loss_model"], "provisional_linear_decay")\n        self.assertEqual(condition["decay_percentage_points_per_day"], 0.8)\n',
+    '        self.assertEqual(condition["loss_model"], "zero_g_mx2001_et_plus_navajo")\n        self.assertAlmostEqual(condition["decay_percentage_points_per_day"], 1.07, delta=0.05)\n        self.assertAlmostEqual(condition["navajo_seepage_inches_per_day"], 1.28, places=2)\n',
+    "Zero G anchor loss-model test",
+)
+EVENT_TEST.write_text(event_test, encoding="utf-8")
 
 print("Installed Zero G ET + Navajo loss model into tracker.py and docs/app.js")
