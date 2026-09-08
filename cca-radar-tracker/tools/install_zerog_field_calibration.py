@@ -245,7 +245,6 @@ if old_reason_major not in text:
     raise SystemExit("major reason marker not found")
 text = text.replace(old_reason_major, new_reason_major, 1)
 
-# Metadata wording: explain both production changes and retain the baseline formulas.
 old_explain = '''                "No fixed runoff coefficient is used. Accumulated basin-average radar "
                 "rainfall is converted to dry, normal, and wet direct-runoff estimates "
                 "with canyon-specific composite curve numbers from SSURGO soils and "
@@ -259,10 +258,11 @@ new_explain = '''                "No fixed runoff coefficient is used. Zero G no
                 "because paired logger events showed that basin averaging can erase localized "
                 "slickrock runoff. Other canyons retain the basin-average calculation pending "
                 "field calibration. Dry, normal, and wet estimates use canyon-specific composite "
-                "curve numbers from SSURGO soils and 2021 NLCD land cover; the central display "
-                "uses normal conditions. Zero G also carries an independent field-calibrated "
-                "storm-core response test: 0.20 in for major refill evidence and 1.00 in for "
-                "strong-flush evidence, each requiring the normal duration check."
+                "curve numbers from SSURGO soils and 2021 NLCD land cover. Pixels without a "
+                "usable SSURGO hydrologic soil group are conservatively assigned to HSG D. "
+                "The central display uses normal conditions. Zero G also carries an independent "
+                "field-calibrated storm-core response test: 0.20 in for major refill evidence "
+                "and 1.00 in for strong-flush evidence, each requiring the normal duration check."
 '''
 if old_explain not in text:
     raise SystemExit("metadata explanation marker not found")
