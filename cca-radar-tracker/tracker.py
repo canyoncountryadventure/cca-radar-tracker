@@ -2353,7 +2353,7 @@ def cumulative_refill_evidence(
     else:
         basis_time = now
         condition_ratio = None
-        basis = "No meaningful refill recorded"
+        basis = "No positive modeled runoff recorded"
         last_verified = None
 
     confidence_time = basis_time
