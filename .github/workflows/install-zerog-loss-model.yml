@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/install-zerog-loss-model.yml'
+      - 'cca-radar-tracker/tools/install_zerog_loss_model.py'
+      - 'cca-radar-tracker/loss_model.py'
+      - 'cca-radar-tracker/tests/test_loss_model.py'
   workflow_dispatch:
 
 permissions:
@@ -41,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tracker.py docs/app.js tests/test_tracker.py
+          git add tracker.py docs/app.js tests/test_tracker.py tests/test_event_accumulation.py
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
