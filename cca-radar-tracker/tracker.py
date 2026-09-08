@@ -2144,24 +2144,13 @@ def cumulative_refill_evidence(
         else None
     )
 
-    default_decay_points_per_day = max(
-        0.0, float(config.get("condition_decay_percentage_points_per_day", 0.8))
+    current_loss_components = zero_g_loss_components(now)
+    decay_points_per_day = float(
+        current_loss_components["percentage_points_per_day"]
     )
-    if canyon.canyon_id == "zerog":
-        current_loss_components = zero_g_loss_components(now)
-        decay_points_per_day = float(
-            current_loss_components["percentage_points_per_day"]
-        )
-    else:
-        current_loss_components = None
-        decay_points_per_day = default_decay_points_per_day
 
     def apply_decay(value: float, start: datetime, end: datetime) -> float:
-        if canyon.canyon_id == "zerog":
-            loss_ratio = zero_g_integrated_loss_ratio(start, end)
-        else:
-            elapsed_days = max(0.0, (end - start).total_seconds() / 86400.0)
-            loss_ratio = default_decay_points_per_day / 100.0 * elapsed_days
+        loss_ratio = zero_g_integrated_loss_ratio(start, end)
         return max(0.0, value - loss_ratio)
 
     if anchor:
@@ -2227,32 +2216,26 @@ def cumulative_refill_evidence(
     else:
         current_condition = "limited refill indicated"
 
-    if canyon.canyon_id == "zerog" and current_loss_components is not None:
-        loss_fields = {
-            "loss_model": "zero_g_mx2001_et_plus_navajo",
-            "decay_percentage_points_per_day": round(decay_points_per_day, 3),
-            "eto_inches_per_day": round(
-                float(current_loss_components["eto_inches_per_day"]), 3
-            ),
-            "navajo_seepage_inches_per_day": round(
-                float(current_loss_components["navajo_seepage_inches_per_day"]), 3
-            ),
-            "total_loss_inches_per_day": round(
-                float(current_loss_components["total_loss_inches_per_day"]), 3
-            ),
-            "reference_pool_depth_ft": ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,
-            "retention_class": "Zero G stable-lower-MX2001 field calibration",
-            "loss_calibration_note": (
-                "Central rate uses the unmoved lower logger. Upper logger moved on "
-                "2026-08-08 and is retained only as an exposed/high-loss bound."
-            ),
-        }
-    else:
-        loss_fields = {
-            "loss_model": "provisional_linear_decay",
-            "decay_percentage_points_per_day": decay_points_per_day,
-            "retention_class": "provisional reference-canyon field calibration",
-        }
+    loss_fields = {
+        "loss_model": "zero_g_mx2001_et_plus_navajo",
+        "decay_percentage_points_per_day": round(decay_points_per_day, 3),
+        "eto_inches_per_day": round(
+            float(current_loss_components["eto_inches_per_day"]), 3
+        ),
+        "navajo_seepage_inches_per_day": round(
+            float(current_loss_components["navajo_seepage_inches_per_day"]), 3
+        ),
+        "total_loss_inches_per_day": round(
+            float(current_loss_components["total_loss_inches_per_day"]), 3
+        ),
+        "reference_pool_depth_ft": ZERO_G_REFERENCE_LOWER_POOL_DEPTH_FT,
+        "retention_class": "Transferred Zero G stable-lower-MX2001 reference calibration",
+        "loss_calibration_note": (
+            "Reference rate comes from the unmoved lower Zero G logger; the upper "
+            "logger moved on 2026-08-08 and is retained only as an exposed/high-loss "
+            "bound. This reference recession is transferred to all modeled canyons."
+        ),
+    }
 
     canyon_status["condition_estimate"] = {
         "percent": (
@@ -2726,23 +2709,24 @@ def model_metadata(
                 "not explicitly subtract channel transmission losses."
             ),
             "cumulative_refill_explanation": (
-                "Current conditions lose modeled storage between storms. Zero G now uses an "
-                "MX2001 field-calibrated seasonal loss model: 1.28 inches/day of empirical "
-                "Navajo sandstone/seepage-equivalent recession plus monthly Moab reference "
-                "ETo. Other canyons retain the provisional fixed percentage-point decay until "
-                "their own geology or field data support a canyon-specific loss model. New "
-                "modeled runoff is added to the decayed balance and capped at 100%."
+                "All canyon condition balances now use the same transferred Zero G reference "
+                "recession between storms. The reference combines 1.28 inches/day of empirical "
+                "Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. "
+                "New modeled runoff is added after time-integrated loss and the condition is "
+                "capped at 100%."
             ),
             "pool_loss_explanation": (
-                "Zero G's central loss calibration uses the stable lower MX2001 logger from "
-                "August 1 through September 7, 2026. The upper logger is excluded from the "
-                "central rate because it physically relocated on August 8 and remained a "
-                "shallower, more exposed high-loss comparison. The 1.28 in/day residual is an "
-                "empirical stage-equivalent term after subtracting USU Moab monthly reference "
-                "ETo; it includes Navajo sandstone/fracture seepage and any inseparable quiet-"
-                "pool drainage. The percent conversion uses the lower logger's initial 11.9288-"
-                "ft water column and is therefore a field-calibrated stage-equivalent condition "
-                "model, not a surveyed stage-volume curve."
+                "The loss reference comes from the stable lower HOBO MX2001 logger in Zero G, "
+                "deployed August 1 through September 7, 2026. The upper logger is excluded from "
+                "the central rate because it physically relocated on August 8 and remained a "
+                "shallower, more exposed high-loss comparison. After subtracting USU Moab "
+                "monthly reference ETo normals (2000-2022), the stable lower logger supports a "
+                "1.28 in/day empirical Navajo/seepage-equivalent residual. The percentage "
+                "conversion uses the lower logger's initial 11.9288-ft water column. That same "
+                "seasonal stage-equivalent percentage-point loss is transferred to all 22 "
+                "modeled canyons until canyon-specific recession data are available. This is an "
+                "explicit transfer assumption, not a claim that every canyon has identical pool "
+                "geometry, evaporation, fractures, or seepage."
             ),
             "atlas_explanation": (
                 "Atlas 14 context compares event-duration watershed-average radar rainfall "

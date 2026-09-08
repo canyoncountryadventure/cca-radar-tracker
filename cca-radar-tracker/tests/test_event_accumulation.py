@@ -325,6 +325,9 @@ class EventAccumulationTests(unittest.TestCase):
         self.assertIsNone(condition["percent"])
         self.assertEqual(condition["current_condition"], "unknown")
         self.assertEqual(condition["confidence"], "Unknown")
+        self.assertEqual(condition["loss_model"], "zero_g_mx2001_et_plus_navajo")
+        self.assertAlmostEqual(condition["navajo_seepage_inches_per_day"], 1.28, places=2)
+        self.assertAlmostEqual(condition["decay_percentage_points_per_day"], 1.07, delta=0.05)
 
     def test_event_after_field_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)

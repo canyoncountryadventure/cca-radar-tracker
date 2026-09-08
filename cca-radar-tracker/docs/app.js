@@ -816,8 +816,8 @@ function renderRefillHistory(status, model) {
     <h3>Current condition: ${escapeHtml(condition.current_condition || "unknown")} — ${escapeHtml(condition.confidence || "Unknown")} confidence</h3>
     <p class="event-summary">
       ${condition.loss_model === "zero_g_mx2001_et_plus_navajo"
-        ? `Reference-canyon loss is field-calibrated from the stable lower MX2001 logger: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day).`
-        : `The provisional condition percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day.`}
+        ? `All-canyon loss uses the transferred Zero G stable-lower-MX2001 reference: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day empirical Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal Moab ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day). The Zero G reference uses an 11.9288-ft lower-logger water column and is applied to every canyon until canyon-specific recession data exist.`
+        : `Pool-loss calibration unavailable.`}
       New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
     </p>
     <div class="event-meta-grid">
