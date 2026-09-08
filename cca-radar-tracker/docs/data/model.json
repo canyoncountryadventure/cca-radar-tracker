@@ -17,8 +17,106 @@
     "spatial_formula": "Area-weighted watershed percentages in exclusive peak-frame bands: no echo/<5 dBZ, every 5-dBZ band from 5 through 70 dBZ, and 70+ dBZ",
     "spatial_explanation": "The distribution is a snapshot of the selected storm's maximum-reflectivity frame. Bands are mutually exclusive and sum to the watershed total. It is storm context and does not control the canyon-condition classification.",
     "fill_ratio_explanation": "Estimated fill ratio = normal-condition NRCS watershed direct runoff \u00f7 provisional empty-pool storage target. It is not a measured pool-depth percentage and does not explicitly subtract channel transmission losses.",
-    "cumulative_refill_explanation": "All canyon condition balances and cumulative refill balances use the same transferred Zero G reference recession between storms and from the most recent storm through the present. The reference combines 1.28 inches/day of empirical Navajo sandstone/seepage-equivalent loss with monthly Moab reference ETo. New modeled runoff is added after time-integrated loss and storage is capped at 100%.",
-    "pool_loss_explanation": "The loss reference comes from the stable lower HOBO MX2001 logger in Zero G, deployed August 1 through September 7, 2026. The upper logger is excluded from the central rate because it physically relocated on August 8 and remained a shallower, more exposed high-loss comparison. After subtracting USU Moab monthly reference ETo normals (2000-2022), the stable lower logger supports a 1.28 in/day empirical Navajo/seepage-equivalent residual. The percentage conversion uses the 13.0-ft operational full-stage reference, bracketed by field observations of about 12 ft nearly full and 13.66 ft actively spilling. That same seasonal stage-equivalent percentage-point loss is transferred to all 22 modeled canyons until canyon-specific recession data are available. This is an explicit transfer assumption, not a claim that every canyon has identical pool geometry, evaporation, fractures, or seepage.",
+    "cumulative_refill_explanation": "All canyon condition balances and cumulative refill balances use the same transferred Zero G reference recession. Every retained rain event with positive modeled runoff advances that canyon's recession clock, even when the refill is below the 25% classification threshold. Loss is integrated between successive refill events and from the latest refill through the present. The reference combines a 1.28 inches/day empirical Navajo sandstone/seepage-equivalent residual with monthly Moab reference ETo; new modeled runoff is then added and storage is capped at 100%.",
+    "pool_loss_explanation": "The loss reference comes from the stable lower HOBO MX2001 logger in Zero G, deployed August 1 through September 7, 2026. The upper logger is excluded from the central rate because it physically relocated on August 8 and remained a shallower, more exposed high-loss comparison. After subtracting USU Moab monthly reference ETo normals (2000-2022), the stable lower logger supports a 1.28 in/day empirical Navajo/seepage-equivalent residual. The percentage conversion uses the 13.0-ft operational full-stage reference, bracketed by field observations of about 12 ft nearly full and 13.66 ft actively spilling. That same seasonal stage-equivalent percentage-point loss is transferred to all 22 modeled canyons until canyon-specific recession data are available. This is an explicit transfer assumption, not a claim that every canyon has identical pool geometry, evaporation, fractures, or seepage. Temperature alone is not used as a recession predictor because the logger record showed large rate differences at similar temperatures when geometry/logger position changed; monthly ETo is the seasonal atmospheric term, while the 1.28 in/day residual remains constant until field data support a seasonal seepage function.",
+    "monthly_recession_reference": [
+      {
+        "month": 1,
+        "month_name": "January",
+        "eto_inches_per_month": 1.16,
+        "eto_inches_per_day": 0.0374,
+        "total_loss_inches_per_day": 1.3174,
+        "percentage_points_per_day": 0.8445
+      },
+      {
+        "month": 2,
+        "month_name": "February",
+        "eto_inches_per_month": 1.8,
+        "eto_inches_per_day": 0.0643,
+        "total_loss_inches_per_day": 1.3443,
+        "percentage_points_per_day": 0.8617
+      },
+      {
+        "month": 3,
+        "month_name": "March",
+        "eto_inches_per_month": 3.55,
+        "eto_inches_per_day": 0.1145,
+        "total_loss_inches_per_day": 1.3945,
+        "percentage_points_per_day": 0.8939
+      },
+      {
+        "month": 4,
+        "month_name": "April",
+        "eto_inches_per_month": 5.1,
+        "eto_inches_per_day": 0.17,
+        "total_loss_inches_per_day": 1.45,
+        "percentage_points_per_day": 0.9295
+      },
+      {
+        "month": 5,
+        "month_name": "May",
+        "eto_inches_per_month": 7.16,
+        "eto_inches_per_day": 0.231,
+        "total_loss_inches_per_day": 1.511,
+        "percentage_points_per_day": 0.9686
+      },
+      {
+        "month": 6,
+        "month_name": "June",
+        "eto_inches_per_month": 8.5,
+        "eto_inches_per_day": 0.2833,
+        "total_loss_inches_per_day": 1.5633,
+        "percentage_points_per_day": 1.0021
+      },
+      {
+        "month": 7,
+        "month_name": "July",
+        "eto_inches_per_month": 9.03,
+        "eto_inches_per_day": 0.2913,
+        "total_loss_inches_per_day": 1.5713,
+        "percentage_points_per_day": 1.0072
+      },
+      {
+        "month": 8,
+        "month_name": "August",
+        "eto_inches_per_month": 7.78,
+        "eto_inches_per_day": 0.251,
+        "total_loss_inches_per_day": 1.531,
+        "percentage_points_per_day": 0.9814
+      },
+      {
+        "month": 9,
+        "month_name": "September",
+        "eto_inches_per_month": 5.72,
+        "eto_inches_per_day": 0.1907,
+        "total_loss_inches_per_day": 1.4707,
+        "percentage_points_per_day": 0.9427
+      },
+      {
+        "month": 10,
+        "month_name": "October",
+        "eto_inches_per_month": 3.51,
+        "eto_inches_per_day": 0.1132,
+        "total_loss_inches_per_day": 1.3932,
+        "percentage_points_per_day": 0.8931
+      },
+      {
+        "month": 11,
+        "month_name": "November",
+        "eto_inches_per_month": 1.8,
+        "eto_inches_per_day": 0.06,
+        "total_loss_inches_per_day": 1.34,
+        "percentage_points_per_day": 0.859
+      },
+      {
+        "month": 12,
+        "month_name": "December",
+        "eto_inches_per_month": 1.06,
+        "eto_inches_per_day": 0.0342,
+        "total_loss_inches_per_day": 1.3142,
+        "percentage_points_per_day": 0.8424
+      }
+    ],
     "atlas_explanation": "Atlas 14 context compares event-duration watershed-average radar rainfall with duration-interpolated NOAA Atlas 14 point-frequency depths at the canyon outlet. It is context, not a watershed return interval. The comparison is suppressed when the event exceeds the longest available duration instead of being clamped to a shorter storm.",
     "scaling_basis": "Technical-section length replaces drainage-area scaling for pool storage. Drainage area remains in the runoff calculation because it controls how much watershed runoff a given rain depth can generate.",
     "condition_language": "Condition statements combine modeled refill with the provisional daily loss while confidence ages. Below 25% of the empty-storage target is no meaningful refill. 'Likely full' requires the storage-volume and minimum wet-duration tests; dBZ footprints are context only.",
