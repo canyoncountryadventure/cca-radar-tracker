@@ -815,7 +815,10 @@ function renderRefillHistory(status, model) {
     <p class="event-kicker">CURRENT CONDITION AND REFILL HISTORY</p>
     <h3>Current condition: ${escapeHtml(condition.current_condition || "unknown")} — ${escapeHtml(condition.confidence || "Unknown")} confidence</h3>
     <p class="event-summary">
-      The percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day. New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
+      ${condition.loss_model === "zero_g_mx2001_et_plus_navajo"
+        ? `Reference-canyon loss is field-calibrated from the stable lower MX2001 logger: ${number(condition.navajo_seepage_inches_per_day, 2)} in/day Navajo/seepage-equivalent loss + ${number(condition.eto_inches_per_day, 2)} in/day seasonal ETo = ${number(condition.total_loss_inches_per_day, 2)} in/day currently (${number(condition.decay_percentage_points_per_day, 2)} stage-equivalent percentage points/day).`
+        : `The provisional condition percentage decreases ${number(condition.decay_percentage_points_per_day || 0.8, 1)} point per day.`}
+      New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
     </p>
     <div class="event-meta-grid">
       ${eventMeta("Last verified", condition.last_verified ? `${number(condition.last_verified.percent, 0)}% — ${dateOnly(condition.last_verified.observed_utc)}` : "No field verification")}

@@ -303,11 +303,12 @@ class EventAccumulationTests(unittest.TestCase):
             status, canyon, self.config, now_utc=evaluation_time
         )
         condition = status["condition_estimate"]
-        self.assertEqual(condition["percent"], 96)
+        self.assertEqual(condition["percent"], 95)
         self.assertEqual(condition["basis"], "Field verified")
         self.assertEqual(condition["last_verified"]["observed_utc"], "2026-08-01T12:00:00Z")
-        self.assertEqual(condition["loss_model"], "provisional_linear_decay")
-        self.assertEqual(condition["decay_percentage_points_per_day"], 0.8)
+        self.assertEqual(condition["loss_model"], "zero_g_mx2001_et_plus_navajo")
+        self.assertAlmostEqual(condition["decay_percentage_points_per_day"], 1.07, delta=0.05)
+        self.assertAlmostEqual(condition["navajo_seepage_inches_per_day"], 1.28, places=2)
 
     def test_no_refill_history_is_unknown_not_zero_percent(self):
         canyon = canyon_fixture(fill_target=100)
