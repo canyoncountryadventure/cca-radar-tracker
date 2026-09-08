@@ -39,10 +39,12 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
+          import textwrap
 
           path = Path('tests/test_event_accumulation.py')
           text = path.read_text()
-          replacement = '''    def test_cumulative_loss_evidence_applies_transferred_recession_between_storms(self):
+          body = textwrap.dedent('''
+          def test_cumulative_loss_evidence_applies_transferred_recession_between_storms(self):
               canyon = canyon_fixture(fill_target=100)
               status = tracker.empty_canyon_status(canyon)
               status["events"] = [
@@ -55,8 +57,8 @@ jobs:
                   {
                       "start_utc": "2026-07-28T18:00:00Z",
                       "end_utc": "2026-07-28T18:10:00Z",
-                      "direct_runoff_ft3": 80,
-                      "fill_ratio": 0.8,
+                      "direct_runoff_ft3": 50,
+                      "fill_ratio": 0.5,
                   },
               ]
               evaluation_time = datetime(2026, 7, 28, 18, 10, tzinfo=timezone.utc)
@@ -65,8 +67,8 @@ jobs:
               )
               evidence = status["cumulative_refill_evidence"]
               self.assertEqual(evidence["event_count"], 2)
-              self.assertLess(evidence["balance_ft3"], 100)
-              self.assertGreater(evidence["balance_ft3"], 80)
+              self.assertLess(evidence["balance_ft3"], 90)
+              self.assertGreater(evidence["balance_ft3"], 85)
               self.assertEqual(evidence["loss_model"], "zero_g_mx2001_et_plus_navajo")
               self.assertGreater(evidence["modeled_loss_ft3"], 0)
               self.assertEqual(
@@ -76,7 +78,8 @@ jobs:
               self.assertIsNone(evidence["milestones_utc"]["100"])
               self.assertEqual(len(status["refill_history"]), 2)
 
-          '''
+          ''').lstrip('\n')
+          replacement = textwrap.indent(body, '    ')
           pattern = r'    def test_cumulative_no_loss_evidence_preserves_multiple_storms\(self\):\n.*?(?=    def test_recent_evidence_does_not_reset_when_new_event_has_zero_runoff)'
           text, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
           if count != 1:
