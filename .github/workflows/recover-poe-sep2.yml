@@ -1,0 +1,109 @@
+name: Recover Poe Sept 2 full event
+
+on:
+  push:
+    branches: [audit-pool-fill-20260929]
+    paths:
+      - ".github/workflows/recover-poe-sep2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: cca-radar-tracker
+        run: pip install -r requirements.txt
+      - name: Merge verified Poe Sept 2 full-flush event
+        env:
+          DATA_BRANCH: operational-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          worktree="$(mktemp -d)"
+          git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
+          git worktree add "$worktree" "$DATA_BRANCH"
+
+          python - "$worktree/latest/status.json" <<'PY'
+          import json, sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          root = Path("cca-radar-tracker")
+          sys.path.insert(0, str(root))
+          import tracker
+
+          status_path = Path(sys.argv[1])
+          status = json.loads(status_path.read_text())
+          config = json.loads((root/"config.json").read_text())
+          collection = json.loads((root/"watersheds.geojson").read_text())
+          atlas = json.loads((root/"atlas14.json").read_text())
+          hydrology = json.loads((root/"hydrology.json").read_text())
+          canyons, _ = tracker.build_canyons(collection, atlas, config, hydrology)
+          canyon = next(c for c in canyons if c.canyon_id == "poe")
+
+          event = {
+            "start_utc": "2026-09-02T17:50:00Z",
+            "end_utc": "2026-09-02T18:10:00Z",
+            "basin_rain_inches": 0.3973,
+            "max_pixel_storm_inches": 0.559,
+            "direct_runoff_ft3": 214670,
+            "generated_runoff_ft3": 214670,
+            "fill_ratio": 2.36,
+            "classification": "full_flush",
+            "classification_label": "Strong refill/flush potential — full pools possible",
+            "peak_dbz": 59.5,
+            "peak_frame_utc": "2026-09-02T18:05:00Z",
+            "wet_frames": 5,
+            "frames": 5,
+            "history_recovered_from_raw_radar": True,
+            "history_recovery_method": "Verified by Sept 29 MRMS archive replay; inserted after duplicate-tolerance merge skipped it"
+          }
+
+          cs = status["canyons"]["poe"]
+          events = list(cs.get("events") or [])
+          key = (event["start_utc"], event["end_utc"])
+          if not any((e.get("start_utc"), e.get("end_utc") or e.get("start_utc")) == key for e in events):
+              events.append(event)
+          cs["events"] = tracker.dedupe_events(events)[:int(config.get("max_retained_events_per_canyon",120))]
+          qualifying = [e for e in cs["events"] if e.get("classification") in {"likely_full","full_flush"}]
+          cs["last_qualifying_event"] = max(qualifying, key=tracker.event_end_utc, default=None)
+          now = tracker.parse_utc(status["last_checked_utc"]) if status.get("last_checked_utc") else datetime.now(timezone.utc)
+          tracker.cumulative_refill_evidence(cs, canyon, config, now_utc=now)
+          status.setdefault("history_recovery", {})["poe_sep2_full_2026"] = {
+              "ok": True,
+              "applied_utc": tracker.utc_text(datetime.now(timezone.utc)),
+              "event_start_utc": event["start_utc"],
+              "event_end_utc": event["end_utc"],
+              "fill_ratio": event["fill_ratio"],
+              "classification": event["classification"]
+          }
+          status_path.write_text(json.dumps(status, indent=2)+"\n")
+          print(json.dumps(status["history_recovery"]["poe_sep2_full_2026"], indent=2))
+          PY
+
+          backup_date="$(date -u +%F)"
+          mkdir -p "$worktree/backups/$backup_date"
+          cp "$worktree/latest/status.json" "$worktree/backups/$backup_date/status.json"
+          git -C "$worktree" add latest/status.json "backups/$backup_date/status.json"
+          if git -C "$worktree" diff --cached --quiet; then
+            echo "Poe event already present"
+          else
+            git -C "$worktree" commit -m "Recover Poe Sept 2 full-flush event"
+            git -C "$worktree" push origin "$DATA_BRANCH"
+          fi
+          git worktree remove "$worktree"
+
+      - name: Refresh production radar state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
