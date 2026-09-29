@@ -1,4 +1,4 @@
-name: Audit No Kidding and Hog history
+name: Audit selected canyon radar history
 
 on:
   push:
@@ -10,27 +10,36 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     steps:
-      - name: Scan every durable August backup
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install radar dependencies
+        run: pip install -r cca-radar-tracker/requirements.txt
+
+      - name: Compare durable August backups
         run: |
           python - <<'PY'
           import json, urllib.request
           from datetime import date, timedelta
 
           base = 'https://raw.githubusercontent.com/canyoncountryadventure/cca-radar-tracker/operational-data/backups/{}/status.json'
-          targets = ['no-kidding','hog-canyons']
+          targets = ['alcatraz','hog-canyons','no-kidding','poe']
           best = {cid: {'runoff': -1, 'date': None, 'event': None, 'ratio': None, 'class': None} for cid in targets}
           meaningful = {cid: [] for cid in targets}
 
-          d = date(2026,8,3)
+          d = date(2026,8,1)
           end = date(2026,8,31)
           scanned = 0
           missing = []
           while d <= end:
               ds = d.isoformat()
-              url = base.format(ds)
               try:
-                  req = urllib.request.Request(url, headers={'User-Agent':'CCA-history-audit/1.1'})
+                  req = urllib.request.Request(base.format(ds), headers={'User-Agent':'CCA-history-audit/2.0'})
                   with urllib.request.urlopen(req, timeout=120) as r:
                       status = json.load(r)
               except Exception as exc:
@@ -43,15 +52,6 @@ jobs:
                   events = list(c.get('events') or [])
                   for key in ('last_rain_event','last_qualifying_event'):
                       if c.get(key): events.append(c[key])
-                  rec = (c.get('historical_records') or {}).get('peak_individual_event') or {}
-                  if rec.get('start_utc'):
-                      events.append({
-                          'start_utc': rec.get('start_utc'),
-                          'end_utc': rec.get('end_utc'),
-                          'direct_runoff_ft3': rec.get('direct_runoff_ft3'),
-                          'fill_ratio': rec.get('fill_ratio'),
-                          'classification': rec.get('classification') or rec.get('classification_label')
-                      })
                   for e in events:
                       runoff = float(e.get('direct_runoff_ft3') or e.get('generated_runoff_ft3') or 0)
                       ratio = float(e.get('fill_ratio') or e.get('storage_ratio') or e.get('cumulative_ratio') or 0)
@@ -61,22 +61,120 @@ jobs:
                               'date': ds,
                               'event': e.get('start_utc'),
                               'end': e.get('end_utc'),
+                              'rain': e.get('basin_rain_inches'),
+                              'dbz': e.get('peak_dbz'),
                               'ratio': ratio,
                               'class': e.get('classification') or e.get('classification_label')
                           }
-                      if runoff >= 5000 or ratio >= 0.10 or str(e.get('classification') or '') in ('moderate','likely_full','full_flush'):
-                          meaningful[cid].append((ds, e.get('start_utc'), runoff, ratio, e.get('classification')))
+                      if runoff > 0 or ratio > 0:
+                          meaningful[cid].append((e.get('start_utc'), e.get('end_utc'), runoff, ratio, e.get('basin_rain_inches'), e.get('peak_dbz')))
               d += timedelta(days=1)
 
           print('SCANNED_BACKUPS', scanned)
           print('MISSING_DATES', missing)
           for cid in targets:
               print('BEST', cid, json.dumps(best[cid], sort_keys=True))
-              unique = []
-              seen = set()
+              seen=set(); unique=[]
               for row in meaningful[cid]:
-                  key = row[1:]
-                  if key not in seen:
-                      seen.add(key); unique.append(row)
-              print('MEANINGFUL', cid, json.dumps(unique, default=str))
+                  if row[:2] not in seen:
+                      seen.add(row[:2]); unique.append(row)
+              print('POSITIVE_RUNOFF', cid, json.dumps(unique))
+          PY
+
+      - name: Fresh N0Q replay of Aug 6-9 coverage hole
+        working-directory: cca-radar-tracker
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timedelta
+          from pathlib import Path
+
+          import tracker
+
+          ROOT = Path('.')
+          TARGET_IDS = ['alcatraz','hog-canyons','no-kidding','poe']
+          START = tracker.parse_utc('2026-08-06T05:00:00Z')
+          END = tracker.parse_utc('2026-08-09T19:30:00Z')
+
+          config = json.loads((ROOT/'config.json').read_text())
+          collection = json.loads((ROOT/'watersheds.geojson').read_text())
+          atlas = json.loads((ROOT/'atlas14.json').read_text())
+          hydrology = json.loads((ROOT/'hydrology.json').read_text())
+          canyons, _ = tracker.build_canyons(collection, atlas, config, hydrology)
+          targets = [c for c in canyons if c.canyon_id in TARGET_IDS]
+          global_grid = tracker.aligned_grid_for_points(
+              (p for c in targets for p in tracker.all_points(c.geometry)),
+              int(config.get('grid_padding_cells', 2)),
+          )
+          palette = tracker.load_palette(ROOT/'n0q_palette.json')
+          latest_reference = datetime.now(tracker.UTC)
+
+          # Ten-minute screening catches sustained echoes cheaply. Any screen
+          # frame >=20 dBZ expands to a full five-minute scan +/-30 minutes.
+          candidates=set()
+          screening={}
+          t=START
+          while t <= END:
+              record, summary = tracker.analyze_timestamp_record(
+                  t, targets, global_grid, palette, config, latest_reference
+              )
+              screening[tracker.utc_text(t)] = summary
+              for cid, a in summary.items():
+                  dbz=a.get('maximum_dbz')
+                  if dbz is not None and float(dbz) >= 20.0:
+                      for minutes in range(-30, 31, 5):
+                          tt=t+timedelta(minutes=minutes)
+                          if START <= tt <= END:
+                              candidates.add(tt)
+              t += timedelta(minutes=10)
+
+          fine={}
+          for t in sorted(candidates):
+              record, summary = tracker.analyze_timestamp_record(
+                  t, targets, global_grid, palette, config, latest_reference
+              )
+              fine[tracker.utc_text(t)] = summary
+
+          results={}
+          for cid in TARGET_IDS:
+              rows=[]
+              for ts, summary in sorted(fine.items()):
+                  a=summary[cid]
+                  if a.get('rain_detected') or a.get('wet'):
+                      rows.append({
+                          'ts': ts,
+                          'dbz': a.get('maximum_dbz'),
+                          'rain': float(a.get('frame_basin_rain_inches') or 0),
+                          'wet': bool(a.get('wet')),
+                          'quality': a.get('radar_data_quality'),
+                      })
+
+              events=[]
+              current=[]
+              last=None
+              for row in rows:
+                  ts=tracker.parse_utc(row['ts'])
+                  if current and last is not None and ts-last > timedelta(minutes=30):
+                      events.append(current); current=[]
+                  current.append(row); last=ts
+              if current: events.append(current)
+
+              packed=[]
+              for event in events:
+                  if not any(r['wet'] for r in event):
+                      continue
+                  packed.append({
+                      'start_utc': event[0]['ts'],
+                      'end_utc': event[-1]['ts'],
+                      'basin_rain_inches': round(sum(r['rain'] for r in event),4),
+                      'peak_dbz': max(r['dbz'] for r in event if r['dbz'] is not None),
+                      'wet_frames': sum(1 for r in event if r['wet']),
+                      'frames': len(event),
+                  })
+              results[cid]=packed
+
+          print('AUDIT_WINDOW', tracker.utc_text(START), tracker.utc_text(END))
+          print('SCREEN_FRAMES', len(screening), 'FINE_FRAMES', len(fine))
+          print('FRESH_RADAR_EVENTS_JSON')
+          print(json.dumps(results, indent=2, sort_keys=True))
           PY
