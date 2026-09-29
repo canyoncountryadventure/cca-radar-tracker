@@ -7,6 +7,9 @@ on:
       - ".github/workflows/audit-no-kidding-hog-history.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -175,6 +178,28 @@ jobs:
 
           print('AUDIT_WINDOW', tracker.utc_text(START), tracker.utc_text(END))
           print('SCREEN_FRAMES', len(screening), 'FINE_FRAMES', len(fine))
+          output = {
+              'generated_utc': tracker.utc_text(datetime.now(tracker.UTC)),
+              'audit_window_start_utc': tracker.utc_text(START),
+              'audit_window_end_utc': tracker.utc_text(END),
+              'screen_interval_minutes': 10,
+              'screen_frames': len(screening),
+              'fine_frames': len(fine),
+              'targets': results,
+          }
           print('FRESH_RADAR_EVENTS_JSON')
-          print(json.dumps(results, indent=2, sort_keys=True))
+          print(json.dumps(output, indent=2, sort_keys=True))
+          outpath = ROOT.parent/'audit-results'/'aug6-9-radar-audit.json'
+          outpath.parent.mkdir(parents=True, exist_ok=True)
+          outpath.write_text(json.dumps(output, indent=2, sort_keys=True) + '\\n')
           PY
+
+      - name: Save read-only audit result
+        run: |
+          git config user.name "cca-radar-audit"
+          git config user.email "actions@users.noreply.github.com"
+          git add audit-results/aug6-9-radar-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Store Aug 6-9 radar audit result"
+            git push
+          fi
