@@ -20,7 +20,7 @@ import tracker
 
 UTC = timezone.utc
 ROOT = Path(__file__).resolve().parents[1]
-TARGET_IDS = ("alcatraz", "hog-canyons", "poe")
+TARGET_IDS = ("alcatraz", "hog-canyons", "no-kidding", "poe")
 START = datetime(2026, 8, 1, tzinfo=UTC)
 END = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
 UA = {"User-Agent": "CCA-pool-fill-history-audit/1.0"}
