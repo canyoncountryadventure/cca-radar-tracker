@@ -1,0 +1,75 @@
+name: Recover Poe Sept 6 minor event
+
+on:
+  push:
+    branches: [audit-pool-fill-20260929]
+    paths:
+      - ".github/workflows/recover-poe-sep6-minor.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge verified Poe Sept 6 minor event
+        env:
+          DATA_BRANCH: operational-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          worktree="$(mktemp -d)"
+          git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
+          git worktree add "$worktree" "$DATA_BRANCH"
+          python - "$worktree/latest/status.json" <<'PY'
+          import json, sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          p=Path(sys.argv[1])
+          s=json.loads(p.read_text())
+          e={
+            "start_utc":"2026-09-06T18:00:00Z",
+            "end_utc":"2026-09-06T18:25:00Z",
+            "basin_rain_inches":0.0108,
+            "max_pixel_storm_inches":0.015,
+            "direct_runoff_ft3":0,
+            "generated_runoff_ft3":0,
+            "fill_ratio":0.0,
+            "classification":"minor",
+            "classification_label":"No meaningful pool refill indicated",
+            "peak_dbz":28.0,
+            "peak_frame_utc":"2026-09-06T18:05:00Z",
+            "wet_frames":4,
+            "frames":6,
+            "history_recovered_from_raw_radar":True,
+            "history_recovery_method":"Verified by Sept 29 MRMS archive replay"
+          }
+          cs=s["canyons"]["poe"]
+          ev=list(cs.get("events") or [])
+          key=(e["start_utc"],e["end_utc"])
+          if not any((x.get("start_utc"),x.get("end_utc") or x.get("start_utc"))==key for x in ev):
+              ev.append(e)
+          ev.sort(key=lambda x:x.get("end_utc") or x.get("start_utc") or "", reverse=True)
+          cs["events"]=ev
+          s.setdefault("history_recovery",{})["poe_sep6_minor_2026"]={
+            "ok":True,
+            "applied_utc":datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "event_start_utc":e["start_utc"],
+            "event_end_utc":e["end_utc"]
+          }
+          p.write_text(json.dumps(s,indent=2)+"\n")
+          PY
+
+          backup_date="$(date -u +%F)"
+          mkdir -p "$worktree/backups/$backup_date"
+          cp "$worktree/latest/status.json" "$worktree/backups/$backup_date/status.json"
+          git -C "$worktree" add latest/status.json "backups/$backup_date/status.json"
+          if ! git -C "$worktree" diff --cached --quiet; then
+            git -C "$worktree" commit -m "Recover Poe Sept 6 minor radar event"
+            git -C "$worktree" push origin "$DATA_BRANCH"
+          fi
+          git worktree remove "$worktree"
