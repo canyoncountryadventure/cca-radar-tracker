@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGET_IDS = ("alcatraz", "hog-canyons", "poe")
 START = datetime(2026, 8, 1, tzinfo=UTC)
 END = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-UA = {"User-Agent": "CCA-pool-fill-history-audit/1.0"}\n# Branch-only audit; does not modify production state.
+UA = {"User-Agent": "CCA-pool-fill-history-audit/1.0"}
+# Branch-only audit; does not modify production state.
 
 def fetch_bytes(url: str, timeout: int = 90) -> bytes:
     req = urllib.request.Request(url, headers=UA)
