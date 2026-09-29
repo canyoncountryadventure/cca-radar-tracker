@@ -1,4 +1,4 @@
-name: Audit pool-fill history
+name: Audit and recover pool-fill history
 
 on:
   push:
@@ -7,6 +7,16 @@ on:
     paths:
       - ".github/workflows/audit-pool-fill-history.yml"
       - "cca-radar-tracker/tools/audit_pool_fill_history.py"
+      - "cca-radar-tracker/tools/merge_pool_fill_audit.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: pool-fill-history-recovery-20260929
+  cancel-in-progress: true
 
 jobs:
   audit:
@@ -20,9 +30,42 @@ jobs:
       - name: Install dependencies
         working-directory: cca-radar-tracker
         run: pip install -r requirements.txt
-      - name: Audit Alcatraz, Hog Canyons, and Poe since August 1
+
+      - name: Replay Alcatraz, Hog Canyons, No Kidding, and Poe since August 1
         working-directory: cca-radar-tracker
         run: python tools/audit_pool_fill_history.py
+
+      - name: Merge missing raw-radar events into operational state
+        env:
+          DATA_BRANCH: operational-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          worktree="$(mktemp -d)"
+          git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
+          git worktree add "$worktree" "$DATA_BRANCH"
+
+          python cca-radar-tracker/tools/merge_pool_fill_audit.py             --status "$worktree/latest/status.json"             --report cca-radar-tracker/audit_pool_fill_history_report.json
+
+          backup_date="$(date -u +%F)"
+          mkdir -p "$worktree/backups/$backup_date"
+          cp "$worktree/latest/status.json" "$worktree/backups/$backup_date/status.json"
+
+          git -C "$worktree" add latest/status.json "backups/$backup_date/status.json"
+          if git -C "$worktree" diff --cached --quiet; then
+            echo "No pool-fill history changes to commit"
+          else
+            git -C "$worktree" commit -m "Recover missing pool-fill radar history"
+            git -C "$worktree" push origin "$DATA_BRANCH"
+          fi
+          git worktree remove "$worktree"
+
+      - name: Queue production refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
+
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
