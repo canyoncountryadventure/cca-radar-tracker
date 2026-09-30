@@ -1,4 +1,4 @@
-name: Verify live Alcatraz and Poe recovery
+name: Inspect live Alcatraz and Poe Sept 2 history
 
 on:
   push:
@@ -6,36 +6,29 @@ on:
       - audit-pool-fill-20260929
     paths:
       - ".github/workflows/audit-pool-fill-history.yml"
-  workflow_dispatch:
 
 jobs:
-  verify:
+  inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live published events
+      - name: Print Sept 2 live events
         run: |
           set -euo pipefail
-          url="https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?verify=$(date +%s)"
-          curl --fail --silent --show-error --location --max-time 90             --header "Cache-Control: no-cache"             --header "Pragma: no-cache"             "$url" -o /tmp/status.json
+          curl --fail --silent --show-error --location --max-time 90             --header "Cache-Control: no-cache"             "https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?inspect=$(date +%s)"             -o /tmp/status.json
           python - <<'PY'
           import json
-          status = json.load(open('/tmp/status.json'))
-          checks = {
-              "alcatraz": ("2026-09-02T15:20:00Z", 4.45),
-              "poe": ("2026-09-02T17:50:00Z", 2.36),
-          }
-          for cid, (start, minimum_ratio) in checks.items():
-              events = status["canyons"][cid].get("events") or []
-              match = next((e for e in events if e.get("start_utc") == start), None)
-              if not match:
-                  raise SystemExit(f"LIVE MISSING: {cid} {start}")
-              ratio = float(match.get("fill_ratio") or 0)
-              cls = match.get("classification")
-              if ratio < minimum_ratio or cls != "full_flush":
-                  raise SystemExit(f"LIVE BAD EVENT: {cid} ratio={ratio} class={cls}")
-              print(
-                  f"LIVE OK {cid}: start={start}; ratio={ratio}; "
-                  f"class={cls}; rain={match.get('basin_rain_inches')}; "
-                  f"runoff={match.get('direct_runoff_ft3')}"
-              )
+          s=json.load(open('/tmp/status.json'))
+          for cid in ('alcatraz','poe'):
+              print('CANYON',cid)
+              c=s['canyons'][cid]
+              for e in c.get('events') or []:
+                  if str(e.get('start_utc','')).startswith('2026-09-02') or str(e.get('end_utc','')).startswith('2026-09-02'):
+                      keep={k:e.get(k) for k in (
+                        'start_utc','end_utc','basin_rain_inches','max_pixel_storm_inches',
+                        'direct_runoff_ft3','generated_runoff_ft3','fill_ratio','classification',
+                        'classification_label','peak_dbz','peak_frame_utc','history_recovered_from_raw_radar'
+                      )}
+                      print(json.dumps(keep, sort_keys=True))
+              print('LAST_QUAL',json.dumps(c.get('last_qualifying_event'), sort_keys=True)[:3000])
+              print('PEAK',json.dumps((c.get('historical_records') or {}).get('peak_individual_event'), sort_keys=True)[:3000])
           PY
