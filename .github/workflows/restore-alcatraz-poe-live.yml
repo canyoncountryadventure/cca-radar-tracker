@@ -1,4 +1,4 @@
-name: Restore Alcatraz and Poe live history
+name: Verify restored Alcatraz and Poe history
 
 on:
   push:
@@ -8,179 +8,18 @@ on:
       - ".github/workflows/restore-alcatraz-poe-live.yml"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  actions: write
-
 jobs:
-  restore:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Merge recovered Alcatraz and Poe events into current operational state
-        env:
-          DATA_BRANCH: operational-data
-          RECOVERY_COMMIT: cd0cb928e2fb38ed47017c694fb748f6cdfc2951
+      - name: Verify live published events
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin "$DATA_BRANCH"
-          git fetch origin "$RECOVERY_COMMIT"
-          git show "$RECOVERY_COMMIT:latest/status.json" > /tmp/recovered-status.json
-
-          worktree="$(mktemp -d)"
-          git worktree add "$worktree" "origin/$DATA_BRANCH"
-
-          python - "$worktree/latest/status.json" /tmp/recovered-status.json <<'PY'
-          import copy
+          url="https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?verify=$(date +%s)"
+          curl --fail --silent --show-error --location --max-time 90             --header "Cache-Control: no-cache"             --header "Pragma: no-cache"             "$url" -o /tmp/status.json
+          python - <<'PY'
           import json
-          import sys
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          current_path = Path(sys.argv[1])
-          recovered_path = Path(sys.argv[2])
-          current = json.loads(current_path.read_text())
-          recovered = json.loads(recovered_path.read_text())
-          targets = {"alcatraz", "poe"}
-
-          def event_end(e):
-              return e.get("end_utc") or e.get("start_utc") or ""
-
-          def event_key(e):
-              return (e.get("start_utc") or "", e.get("end_utc") or e.get("start_utc") or "")
-
-          restored = {}
-          for cid in targets:
-              src = recovered["canyons"][cid]
-              dst = current["canyons"][cid]
-
-              candidates = list(src.get("events") or [])
-              for key in ("last_rain_event", "last_qualifying_event"):
-                  if src.get(key):
-                      candidates.append(src[key])
-
-              by_key = {
-                  event_key(e): copy.deepcopy(e)
-                  for e in (dst.get("events") or [])
-                  if e and e.get("start_utc")
-              }
-              added = []
-              for e in candidates:
-                  if not e or not e.get("start_utc"):
-                      continue
-                  key = event_key(e)
-                  if key not in by_key:
-                      by_key[key] = copy.deepcopy(e)
-                      added.append(copy.deepcopy(e))
-
-              events = sorted(by_key.values(), key=event_end, reverse=True)
-              dst["events"] = events[:120]
-              if events:
-                  dst["last_rain_event"] = events[0]
-              qualifying = [
-                  e for e in events
-                  if e.get("classification") in {"likely_full", "full_flush"}
-              ]
-              dst["last_qualifying_event"] = max(qualifying, key=event_end, default=None)
-
-              src_records = src.get("historical_records") or {}
-              dst_records = dst.setdefault("historical_records", {})
-              for rkey in ("peak_individual_event", "peak_seven_day_evidence"):
-                  sr = src_records.get(rkey)
-                  dr = dst_records.get(rkey)
-                  sr_ratio = float((sr or {}).get("fill_ratio", (sr or {}).get("ratio", 0)) or 0)
-                  dr_ratio = float((dr or {}).get("fill_ratio", (dr or {}).get("ratio", 0)) or 0)
-                  if sr and sr_ratio > dr_ratio:
-                      dst_records[rkey] = copy.deepcopy(sr)
-
-              restored[cid] = [
-                  {
-                      "start_utc": e.get("start_utc"),
-                      "end_utc": e.get("end_utc"),
-                      "fill_ratio": e.get("fill_ratio"),
-                      "classification": e.get("classification"),
-                      "basin_rain_inches": e.get("basin_rain_inches"),
-                      "direct_runoff_ft3": e.get("direct_runoff_ft3"),
-                  }
-                  for e in added
-              ]
-
-          # Make this repaired state fresher than the currently published copy so
-          # select_status.py cannot immediately choose the stale website snapshot.
-          now = datetime.now(timezone.utc).replace(microsecond=0)
-          current["last_checked_utc"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-          current.setdefault("history_recovery", {})["alcatraz_poe_live_restore_20260929"] = {
-              "applied_utc": current["last_checked_utc"],
-              "source_commit": "cd0cb928e2fb38ed47017c694fb748f6cdfc2951",
-              "restored": restored,
-          }
-
-          # Hard verification of the two full-flush events the live UI must retain.
-          checks = {
-              "alcatraz": ("2026-09-02T15:20:00Z", 4.45),
-              "poe": ("2026-09-02T17:50:00Z", 2.36),
-          }
-          for cid, (start, minimum_ratio) in checks.items():
-              match = next((e for e in current["canyons"][cid]["events"] if e.get("start_utc") == start), None)
-              if not match:
-                  raise SystemExit(f"Missing required restored event: {cid} {start}")
-              if float(match.get("fill_ratio") or 0) < minimum_ratio:
-                  raise SystemExit(f"Bad restored fill ratio for {cid}: {match.get('fill_ratio')}")
-              if match.get("classification") != "full_flush":
-                  raise SystemExit(f"Bad restored classification for {cid}: {match.get('classification')}")
-
-          current_path.write_text(json.dumps(current, indent=2) + "\n")
-          print(json.dumps(restored, indent=2))
-          PY
-
-          backup_date="$(date -u +%F)"
-          mkdir -p "$worktree/backups/$backup_date"
-          cp "$worktree/latest/status.json" "$worktree/backups/$backup_date/status.json"
-          git -C "$worktree" add latest/status.json "backups/$backup_date/status.json"
-          git -C "$worktree" commit -m "Restore Alcatraz and Poe full-flush history"
-          git -C "$worktree" push origin HEAD:"$DATA_BRANCH"
-          git worktree remove "$worktree"
-
-      - name: Queue live radar refresh
-        id: dispatch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
-          sleep 5
-          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/update-radar.yml/runs?event=workflow_dispatch&per_page=10"             --jq ".workflow_runs[] | select(.created_at >= \"$before\") | .id" | head -n 1)"
-          if [[ -z "$run_id" ]]; then
-            echo "Could not identify dispatched update run"
-            exit 1
-          fi
-          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          echo "Dispatched update run $run_id"
-
-      - name: Wait for live refresh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ steps.dispatch.outputs.run_id }}
-        run: |
-          set -euo pipefail
-          gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
-
-      - name: Verify published website contains restored events
-        run: |
-          set -euo pipefail
-          url="https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?restore=$(date +%s)"
-          curl --fail --silent --show-error --location --max-time 60             --header "Cache-Control: no-cache" "$url" -o /tmp/published.json
-          python - /tmp/published.json <<'PY'
-          import json, sys
-          status = json.load(open(sys.argv[1]))
+          status = json.load(open('/tmp/status.json'))
           checks = {
               "alcatraz": ("2026-09-02T15:20:00Z", 4.45),
               "poe": ("2026-09-02T17:50:00Z", 2.36),
@@ -189,9 +28,17 @@ jobs:
               events = status["canyons"][cid].get("events") or []
               match = next((e for e in events if e.get("start_utc") == start), None)
               if not match:
-                  raise SystemExit(f"PUBLISHED MISSING: {cid} {start}")
+                  raise SystemExit(f"LIVE MISSING: {cid} {start}")
               ratio = float(match.get("fill_ratio") or 0)
-              if ratio < minimum_ratio or match.get("classification") != "full_flush":
-                  raise SystemExit(f"PUBLISHED BAD EVENT: {cid} ratio={ratio} class={match.get('classification')}")
-              print(f"PUBLISHED OK {cid}: {start}, ratio={ratio}, class={match.get('classification')}")
+              classification = match.get("classification")
+              if ratio < minimum_ratio or classification != "full_flush":
+                  raise SystemExit(
+                      f"LIVE BAD EVENT: {cid} ratio={ratio} class={classification}"
+                  )
+              print(
+                  f"LIVE OK {cid}: start={start} "
+                  f"ratio={ratio} class={classification} "
+                  f"rain={match.get('basin_rain_inches')} "
+                  f"runoff={match.get('direct_runoff_ft3')}"
+              )
           PY
