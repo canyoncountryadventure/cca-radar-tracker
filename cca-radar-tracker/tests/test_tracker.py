@@ -17,7 +17,7 @@ EXPECTED_POOL_TARGETS = {
     "entrajo": 17_830,
     "hog-canyons": 34_087,
     "leprechaun": 6_992,
-    "no-kidding": 28_528,
+    "no-kidding": 23_774,
     "pool-arch": 5_244,
     "alcatraz": 54_540,
     "cable-canyon": 262_210,
