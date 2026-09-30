@@ -1,4 +1,4 @@
-name: Audit and recover pool-fill history
+name: Restore Alcatraz and Poe live history
 
 on:
   push:
@@ -6,70 +6,160 @@ on:
       - audit-pool-fill-20260929
     paths:
       - ".github/workflows/audit-pool-fill-history.yml"
-      - "cca-radar-tracker/tools/audit_pool_fill_history.py"
-      - "cca-radar-tracker/tools/merge_pool_fill_audit.py"
   workflow_dispatch:
 
 permissions:
   contents: write
   actions: write
 
-concurrency:
-  group: pool-fill-history-recovery-20260929
-  cancel-in-progress: true
-
 jobs:
-  audit:
+  restore:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Install dependencies
-        working-directory: cca-radar-tracker
-        run: pip install -r requirements.txt
+          fetch-depth: 0
 
-      - name: Replay Alcatraz, Hog Canyons, No Kidding, and Poe since August 1
-        working-directory: cca-radar-tracker
-        run: python tools/audit_pool_fill_history.py
-
-      - name: Merge missing raw-radar events into operational state
+      - name: Merge recovered Alcatraz and Poe events into current operational state
         env:
           DATA_BRANCH: operational-data
+          RECOVERY_COMMIT: cd0cb928e2fb38ed47017c694fb748f6cdfc2951
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          worktree="$(mktemp -d)"
-          git fetch origin "$DATA_BRANCH:$DATA_BRANCH"
-          git worktree add "$worktree" "$DATA_BRANCH"
+          git fetch origin "$DATA_BRANCH"
+          git show "$RECOVERY_COMMIT:latest/status.json" > /tmp/recovered-status.json
 
-          python cca-radar-tracker/tools/merge_pool_fill_audit.py             --status "$worktree/latest/status.json"             --report cca-radar-tracker/audit_pool_fill_history_report.json
+          worktree="$(mktemp -d)"
+          git worktree add "$worktree" "origin/$DATA_BRANCH"
+
+          python - "$worktree/latest/status.json" /tmp/recovered-status.json <<'PY'
+          import copy, json, sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          current_path = Path(sys.argv[1])
+          recovered_path = Path(sys.argv[2])
+          current = json.loads(current_path.read_text())
+          recovered = json.loads(recovered_path.read_text())
+          targets = {"alcatraz", "poe"}
+
+          def event_end(e):
+              return e.get("end_utc") or e.get("start_utc") or ""
+          def event_key(e):
+              return (e.get("start_utc") or "", e.get("end_utc") or e.get("start_utc") or "")
+
+          restored = {}
+          for cid in targets:
+              src = recovered["canyons"][cid]
+              dst = current["canyons"][cid]
+              candidates = list(src.get("events") or [])
+              for key in ("last_rain_event", "last_qualifying_event"):
+                  if src.get(key):
+                      candidates.append(src[key])
+
+              by_key = {event_key(e): copy.deepcopy(e) for e in (dst.get("events") or []) if e and e.get("start_utc")}
+              added = []
+              for e in candidates:
+                  if not e or not e.get("start_utc"):
+                      continue
+                  k = event_key(e)
+                  if k not in by_key:
+                      by_key[k] = copy.deepcopy(e)
+                      added.append(copy.deepcopy(e))
+
+              events = sorted(by_key.values(), key=event_end, reverse=True)
+              dst["events"] = events[:120]
+              if events:
+                  dst["last_rain_event"] = events[0]
+              qualifying = [e for e in events if e.get("classification") in {"likely_full", "full_flush"}]
+              dst["last_qualifying_event"] = max(qualifying, key=event_end, default=None)
+
+              src_records = src.get("historical_records") or {}
+              dst_records = dst.setdefault("historical_records", {})
+              for rkey in ("peak_individual_event", "peak_seven_day_evidence"):
+                  sr, dr = src_records.get(rkey), dst_records.get(rkey)
+                  sr_ratio = float((sr or {}).get("fill_ratio", (sr or {}).get("ratio", 0)) or 0)
+                  dr_ratio = float((dr or {}).get("fill_ratio", (dr or {}).get("ratio", 0)) or 0)
+                  if sr and sr_ratio > dr_ratio:
+                      dst_records[rkey] = copy.deepcopy(sr)
+
+              restored[cid] = [{"start_utc":e.get("start_utc"),"end_utc":e.get("end_utc"),"fill_ratio":e.get("fill_ratio"),"classification":e.get("classification"),"basin_rain_inches":e.get("basin_rain_inches"),"direct_runoff_ft3":e.get("direct_runoff_ft3")} for e in added]
+
+          now = datetime.now(timezone.utc).replace(microsecond=0)
+          current["last_checked_utc"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+          current.setdefault("history_recovery", {})["alcatraz_poe_live_restore_20260929"] = {
+              "applied_utc": current["last_checked_utc"],
+              "source_commit": "cd0cb928e2fb38ed47017c694fb748f6cdfc2951",
+              "restored": restored,
+          }
+
+          checks = {
+              "alcatraz": ("2026-09-02T15:20:00Z", 4.45),
+              "poe": ("2026-09-02T17:50:00Z", 2.36),
+          }
+          for cid, (start, minimum_ratio) in checks.items():
+              match = next((e for e in current["canyons"][cid]["events"] if e.get("start_utc") == start), None)
+              if not match:
+                  raise SystemExit(f"Missing required restored event: {cid} {start}")
+              ratio = float(match.get("fill_ratio") or 0)
+              if ratio < minimum_ratio or match.get("classification") != "full_flush":
+                  raise SystemExit(f"Bad restored event {cid}: ratio={ratio}, class={match.get('classification')}")
+              print(f"RESTORED {cid}: {start} ratio={ratio} class={match.get('classification')}")
+
+          current_path.write_text(json.dumps(current, indent=2) + "\n")
+          print("ADDED", json.dumps(restored))
+          PY
 
           backup_date="$(date -u +%F)"
           mkdir -p "$worktree/backups/$backup_date"
           cp "$worktree/latest/status.json" "$worktree/backups/$backup_date/status.json"
-
           git -C "$worktree" add latest/status.json "backups/$backup_date/status.json"
-          if git -C "$worktree" diff --cached --quiet; then
-            echo "No pool-fill history changes to commit"
-          else
-            git -C "$worktree" commit -m "Recover missing pool-fill radar history"
-            git -C "$worktree" push origin "$DATA_BRANCH"
-          fi
+          git -C "$worktree" commit -m "Restore Alcatraz and Poe full-flush history"
+          git -C "$worktree" push origin HEAD:"$DATA_BRANCH"
           git worktree remove "$worktree"
 
-      - name: Queue production refresh
+      - name: Queue live radar refresh
+        id: dispatch
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
+        run: |
+          set -euo pipefail
+          before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
+          sleep 8
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/update-radar.yml/runs?event=workflow_dispatch&per_page=10" --jq ".workflow_runs[] | select(.created_at >= \"$before\") | .id" | head -n 1)"
+          test -n "$run_id"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "Dispatched update run $run_id"
 
-      - name: Upload audit report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pool-fill-history-audit
-          path: cca-radar-tracker/audit_pool_fill_history_report.json
-          if-no-files-found: warn
+      - name: Wait for live refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+        run: gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+
+      - name: Verify published website contains restored events
+        run: |
+          set -euo pipefail
+          url="https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?restore=$(date +%s)"
+          curl --fail --silent --show-error --location --max-time 60 --header "Cache-Control: no-cache" "$url" -o /tmp/published.json
+          python - /tmp/published.json <<'PY'
+          import json, sys
+          status = json.load(open(sys.argv[1]))
+          checks = {
+              "alcatraz": ("2026-09-02T15:20:00Z", 4.45),
+              "poe": ("2026-09-02T17:50:00Z", 2.36),
+          }
+          for cid, (start, minimum_ratio) in checks.items():
+              events = status["canyons"][cid].get("events") or []
+              match = next((e for e in events if e.get("start_utc") == start), None)
+              if not match:
+                  raise SystemExit(f"PUBLISHED MISSING: {cid} {start}")
+              ratio = float(match.get("fill_ratio") or 0)
+              if ratio < minimum_ratio or match.get("classification") != "full_flush":
+                  raise SystemExit(f"PUBLISHED BAD EVENT: {cid} ratio={ratio} class={match.get('classification')}")
+              print(f"PUBLISHED OK {cid}: {start}, ratio={ratio}, class={match.get('classification')}")
+          PY
