@@ -86,8 +86,8 @@ CANYON_POOL_STORAGE: dict[str, dict[str, float | str]] = {
     },
     "no-kidding": {
         "technical_length_miles": 0.34,
-        "pothole_modifier": 0.20,
-        "basis": "User technical-section length and higher pothole-storage adjustment",
+        "pothole_modifier": 0.00,
+        "basis": "User technical-section length and zero pothole-storage adjustment",
     },
     "angel-cove": {
         "technical_length_miles": 0.65,
