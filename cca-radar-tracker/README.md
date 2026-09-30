@@ -53,7 +53,7 @@ Drainage area is not used to scale pool storage. It remains necessary for conver
 | Entrajo | 0.85 | -0.70 | 17,830 | 35,660 |
 | Hog Canyons | 0.65 | -0.25 | 34,087 | 68,174 |
 | Leprechaun | 1.00 | -0.90 | 6,992 | 13,984 |
-| No Kidding | 0.34 | +0.20 | 28,528 | 57,056 |
+| No Kidding | 0.34 | 0.00 | 23,774 | 47,548 |
 | Pool Arch | 0.25 | -0.70 | 5,244 | 10,488 |
 | Alcatraz | 0.65 | +0.20 | 54,540 | 109,080 |
 | Cable Canyon | 2.50 | +0.50 | 262,210 | 524,420 |
