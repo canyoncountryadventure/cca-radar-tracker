@@ -1,4 +1,4 @@
-name: Inspect live Alcatraz and Poe Sept 2 history
+name: Verify live refill-history rows
 
 on:
   push:
@@ -8,27 +8,24 @@ on:
       - ".github/workflows/audit-pool-fill-history.yml"
 
 jobs:
-  inspect:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Print Sept 2 live events
+      - name: Verify UI refill-history rows
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 90             --header "Cache-Control: no-cache"             "https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?inspect=$(date +%s)"             -o /tmp/status.json
+          curl --fail --silent --show-error --location --max-time 90             --header "Cache-Control: no-cache"             "https://canyoncountryadventure.github.io/cca-radar-tracker/data/status.json?history=$(date +%s)"             -o /tmp/status.json
           python - <<'PY'
           import json
           s=json.load(open('/tmp/status.json'))
-          for cid in ('alcatraz','poe'):
-              print('CANYON',cid)
-              c=s['canyons'][cid]
-              for e in c.get('events') or []:
-                  if str(e.get('start_utc','')).startswith('2026-09-02') or str(e.get('end_utc','')).startswith('2026-09-02'):
-                      keep={k:e.get(k) for k in (
-                        'start_utc','end_utc','basin_rain_inches','max_pixel_storm_inches',
-                        'direct_runoff_ft3','generated_runoff_ft3','fill_ratio','classification',
-                        'classification_label','peak_dbz','peak_frame_utc','history_recovered_from_raw_radar'
-                      )}
-                      print(json.dumps(keep, sort_keys=True))
-              print('LAST_QUAL',json.dumps(c.get('last_qualifying_event'), sort_keys=True)[:3000])
-              print('PEAK',json.dumps((c.get('historical_records') or {}).get('peak_individual_event'), sort_keys=True)[:3000])
+          checks={
+            'alcatraz':'2026-09-02T15:20:00Z',
+            'poe':'2026-09-02T17:50:00Z',
+          }
+          for cid,start in checks.items():
+              rows=s['canyons'][cid].get('refill_history') or []
+              match=next((r for r in rows if r.get('start_utc')==start),None)
+              if not match:
+                  raise SystemExit(f'UI REFILL HISTORY MISSING: {cid} {start}')
+              print('UI ROW',cid,json.dumps(match,sort_keys=True))
           PY
