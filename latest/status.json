@@ -1,8 +1,8 @@
 {
   "schema_version": 5,
   "monitoring_started_utc": "2026-07-22T22:15:00Z",
-  "last_checked_utc": "2026-10-20T14:35:23Z",
-  "latest_frame_utc": "2026-10-20T14:30:00Z",
+  "last_checked_utc": "2026-10-20T14:39:24Z",
+  "latest_frame_utc": "2026-10-20T14:35:00Z",
   "canyons": {
     "zerog": {
       "id": "zerog",
@@ -10,7 +10,7 @@
       "model_signature": "c5774006d8524ec9",
       "area_sq_mi": 1.359,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -15974,7 +15974,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-08-30T21:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -16010,13 +16010,13 @@
       "cumulative_refill_evidence": {
         "event_count": 45,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 39147,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 39146,
         "ratio": 0.75,
         "percent": 75,
         "overflow_ft3": 842118,
-        "modeled_loss_ft3": 45571,
-        "loss_since_latest_event_ft3": 4051,
+        "modeled_loss_ft3": 45572,
+        "loss_since_latest_event_ft3": 4052,
         "milestones_utc": {
           "25": "2026-07-21T09:30:00Z",
           "50": "2026-07-21T09:30:00Z",
@@ -16045,7 +16045,7 @@
       "model_signature": "08299c603300e4b8",
       "area_sq_mi": 262.582,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -635652,7 +635652,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-18T13:00:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -635680,13 +635680,13 @@
       "cumulative_refill_evidence": {
         "event_count": 124,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 232839,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 232833,
         "ratio": 0.89,
         "percent": 89,
         "overflow_ft3": 5873376,
-        "modeled_loss_ft3": 225681,
-        "loss_since_latest_event_ft3": 1521,
+        "modeled_loss_ft3": 225688,
+        "loss_since_latest_event_ft3": 1528,
         "milestones_utc": {
           "25": "2026-07-22T05:15:00Z",
           "50": "2026-07-22T05:15:00Z",
@@ -635715,7 +635715,7 @@
       "model_signature": "0fa08cdfd258847d",
       "area_sq_mi": 1.117,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -650054,7 +650054,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-19T07:05:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -650082,12 +650082,12 @@
       "cumulative_refill_evidence": {
         "event_count": 45,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "balance_ft3": 4996,
         "ratio": 0.71,
         "percent": 71,
         "overflow_ft3": 22591,
-        "modeled_loss_ft3": 6155,
+        "modeled_loss_ft3": 6156,
         "loss_since_latest_event_ft3": 125,
         "milestones_utc": {
           "25": "2026-07-23T02:15:00Z",
@@ -650117,7 +650117,7 @@
       "model_signature": "706e99825657d6f8",
       "area_sq_mi": 0.477,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -660006,7 +660006,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-19T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -660034,13 +660034,13 @@
       "cumulative_refill_evidence": {
         "event_count": 32,
         "period_start_utc": "2026-07-16T06:20:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "balance_ft3": 12488,
         "ratio": 0.71,
         "percent": 71,
         "overflow_ft3": 231800,
-        "modeled_loss_ft3": 9211,
-        "loss_since_latest_event_ft3": 1141,
+        "modeled_loss_ft3": 9212,
+        "loss_since_latest_event_ft3": 1142,
         "milestones_utc": {
           "25": "2026-08-30T22:35:00Z",
           "50": "2026-08-30T22:35:00Z",
@@ -660069,7 +660069,7 @@
       "model_signature": "2a3cf369373e1a51",
       "area_sq_mi": 1.488,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -675474,7 +675474,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -675502,7 +675502,7 @@
       "cumulative_refill_evidence": {
         "event_count": 46,
         "period_start_utc": "2026-07-16T05:40:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -675534,7 +675534,7 @@
       "model_signature": "09a9d5343e966f2b",
       "area_sq_mi": 0.34,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -687816,7 +687816,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -687844,7 +687844,7 @@
       "cumulative_refill_evidence": {
         "event_count": 42,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -687876,7 +687876,7 @@
       "model_signature": "c04a664aa7ede4bb",
       "area_sq_mi": 1.399,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -702383,7 +702383,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-12T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -702411,13 +702411,13 @@
       "cumulative_refill_evidence": {
         "event_count": 47,
         "period_start_utc": "2026-07-17T01:10:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "balance_ft3": 22101,
         "ratio": 0.65,
         "percent": 65,
         "overflow_ft3": 114124,
-        "modeled_loss_ft3": 18281,
-        "loss_since_latest_event_ft3": 2958,
+        "modeled_loss_ft3": 18282,
+        "loss_since_latest_event_ft3": 2959,
         "milestones_utc": {
           "25": "2026-08-24T00:20:00Z",
           "50": "2026-08-24T00:20:00Z",
@@ -702446,7 +702446,7 @@
       "model_signature": "6dec4bd06db4841f",
       "area_sq_mi": 0.365,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -714283,7 +714283,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-12T04:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -714311,13 +714311,13 @@
       "cumulative_refill_evidence": {
         "event_count": 41,
         "period_start_utc": "2026-07-17T01:20:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 14734,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 14733,
         "ratio": 0.7,
         "percent": 70,
         "overflow_ft3": 27611,
-        "modeled_loss_ft3": 18822,
-        "loss_since_latest_event_ft3": 1813,
+        "modeled_loss_ft3": 18823,
+        "loss_since_latest_event_ft3": 1814,
         "milestones_utc": {
           "25": "2026-07-20T06:30:00Z",
           "50": "2026-07-20T06:30:00Z",
@@ -714346,7 +714346,7 @@
       "model_signature": "b7aa76d478b36eaf",
       "area_sq_mi": 8.887,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -737750,7 +737750,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-02T16:30:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -737778,13 +737778,13 @@
       "cumulative_refill_evidence": {
         "event_count": 49,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 14578,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 14576,
         "ratio": 0.27,
         "percent": 27,
         "overflow_ft3": 0,
-        "modeled_loss_ft3": 28068,
-        "loss_since_latest_event_ft3": 3672,
+        "modeled_loss_ft3": 28070,
+        "loss_since_latest_event_ft3": 3673,
         "milestones_utc": {
           "25": "2026-09-02T16:30:00Z",
           "50": "2026-09-02T16:30:00Z",
@@ -737813,7 +737813,7 @@
       "model_signature": "5150cc71d5bedcf0",
       "area_sq_mi": 1.526,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -766724,7 +766724,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-02T18:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -766752,13 +766752,13 @@
       "cumulative_refill_evidence": {
         "event_count": 66,
         "period_start_utc": "2026-07-16T08:20:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 52195,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 52192,
         "ratio": 0.57,
         "percent": 57,
         "overflow_ft3": 97042,
-        "modeled_loss_ft3": 43358,
-        "loss_since_latest_event_ft3": 1613,
+        "modeled_loss_ft3": 43360,
+        "loss_since_latest_event_ft3": 1615,
         "milestones_utc": {
           "25": "2026-09-02T18:10:00Z",
           "50": "2026-09-02T18:10:00Z",
@@ -766784,7 +766784,7 @@
       "model_signature": "34afd8ea1effb390",
       "area_sq_mi": 1.786,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -806367,7 +806367,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-16T22:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -806395,13 +806395,13 @@
       "cumulative_refill_evidence": {
         "event_count": 97,
         "period_start_utc": "2026-07-16T20:40:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "balance_ft3": 12573,
         "ratio": 0.71,
         "percent": 71,
         "overflow_ft3": 235139,
         "modeled_loss_ft3": 15352,
-        "loss_since_latest_event_ft3": 126,
+        "loss_since_latest_event_ft3": 127,
         "milestones_utc": {
           "25": "2026-07-22T04:30:00Z",
           "50": "2026-07-22T04:30:00Z",
@@ -806430,7 +806430,7 @@
       "model_signature": "2554f85b6c6ace3e",
       "area_sq_mi": 0.701,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -839488,7 +839488,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-12T11:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -839516,13 +839516,13 @@
       "cumulative_refill_evidence": {
         "event_count": 81,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "balance_ft3": 4453,
         "ratio": 0.85,
         "percent": 85,
         "overflow_ft3": 539211,
         "modeled_loss_ft3": 4779,
-        "loss_since_latest_event_ft3": 83,
+        "loss_since_latest_event_ft3": 84,
         "milestones_utc": {
           "25": "2026-07-17T04:45:00Z",
           "50": "2026-07-17T04:45:00Z",
@@ -839551,7 +839551,7 @@
       "model_signature": "827264741cdd7f64",
       "area_sq_mi": 7.028,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -887608,7 +887608,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-22T15:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -887636,13 +887636,13 @@
       "cumulative_refill_evidence": {
         "event_count": 90,
         "period_start_utc": "2026-07-16T05:55:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 114385,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 114381,
         "ratio": 0.75,
         "percent": 75,
         "overflow_ft3": 7795243,
-        "modeled_loss_ft3": 139597,
-        "loss_since_latest_event_ft3": 11806,
+        "modeled_loss_ft3": 139601,
+        "loss_since_latest_event_ft3": 11810,
         "milestones_utc": {
           "25": "2026-07-17T01:25:00Z",
           "50": "2026-07-17T01:25:00Z",
@@ -887671,7 +887671,7 @@
       "model_signature": "cc1087494960237e",
       "area_sq_mi": 3.89,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -929799,7 +929799,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-16T01:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -929827,13 +929827,13 @@
       "cumulative_refill_evidence": {
         "event_count": 87,
         "period_start_utc": "2026-07-16T06:00:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 179866,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 179859,
         "ratio": 0.69,
         "percent": 69,
         "overflow_ft3": 2303177,
-        "modeled_loss_ft3": 239318,
-        "loss_since_latest_event_ft3": 18475,
+        "modeled_loss_ft3": 239324,
+        "loss_since_latest_event_ft3": 18481,
         "milestones_utc": {
           "25": "2026-07-17T01:20:00Z",
           "50": "2026-07-22T05:55:00Z",
@@ -929862,7 +929862,7 @@
       "model_signature": "31ead494ddc1c3ba",
       "area_sq_mi": 77.36,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1076123,7 +1076123,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-08-31T01:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1076151,13 +1076151,13 @@
       "cumulative_refill_evidence": {
         "event_count": 95,
         "period_start_utc": "2026-07-16T11:25:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 151425,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 151418,
         "ratio": 0.57,
         "percent": 57,
         "overflow_ft3": 7484822,
-        "modeled_loss_ft3": 234396,
-        "loss_since_latest_event_ft3": 20517,
+        "modeled_loss_ft3": 234403,
+        "loss_since_latest_event_ft3": 20524,
         "milestones_utc": {
           "25": "2026-07-20T02:05:00Z",
           "50": "2026-07-20T02:05:00Z",
@@ -1076186,7 +1076186,7 @@
       "model_signature": "3dfd56e239f93766",
       "area_sq_mi": 3.254,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1097791,7 +1097791,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-08-30T21:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1097819,13 +1097819,13 @@
       "cumulative_refill_evidence": {
         "event_count": 55,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 37914,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 37913,
         "ratio": 0.72,
         "percent": 72,
         "overflow_ft3": 738247,
-        "modeled_loss_ft3": 45578,
-        "loss_since_latest_event_ft3": 4053,
+        "modeled_loss_ft3": 45580,
+        "loss_since_latest_event_ft3": 4054,
         "milestones_utc": {
           "25": "2026-07-21T09:45:00Z",
           "50": "2026-07-21T09:45:00Z",
@@ -1097854,7 +1097854,7 @@
       "model_signature": "f7d44ec246ce90d4",
       "area_sq_mi": 3.581,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1120089,7 +1120089,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-08-31T01:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1120117,13 +1120117,13 @@
       "cumulative_refill_evidence": {
         "event_count": 54,
         "period_start_utc": "2026-07-17T03:00:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 62217,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 62215,
         "ratio": 0.74,
         "percent": 74,
         "overflow_ft3": 2688572,
-        "modeled_loss_ft3": 72922,
-        "loss_since_latest_event_ft3": 6479,
+        "modeled_loss_ft3": 72924,
+        "loss_since_latest_event_ft3": 6481,
         "milestones_utc": {
           "25": "2026-07-21T09:15:00Z",
           "50": "2026-07-21T09:15:00Z",
@@ -1120152,7 +1120152,7 @@
       "model_signature": "f05270fe56ed2c43",
       "area_sq_mi": 0.581,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1145836,7 +1145836,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-22T18:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1145864,12 +1145864,12 @@
       "cumulative_refill_evidence": {
         "event_count": 80,
         "period_start_utc": "2026-07-16T10:55:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "balance_ft3": 15685,
         "ratio": 0.81,
         "percent": 81,
         "overflow_ft3": 1320717,
-        "modeled_loss_ft3": 15997,
+        "modeled_loss_ft3": 15998,
         "loss_since_latest_event_ft3": 1342,
         "milestones_utc": {
           "25": "2026-07-25T19:40:00Z",
@@ -1145899,7 +1145899,7 @@
       "model_signature": "236e1696ea8f87fa",
       "area_sq_mi": 0.188,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1155076,7 +1155076,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-19T06:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1155104,7 +1155104,7 @@
       "cumulative_refill_evidence": {
         "event_count": 30,
         "period_start_utc": "2026-07-16T05:35:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "balance_ft3": 2748,
         "ratio": 0.71,
         "percent": 71,
@@ -1155139,7 +1155139,7 @@
       "model_signature": "a9291232a94d24e3",
       "area_sq_mi": 6.265,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1205496,7 +1205496,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:26Z",
         "last_meaningful_event_utc": "2026-09-16T14:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1205524,13 +1205524,13 @@
       "cumulative_refill_evidence": {
         "event_count": 77,
         "period_start_utc": "2026-07-16T09:20:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 84042,
+        "through_utc": "2026-10-20T14:39:26Z",
+        "balance_ft3": 84039,
         "ratio": 0.75,
         "percent": 75,
         "overflow_ft3": 232631,
-        "modeled_loss_ft3": 52330,
-        "loss_since_latest_event_ft3": 7504,
+        "modeled_loss_ft3": 52333,
+        "loss_since_latest_event_ft3": 7507,
         "milestones_utc": {
           "25": "2026-08-31T00:00:00Z",
           "50": "2026-08-31T00:00:00Z",
@@ -1205559,7 +1205559,7 @@
       "model_signature": "7e9fef3ebfb69343",
       "area_sq_mi": 0.822,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1224550,7 +1224550,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-09-15T23:15:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1224578,13 +1224578,13 @@
       "cumulative_refill_evidence": {
         "event_count": 59,
         "period_start_utc": "2026-07-16T05:50:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 76283,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 76280,
         "ratio": 0.69,
         "percent": 69,
         "overflow_ft3": 497733,
-        "modeled_loss_ft3": 60573,
-        "loss_since_latest_event_ft3": 9109,
+        "modeled_loss_ft3": 60576,
+        "loss_since_latest_event_ft3": 9112,
         "milestones_utc": {
           "25": "2026-08-29T20:55:00Z",
           "50": "2026-08-29T20:55:00Z",
@@ -1224613,7 +1224613,7 @@
       "model_signature": "cd534ffbb9ac6c88",
       "area_sq_mi": 4.446,
       "latest_analysis": {
-        "frame_utc": "2026-10-20T14:30:00Z",
+        "frame_utc": "2026-10-20T14:35:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1275374,7 +1275374,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-10-20T14:35:25Z",
+        "through_utc": "2026-10-20T14:39:27Z",
         "last_meaningful_event_utc": "2026-10-13T02:00:00Z",
         "trend": "fading",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1275402,13 +1275402,13 @@
       "cumulative_refill_evidence": {
         "event_count": 89,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-10-20T14:35:25Z",
-        "balance_ft3": 26123,
+        "through_utc": "2026-10-20T14:39:27Z",
+        "balance_ft3": 26122,
         "ratio": 0.93,
         "percent": 93,
         "overflow_ft3": 18864869,
         "modeled_loss_ft3": 25499,
-        "loss_since_latest_event_ft3": 149,
+        "loss_since_latest_event_ft3": 150,
         "milestones_utc": {
           "25": "2026-07-17T03:45:00Z",
           "50": "2026-07-17T03:45:00Z",
@@ -1275433,294 +1275433,29 @@
     }
   },
   "health": {
-    "ok": false,
-    "message": "All expected five-minute radar frames are archive-confirmed through 2026-10-20T09:55:00Z. 6 archive frames are missing. 14 newer live frames are awaiting archive confirmation.",
-    "latest_iem_frame_utc": "2026-10-20T14:30:00Z",
+    "ok": true,
+    "message": "All expected five-minute radar frames are archive-confirmed through 2026-10-20T14:25:00Z. 0 archive frames are missing. 14 newer live frames are awaiting archive confirmation.",
+    "latest_iem_frame_utc": "2026-10-20T14:35:00Z",
     "archive_confirmation_delay_minutes": 10,
-    "missing_archive_frame_count": 6,
-    "stale_missing_archive_frame_count": 6,
+    "missing_archive_frame_count": 0,
+    "stale_missing_archive_frame_count": 0,
     "provisional_frame_count": 14,
-    "earliest_missing_archive_frame_utc": "2026-10-20T10:00:00Z",
-    "manual_replay_from_utc": "2026-10-20T10:00:00Z",
-    "frame_ledger_count": 853,
-    "frames_attempted": 144,
-    "frames_processed": 144,
-    "frames_replaced": 144,
+    "earliest_missing_archive_frame_utc": null,
+    "manual_replay_from_utc": null,
+    "frame_ledger_count": 859,
+    "frames_attempted": 55,
+    "frames_processed": 55,
+    "frames_replaced": 55,
     "current_run_failures": []
   },
   "last_scheduled_run_utc": "2026-10-20T02:02:25Z",
   "last_run_trigger": "workflow_dispatch",
-  "latest_provisional_frame_utc": "2026-10-20T14:30:00Z",
-  "latest_archive_confirmed_frame_utc": "2026-10-20T09:55:00Z",
-  "ledger_started_utc": "2026-10-17T14:30:00Z",
-  "missing_archive_frames_utc": [
-    "2026-10-20T10:00:00Z",
-    "2026-10-20T10:05:00Z",
-    "2026-10-20T10:10:00Z",
-    "2026-10-20T10:15:00Z",
-    "2026-10-20T10:20:00Z",
-    "2026-10-20T10:25:00Z"
-  ],
-  "stale_missing_archive_frames_utc": [
-    "2026-10-20T10:00:00Z",
-    "2026-10-20T10:05:00Z",
-    "2026-10-20T10:10:00Z",
-    "2026-10-20T10:15:00Z",
-    "2026-10-20T10:20:00Z",
-    "2026-10-20T10:25:00Z"
-  ],
+  "latest_provisional_frame_utc": "2026-10-20T14:35:00Z",
+  "latest_archive_confirmed_frame_utc": "2026-10-20T14:25:00Z",
+  "ledger_started_utc": "2026-10-17T14:35:00Z",
+  "missing_archive_frames_utc": [],
+  "stale_missing_archive_frames_utc": [],
   "frame_ledger": {
-    "2026-10-17T14:30:00Z": {
-      "frame_utc": "2026-10-17T14:30:00Z",
-      "source": "historical",
-      "confirmed": true,
-      "processed_utc": "2026-10-17T16:41:45Z",
-      "summary": {
-        "zerog": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "black-hole-white-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "leprechaun": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "woody": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "hog-canyons": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "no-kidding": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "angel-cove": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "constrychnine": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "alcatraz": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "poe": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "entrajo": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "pool-arch": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "the-squeeze": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "cable-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "eardley": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "north-fork-iron-wash": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "upper-greasewood": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "wonderland-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "hogwarts": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "neon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "quandary": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "yankee-doodle": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        }
-      },
-      "wet_canyons": {}
-    },
     "2026-10-17T14:35:00Z": {
       "frame_utc": "2026-10-17T14:35:00Z",
       "source": "historical",
@@ -1510801,7 +1510536,7 @@
       "frame_utc": "2026-10-20T10:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:01Z",
+      "processed_utc": "2026-10-20T14:39:05Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1511052,7 +1510787,7 @@
       "frame_utc": "2026-10-20T10:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:02Z",
+      "processed_utc": "2026-10-20T14:39:05Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1511303,7 +1511038,7 @@
       "frame_utc": "2026-10-20T10:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:02Z",
+      "processed_utc": "2026-10-20T14:39:06Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1511554,7 +1511289,7 @@
       "frame_utc": "2026-10-20T10:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:03Z",
+      "processed_utc": "2026-10-20T14:39:06Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1511805,7 +1511540,7 @@
       "frame_utc": "2026-10-20T10:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:03Z",
+      "processed_utc": "2026-10-20T14:39:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1512056,7 +1511791,7 @@
       "frame_utc": "2026-10-20T11:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:04Z",
+      "processed_utc": "2026-10-20T14:39:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1512307,7 +1512042,7 @@
       "frame_utc": "2026-10-20T11:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:05Z",
+      "processed_utc": "2026-10-20T14:39:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1512558,7 +1512293,7 @@
       "frame_utc": "2026-10-20T11:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:06Z",
+      "processed_utc": "2026-10-20T14:39:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1512809,7 +1512544,7 @@
       "frame_utc": "2026-10-20T11:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:06Z",
+      "processed_utc": "2026-10-20T14:39:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1513060,7 +1512795,7 @@
       "frame_utc": "2026-10-20T11:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:06Z",
+      "processed_utc": "2026-10-20T14:39:09Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1513311,7 +1513046,7 @@
       "frame_utc": "2026-10-20T11:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:07Z",
+      "processed_utc": "2026-10-20T14:39:09Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1513562,7 +1513297,7 @@
       "frame_utc": "2026-10-20T11:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:07Z",
+      "processed_utc": "2026-10-20T14:39:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1513813,7 +1513548,7 @@
       "frame_utc": "2026-10-20T11:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:08Z",
+      "processed_utc": "2026-10-20T14:39:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1514064,7 +1513799,7 @@
       "frame_utc": "2026-10-20T11:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:08Z",
+      "processed_utc": "2026-10-20T14:39:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1514315,7 +1514050,7 @@
       "frame_utc": "2026-10-20T11:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:09Z",
+      "processed_utc": "2026-10-20T14:39:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1514566,7 +1514301,7 @@
       "frame_utc": "2026-10-20T11:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:09Z",
+      "processed_utc": "2026-10-20T14:39:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1514817,7 +1514552,7 @@
       "frame_utc": "2026-10-20T11:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:10Z",
+      "processed_utc": "2026-10-20T14:39:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1515068,7 +1514803,7 @@
       "frame_utc": "2026-10-20T12:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:10Z",
+      "processed_utc": "2026-10-20T14:39:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1515319,7 +1515054,7 @@
       "frame_utc": "2026-10-20T12:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:11Z",
+      "processed_utc": "2026-10-20T14:39:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1515570,7 +1515305,7 @@
       "frame_utc": "2026-10-20T12:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:11Z",
+      "processed_utc": "2026-10-20T14:39:13Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1515821,7 +1515556,7 @@
       "frame_utc": "2026-10-20T12:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:12Z",
+      "processed_utc": "2026-10-20T14:39:13Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1516072,7 +1515807,7 @@
       "frame_utc": "2026-10-20T12:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:12Z",
+      "processed_utc": "2026-10-20T14:39:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1516323,7 +1516058,7 @@
       "frame_utc": "2026-10-20T12:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:12Z",
+      "processed_utc": "2026-10-20T14:39:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1516574,7 +1516309,7 @@
       "frame_utc": "2026-10-20T12:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:13Z",
+      "processed_utc": "2026-10-20T14:39:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1516825,7 +1516560,7 @@
       "frame_utc": "2026-10-20T12:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:13Z",
+      "processed_utc": "2026-10-20T14:39:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1517076,7 +1516811,7 @@
       "frame_utc": "2026-10-20T12:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:14Z",
+      "processed_utc": "2026-10-20T14:39:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1517327,7 +1517062,7 @@
       "frame_utc": "2026-10-20T12:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:14Z",
+      "processed_utc": "2026-10-20T14:39:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1517578,7 +1517313,7 @@
       "frame_utc": "2026-10-20T12:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:14Z",
+      "processed_utc": "2026-10-20T14:39:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1517829,7 +1517564,7 @@
       "frame_utc": "2026-10-20T12:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:15Z",
+      "processed_utc": "2026-10-20T14:39:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1518080,7 +1517815,7 @@
       "frame_utc": "2026-10-20T13:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:15Z",
+      "processed_utc": "2026-10-20T14:39:17Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1518331,7 +1518066,7 @@
       "frame_utc": "2026-10-20T13:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:16Z",
+      "processed_utc": "2026-10-20T14:39:17Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1518582,7 +1518317,7 @@
       "frame_utc": "2026-10-20T13:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:16Z",
+      "processed_utc": "2026-10-20T14:39:18Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1518833,7 +1518568,7 @@
       "frame_utc": "2026-10-20T13:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:17Z",
+      "processed_utc": "2026-10-20T14:39:18Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1519084,7 +1518819,7 @@
       "frame_utc": "2026-10-20T13:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:17Z",
+      "processed_utc": "2026-10-20T14:39:18Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1519335,7 +1519070,7 @@
       "frame_utc": "2026-10-20T13:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:17Z",
+      "processed_utc": "2026-10-20T14:39:19Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1519586,7 +1519321,7 @@
       "frame_utc": "2026-10-20T13:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:18Z",
+      "processed_utc": "2026-10-20T14:39:19Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1519837,7 +1519572,7 @@
       "frame_utc": "2026-10-20T13:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:18Z",
+      "processed_utc": "2026-10-20T14:39:20Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1520088,7 +1519823,7 @@
       "frame_utc": "2026-10-20T13:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:19Z",
+      "processed_utc": "2026-10-20T14:39:20Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1520339,7 +1520074,7 @@
       "frame_utc": "2026-10-20T13:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:19Z",
+      "processed_utc": "2026-10-20T14:39:20Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1520590,7 +1520325,7 @@
       "frame_utc": "2026-10-20T13:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:19Z",
+      "processed_utc": "2026-10-20T14:39:21Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1520841,7 +1520576,7 @@
       "frame_utc": "2026-10-20T13:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:20Z",
+      "processed_utc": "2026-10-20T14:39:21Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1521092,7 +1520827,7 @@
       "frame_utc": "2026-10-20T14:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:20Z",
+      "processed_utc": "2026-10-20T14:39:21Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1521343,7 +1521078,7 @@
       "frame_utc": "2026-10-20T14:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:21Z",
+      "processed_utc": "2026-10-20T14:39:22Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1521594,7 +1521329,7 @@
       "frame_utc": "2026-10-20T14:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:21Z",
+      "processed_utc": "2026-10-20T14:39:22Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1521845,7 +1521580,7 @@
       "frame_utc": "2026-10-20T14:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:22Z",
+      "processed_utc": "2026-10-20T14:39:23Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1522096,7 +1521831,7 @@
       "frame_utc": "2026-10-20T14:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-10-20T14:35:22Z",
+      "processed_utc": "2026-10-20T14:39:23Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1522345,9 +1522080,9 @@
     },
     "2026-10-20T14:25:00Z": {
       "frame_utc": "2026-10-20T14:25:00Z",
-      "source": "provisional",
-      "confirmed": false,
-      "processed_utc": "2026-10-20T14:35:22Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:23Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1522598,7 +1522333,1764 @@
       "frame_utc": "2026-10-20T14:30:00Z",
       "source": "provisional",
       "confirmed": false,
-      "processed_utc": "2026-10-20T14:35:22Z",
+      "processed_utc": "2026-10-20T14:39:24Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:00:00Z": {
+      "frame_utc": "2026-10-20T10:00:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:02Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:05:00Z": {
+      "frame_utc": "2026-10-20T10:05:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:03Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:10:00Z": {
+      "frame_utc": "2026-10-20T10:10:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:03Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:15:00Z": {
+      "frame_utc": "2026-10-20T10:15:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:04Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:20:00Z": {
+      "frame_utc": "2026-10-20T10:20:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:04Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T10:25:00Z": {
+      "frame_utc": "2026-10-20T10:25:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-10-20T14:39:04Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-10-20T14:35:00Z": {
+      "frame_utc": "2026-10-20T14:35:00Z",
+      "source": "provisional",
+      "confirmed": false,
+      "processed_utc": "2026-10-20T14:39:24Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1522852,8 +1524344,8 @@
     "missing_count": 2,
     "recipient": "canyoncountryadventure@gmail.com"
   },
-  "earliest_missing_archive_frame_utc": "2026-10-20T10:00:00Z",
-  "manual_replay_from_utc": "2026-10-20T10:00:00Z",
+  "earliest_missing_archive_frame_utc": null,
+  "manual_replay_from_utc": null,
   "state_restoration": {
     "validated": true,
     "source": "/home/runner/work/cca-radar-tracker/cca-radar-tracker/cca-radar-tracker/docs/data/status.json"
