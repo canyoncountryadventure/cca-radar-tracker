@@ -821,7 +821,7 @@ function renderRefillHistory(status, model) {
       New modeled runoff adds to the current balance, capped at 100%; confidence also decreases as the supporting observation ages.
     </p>
     <div class="event-meta-grid">
-      ${eventMeta("Last verified", condition.last_verified ? `${number(condition.last_verified.percent, 0)}% — ${dateOnly(condition.last_verified.observed_utc)}` : "No field verification")}
+      ${eventMeta("Condition anchor", condition.last_verified ? `${number(condition.last_verified.percent, 0)}% — ${dateOnly(condition.last_verified.observed_utc)}` : "No condition anchor")}
       ${eventMeta("Condition basis", condition.basis_utc ? `${condition.basis} — ${dateOnly(condition.basis_utc)}` : condition.basis || "None")}
       ${eventMeta("Detailed history", `${history.length} event${history.length === 1 ? "" : "s"} retained for 90 days`)}
       ${eventMeta("Last modeled refill", (condition.last_refill_utc || condition.last_meaningful_refill_utc) ? dateTime(condition.last_refill_utc || condition.last_meaningful_refill_utc) : "None")}
