@@ -194,17 +194,49 @@ ZERO_G_FIELD_CALIBRATION_BASIS = (
     "Aug 31 secondary rise at 0.0574 in is not treated as a new-rain refill."
 )
 
-# Rare field checks are calibration anchors, not recurring workflow inputs.
+# Condition anchors are one-time hydrologist adjustments, not fixed display values.
+# The October hurricane-remnant event produced prolonged low-dBZ rain that the
+# base-reflectivity conversion materially undercounted.  Reset every canyon to
+# full at the end of that event, then let the normal seasonal recession model
+# reduce the estimate on every later update.
+HURRICANE_FULL_CONDITION_UTC = "2026-10-24T02:20:00Z"
+HURRICANE_FULL_CONDITION_CANYONS = {
+    "zerog",
+    "black-hole-white-canyon",
+    "leprechaun",
+    "woody",
+    "hog-canyons",
+    "no-kidding",
+    "angel-cove",
+    "constrychnine",
+    "alcatraz",
+    "poe",
+    "entrajo",
+    "pool-arch",
+    "the-squeeze",
+    "cable-canyon",
+    "eardley",
+    "north-fork-iron-wash",
+    "upper-greasewood",
+    "wonderland-canyon",
+    "hogwarts",
+    "neon",
+    "quandary",
+    "yankee-doodle",
+}
 FIELD_CONDITION_ANCHORS: dict[str, dict[str, Any]] = {
-    "zerog": {
-        "observed_utc": "2026-09-07T20:43:00Z",
-        "percent": 72.5,
-        "observed_depth_ft": 9.43,
-        "operational_full_depth_ft": 13.0,
-        "spill_observed_depth_ft": 13.66,
-        "description": "Lower MX2001 field calibration: 9.43 ft observed; 13.0 ft operational full stage",
-        "notes": "Field observations bracket full stage: the logger was installed near 12 ft when the pool was nearly full, while 13.66 ft was actively spilling. Use 13.0 ft as the operational 100% reference until the spill crest is surveyed.",
-    },
+    canyon_id: {
+        "observed_utc": HURRICANE_FULL_CONDITION_UTC,
+        "percent": 100.0,
+        "basis": "Manual hydrologist adjustment",
+        "description": "Full after prolonged hurricane-remnant rainfall",
+        "notes": (
+            "Base-reflectivity radar materially undercounted the prolonged "
+            "low-dBZ rainfall. This is a one-time 100% condition reset; the "
+            "normal seasonal recession model remains active after the anchor."
+        ),
+    }
+    for canyon_id in HURRICANE_FULL_CONDITION_CANYONS
 }
 
 # Peak-flow calibration is deliberately separate from runoff volume and refill.
@@ -2334,7 +2366,7 @@ def cumulative_refill_evidence(
                 )
                 condition_time = event_time
         condition_ratio = apply_decay(condition_ratio, condition_time, now)
-        basis = "Field verified"
+        basis = str(anchor.get("basis") or "Field verified")
         last_verified = dict(anchor)
     elif last_refill:
         basis_time = event_end_utc(last_refill)
