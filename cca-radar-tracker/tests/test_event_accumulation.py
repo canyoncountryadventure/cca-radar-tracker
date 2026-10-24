@@ -298,19 +298,19 @@ class EventAccumulationTests(unittest.TestCase):
             50,
         )
 
-    def test_zero_g_field_anchor_uses_provisional_numeric_decay(self):
+    def test_hurricane_anchor_sets_full_then_uses_numeric_decay(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
-        evaluation_time = datetime(2026, 9, 8, 20, 43, tzinfo=timezone.utc)
+        evaluation_time = datetime(2026, 10, 25, 2, 20, tzinfo=timezone.utc)
         tracker.cumulative_refill_evidence(
             status, canyon, self.config, now_utc=evaluation_time
         )
         condition = status["condition_estimate"]
-        self.assertEqual(condition["percent"], 72)
-        self.assertEqual(condition["basis"], "Field verified")
-        self.assertEqual(condition["last_verified"]["observed_utc"], "2026-09-07T20:43:00Z")
+        self.assertEqual(condition["percent"], 99)
+        self.assertEqual(condition["basis"], "Manual hydrologist adjustment")
+        self.assertEqual(condition["last_verified"]["observed_utc"], "2026-10-24T02:20:00Z")
         self.assertEqual(condition["loss_model"], "zero_g_mx2001_et_plus_navajo")
-        self.assertAlmostEqual(condition["decay_percentage_points_per_day"], 0.943, delta=0.01)
+        self.assertAlmostEqual(condition["decay_percentage_points_per_day"], 0.895, delta=0.02)
         self.assertAlmostEqual(condition["navajo_seepage_inches_per_day"], 1.28, places=2)
 
     def test_no_refill_history_is_unknown_not_zero_percent(self):
@@ -329,10 +329,10 @@ class EventAccumulationTests(unittest.TestCase):
         self.assertEqual(condition["current_condition"], "unknown")
         self.assertEqual(condition["confidence"], "Unknown")
 
-    def test_event_after_field_anchor_can_only_top_off_condition(self):
+    def test_event_after_hurricane_anchor_can_only_top_off_condition(self):
         canyon = canyon_fixture(fill_target=100)
         status = tracker.empty_canyon_status(canyon)
-        evaluation_time = datetime(2026, 9, 8, 20, 43, tzinfo=timezone.utc)
+        evaluation_time = datetime(2026, 10, 25, 2, 20, tzinfo=timezone.utc)
         event_time = evaluation_time - timedelta(hours=1)
         status["events"] = [{
             "start_utc": tracker.utc_text(event_time),

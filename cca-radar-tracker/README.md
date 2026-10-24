@@ -171,7 +171,7 @@ The dashboard includes:
 - Current loss components shown on the front end: empirical 1.28 in/day residual, current monthly ETo, total in/day, and stage-equivalent percentage points/day
 - Explicit front-end methods language identifying the stable lower logger, the August 8 upper-logger relocation, the 13.0-ft operational full-stage reference (12 ft nearly full; 13.66 ft spilling), USU Moab ETo normals, and the fact that the rate is transferred to all canyons
 - Confidence that also declines as the supporting observation or refill event ages
-- Zero G field anchor: lower MX2001 about 9.43 ft on September 7, 2026 = 72.5% of the 13.0-ft operational full-stage reference; 13.66 ft is recorded as observed spill stage
+- October 23, 2026 hurricane-remnant condition reset: all 22 canyons were anchored at 100% at 8:20 p.m. MDT because prolonged low-dBZ rainfall was materially undercounted by the base-reflectivity conversion. This is a one-time hydrologist adjustment; normal seasonal recession continues after the anchor.
 - Largest retained event and retained seven-day-high dates, rebuilt when polygon or storage inputs change
 - Most recent rain event with Atlas 14 equivalent
 - Retained last major-refill event
