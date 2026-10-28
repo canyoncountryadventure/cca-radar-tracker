@@ -608,7 +608,25 @@ jobs:
             "repos/$GITHUB_REPOSITORY/actions/workflows/update-radar.yml/runs?status=queued&per_page=20" \
             --jq ".workflow_runs[] | select(.id != $GITHUB_RUN_ID) | [.id, .created_at] | @tsv")"
           queued_run=""
-          while IFS="$(printf '\\t')" read -r run_id created_at; do
+          while IFS=
+            [[ -z "$run_id" ]] && continue
+            created_epoch="$(date -u -d "$created_at" +%s)"
+            age_seconds="$((now - created_epoch))"
+            if (( age_seconds > 1800 )); then
+              echo "Cancelling stale queued radar run $run_id (${age_seconds}s old)."
+              gh api --method POST \
+                "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" >/dev/null || true
+            elif [[ -z "$queued_run" ]]; then
+              queued_run="$run_id"
+            fi
+          done <<< "$queued_rows"
+          if [[ -n "$queued_run" ]]; then
+            echo "A recent radar update is already queued ($queued_run); no duplicate continuation needed."
+            exit 0
+          fi
+          gh workflow run update-radar.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "Queued the next radar update."
+\t' read -r run_id created_at; do
             [[ -z "$run_id" ]] && continue
             created_epoch="$(date -u -d "$created_at" +%s)"
             age_seconds="$((now - created_epoch))"
