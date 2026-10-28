@@ -130,7 +130,15 @@ class EventAccumulationTests(unittest.TestCase):
         status = tracker.empty_status([self.canyon])
         for item in records:
             tracker.upsert_frame_record(status, item)
-        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        evaluation_time = max(
+            tracker.parse_utc(item["frame_utc"]) for item in records
+        ) + timedelta(hours=1)
+        tracker.rebuild_events_from_ledger(
+            status,
+            [self.canyon],
+            self.config,
+            now_utc=evaluation_time,
+        )
         return status["canyons"]["zerog"]
 
     def test_25_dbz_trigger_includes_lower_rain_before_and_after(self):
@@ -200,7 +208,12 @@ class EventAccumulationTests(unittest.TestCase):
         status = tracker.empty_status([self.canyon])
         for item in records:
             tracker.upsert_frame_record(status, item)
-        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        tracker.rebuild_events_from_ledger(
+            status,
+            [self.canyon],
+            self.config,
+            now_utc=tracker.parse_utc("2026-07-27T01:00:00Z"),
+        )
         original = status["canyons"]["zerog"]["events"][0]
 
         larger_storage = canyon_fixture(fill_target=104_884)
