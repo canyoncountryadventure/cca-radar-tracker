@@ -2463,7 +2463,11 @@ def rebuild_events_from_ledger(
     *,
     now_utc: datetime | None = None,
 ) -> None:
-    """Rebuild recent storms deterministically from timestamp-keyed frame records."""
+    """Rebuild recent storms deterministically from timestamp-keyed frame records.
+
+    ``now_utc`` exists so replay/tests can use the ledger's historical clock
+    instead of accidentally aging synthetic events against the wall clock.
+    """
     ledger = status.get("frame_ledger", {})
     if not ledger:
         return
