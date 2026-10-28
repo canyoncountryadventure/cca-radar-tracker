@@ -2457,7 +2457,11 @@ def cumulative_refill_evidence(
 
 
 def rebuild_events_from_ledger(
-    status: dict[str, Any], canyons: list[Canyon], config: dict[str, Any]
+    status: dict[str, Any],
+    canyons: list[Canyon],
+    config: dict[str, Any],
+    *,
+    now_utc: datetime | None = None,
 ) -> None:
     """Rebuild recent storms deterministically from timestamp-keyed frame records."""
     ledger = status.get("frame_ledger", {})
@@ -2537,7 +2541,9 @@ def rebuild_events_from_ledger(
             for event in dedupe_events(rebuilt.get("events", []))[:maximum_events]
         ]
         rebuilt.pop("_pending_rain_frames", None)
-        cumulative_refill_evidence(rebuilt, canyon, config)
+        cumulative_refill_evidence(
+            rebuilt, canyon, config, now_utc=now_utc
+        )
         status["canyons"][canyon.canyon_id] = rebuilt
 
 
