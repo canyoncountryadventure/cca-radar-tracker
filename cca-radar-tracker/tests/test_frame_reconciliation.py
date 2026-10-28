@@ -302,14 +302,24 @@ class FrameReconciliationTests(unittest.TestCase):
         tracker.upsert_frame_record(status, wet_record("2026-08-26T23:20:00Z"))
         tracker.upsert_frame_record(status, dry_record("2026-08-26T23:50:00Z"))
 
-        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        tracker.rebuild_events_from_ledger(
+            status,
+            [self.canyon],
+            self.config,
+            now_utc=dt("2026-08-27T01:00:00Z"),
+        )
         canyon_status = status["canyons"]["zerog"]
         first = canyon_status["last_rain_event"]
         first_rain = first["basin_rain_inches"]
         self.assertEqual(first["peak_grid_dbz"], [[45.0]])
         self.assertIn("peak_grid_dbz", canyon_status["events"][0])
 
-        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        tracker.rebuild_events_from_ledger(
+            status,
+            [self.canyon],
+            self.config,
+            now_utc=dt("2026-08-27T01:00:00Z"),
+        )
         canyon_status = status["canyons"]["zerog"]
         second = canyon_status["last_rain_event"]
         self.assertEqual(second["basin_rain_inches"], first_rain)
@@ -328,7 +338,12 @@ class FrameReconciliationTests(unittest.TestCase):
         tracker.upsert_frame_record(status, dry_record("2026-07-26T20:35:00Z"))
         tracker.upsert_frame_record(status, dry_record("2026-07-26T21:35:00Z"))
 
-        tracker.rebuild_events_from_ledger(status, [self.canyon], self.config)
+        tracker.rebuild_events_from_ledger(
+            status,
+            [self.canyon],
+            self.config,
+            now_utc=dt("2026-07-27T01:00:00Z"),
+        )
 
         events = status["canyons"]["zerog"]["events"]
         self.assertEqual(len(events), 2)
