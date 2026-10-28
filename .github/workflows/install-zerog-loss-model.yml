@@ -1,19 +1,8 @@
 name: Install all-canyon logger loss model
 
+# This is a legacy one-time installer retained only for manual recovery.
+# Do not run it on ordinary source/test pushes: it rewrites calibrated files.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/install-zerog-loss-model.yml'
-      - 'cca-radar-tracker/tools/finalize_all_canyon_loss.py'
-      - 'cca-radar-tracker/tools/update_zero_g_calibration_tests.py'
-      - 'cca-radar-tracker/tools/apply_per_canyon_recession.py'
-      - 'cca-radar-tracker/tools/fix_recession_frontend_copy.py'
-      - 'cca-radar-tracker/loss_model.py'
-      - 'cca-radar-tracker/README.md'
-      - 'cca-radar-tracker/tests/test_loss_model.py'
-      - 'cca-radar-tracker/tests/test_frontend_contract.py'
-      - 'cca-radar-tracker/tests/test_event_accumulation.py'
   workflow_dispatch:
 
 permissions:
