@@ -1,8 +1,8 @@
 {
   "schema_version": 5,
   "monitoring_started_utc": "2026-07-22T22:15:00Z",
-  "last_checked_utc": "2026-11-05T00:39:58Z",
-  "latest_frame_utc": "2026-11-05T00:35:00Z",
+  "last_checked_utc": "2026-11-05T00:44:17Z",
+  "latest_frame_utc": "2026-11-05T00:40:00Z",
   "canyons": {
     "zerog": {
       "id": "zerog",
@@ -10,7 +10,7 @@
       "model_signature": "c5774006d8524ec9",
       "area_sq_mi": 1.359,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -16559,7 +16559,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-08-30T21:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -16593,13 +16593,13 @@
       "cumulative_refill_evidence": {
         "event_count": 48,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 31997,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 31996,
         "ratio": 0.61,
         "percent": 61,
         "overflow_ft3": 842118,
-        "modeled_loss_ft3": 52721,
-        "loss_since_latest_event_ft3": 5917,
+        "modeled_loss_ft3": 52722,
+        "loss_since_latest_event_ft3": 5919,
         "milestones_utc": {
           "25": "2026-07-21T09:30:00Z",
           "50": "2026-07-21T09:30:00Z",
@@ -16628,7 +16628,7 @@
       "model_signature": "08299c603300e4b8",
       "area_sq_mi": 262.582,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -931276,7 +931276,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-18T13:00:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -931310,13 +931310,13 @@
       "cumulative_refill_evidence": {
         "event_count": 145,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 198799,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 198792,
         "ratio": 0.76,
         "percent": 76,
         "overflow_ft3": 5873376,
-        "modeled_loss_ft3": 261431,
-        "loss_since_latest_event_ft3": 11487,
+        "modeled_loss_ft3": 261438,
+        "loss_since_latest_event_ft3": 11494,
         "milestones_utc": {
           "25": "2026-07-22T05:15:00Z",
           "50": "2026-07-22T05:15:00Z",
@@ -931345,7 +931345,7 @@
       "model_signature": "0fa08cdfd258847d",
       "area_sq_mi": 1.117,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -946698,7 +946698,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-19T07:05:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -946732,13 +946732,13 @@
       "cumulative_refill_evidence": {
         "event_count": 51,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "balance_ft3": 4043,
         "ratio": 0.58,
         "percent": 58,
         "overflow_ft3": 22591,
         "modeled_loss_ft3": 7109,
-        "loss_since_latest_event_ft3": 700,
+        "loss_since_latest_event_ft3": 701,
         "milestones_utc": {
           "25": "2026-07-23T02:15:00Z",
           "50": "2026-07-23T02:15:00Z",
@@ -946767,7 +946767,7 @@
       "model_signature": "706e99825657d6f8",
       "area_sq_mi": 0.477,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -946784,11 +946784,11 @@
       },
       "open_event": null,
       "last_rain_event": {
-        "start_utc": "2026-11-04T20:30:00Z",
+        "start_utc": "2026-11-04T20:15:00Z",
         "end_utc": "2026-11-04T21:15:00Z",
         "last_rain_utc": "2026-11-04T21:15:00Z",
-        "frames": 10,
-        "rain_frames": 10,
+        "frames": 13,
+        "rain_frames": 13,
         "wet_frames": 2,
         "peak_dbz": 26.0,
         "peak_dbz_distribution": [
@@ -946908,80 +946908,80 @@
           "55": 0.0,
           "60": 0.0
         },
-        "basin_rain_inches": 0.0148,
-        "radar_rain_volume_ft3": 16522,
+        "basin_rain_inches": 0.0199,
+        "radar_rain_volume_ft3": 22216,
         "spatial_gate_seen": false,
-        "max_pixel_storm_inches": 0.022,
+        "max_pixel_storm_inches": 0.032,
         "accumulated_rain_grid_inches": [
           [
-            0.0215,
-            0.0163,
-            0.015,
-            0.0129,
-            0.0149,
-            0.015,
-            0.0142,
-            0.0128
-          ],
-          [
-            0.0215,
-            0.0163,
-            0.015,
-            0.0129,
-            0.0149,
-            0.015,
-            0.0142,
-            0.0128
-          ],
-          [
-            0.0196,
-            0.0198,
-            0.0158,
-            0.0167,
-            0.0138,
-            0.0152,
-            0.0161,
-            0.0136
-          ],
-          [
-            0.0223,
-            0.0188,
-            0.016,
-            0.0167,
-            0.0138,
-            0.0152,
-            0.0161,
-            0.0153
-          ],
-          [
-            0.0223,
-            0.0188,
-            0.016,
-            0.0136,
-            0.0138,
-            0.0152,
-            0.0161,
-            0.0153
-          ],
-          [
-            0.0212,
-            0.0204,
+            0.0264,
+            0.0218,
+            0.0202,
             0.0172,
-            0.0167,
-            0.0146,
-            0.0162,
-            0.0162,
-            0.0142
+            0.0207,
+            0.0262,
+            0.0246,
+            0.0223
           ],
           [
+            0.0264,
+            0.0218,
+            0.0202,
+            0.0172,
+            0.0207,
+            0.0262,
+            0.0246,
+            0.0223
+          ],
+          [
+            0.0257,
+            0.0267,
             0.0214,
-            0.0199,
-            0.0151,
-            0.0176,
-            0.0146,
-            0.0162,
-            0.0162,
-            0.0142
+            0.0216,
+            0.0181,
+            0.0217,
+            0.0218,
+            0.0191
+          ],
+          [
+            0.029,
+            0.0255,
+            0.0215,
+            0.0216,
+            0.0184,
+            0.0217,
+            0.0218,
+            0.0218
+          ],
+          [
+            0.029,
+            0.0255,
+            0.0215,
+            0.0197,
+            0.0181,
+            0.0217,
+            0.0218,
+            0.0218
+          ],
+          [
+            0.0275,
+            0.0247,
+            0.0214,
+            0.0216,
+            0.019,
+            0.0225,
+            0.0245,
+            0.0183
+          ],
+          [
+            0.0325,
+            0.0272,
+            0.0207,
+            0.0223,
+            0.019,
+            0.0225,
+            0.0245,
+            0.0183
           ]
         ],
         "peak_grid_dbz": [
@@ -947134,7 +947134,7 @@
         "delivery_status": "not_calibrated",
         "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
         "antecedent_condition": "normal (central estimate)",
-        "storm_duration_minutes": 50,
+        "storm_duration_minutes": 65,
         "wet_duration_minutes": 10,
         "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
         "fill_ratio": 0.0,
@@ -947167,12 +947167,12 @@
         "classification_label": "No meaningful pool refill indicated",
         "atlas14_return_period_years": 0.1,
         "atlas14_basis": "watershed-average radar rainfall",
-        "atlas14_duration_minutes": 50,
-        "atlas14_depth_inches": 0.0148,
+        "atlas14_duration_minutes": 65,
+        "atlas14_depth_inches": 0.0199,
         "rainfall_depth_source": "base_reflectivity_zr_screening",
-        "maximum_watershed_cell_storm_inches": 0.017,
-        "accumulation_grid_area_weighted_mean_inches": 0.015,
-        "accumulation_grid_mean_difference_inches": 0.0002,
+        "maximum_watershed_cell_storm_inches": 0.022,
+        "accumulation_grid_area_weighted_mean_inches": 0.0202,
+        "accumulation_grid_mean_difference_inches": 0.0003,
         "accumulation_grid_mean_consistent": true,
         "storm_core_evidence_source": "base_reflectivity",
         "experimental_model_applied": false,
@@ -947183,7 +947183,7 @@
         "flush_target_ft3": 34962,
         "storage_deficit_ft3": 17481,
         "storage_excess_ft3": 0,
-        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=16&interval=5&year=2026&month=11&day=4&hour=20&minute=35"
+        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=19&interval=5&year=2026&month=11&day=4&hour=20&minute=35"
       },
       "last_qualifying_event": {
         "start_utc": "2026-08-30T20:55:00Z",
@@ -947516,11 +947516,11 @@
       },
       "events": [
         {
-          "start_utc": "2026-11-04T20:30:00Z",
+          "start_utc": "2026-11-04T20:15:00Z",
           "end_utc": "2026-11-04T21:15:00Z",
           "last_rain_utc": "2026-11-04T21:15:00Z",
-          "frames": 10,
-          "rain_frames": 10,
+          "frames": 13,
+          "rain_frames": 13,
           "wet_frames": 2,
           "peak_dbz": 26.0,
           "peak_dbz_distribution": [
@@ -947640,80 +947640,80 @@
             "55": 0.0,
             "60": 0.0
           },
-          "basin_rain_inches": 0.0148,
-          "radar_rain_volume_ft3": 16522,
+          "basin_rain_inches": 0.0199,
+          "radar_rain_volume_ft3": 22216,
           "spatial_gate_seen": false,
-          "max_pixel_storm_inches": 0.022,
+          "max_pixel_storm_inches": 0.032,
           "accumulated_rain_grid_inches": [
             [
-              0.0215,
-              0.0163,
-              0.015,
-              0.0129,
-              0.0149,
-              0.015,
-              0.0142,
-              0.0128
-            ],
-            [
-              0.0215,
-              0.0163,
-              0.015,
-              0.0129,
-              0.0149,
-              0.015,
-              0.0142,
-              0.0128
-            ],
-            [
-              0.0196,
-              0.0198,
-              0.0158,
-              0.0167,
-              0.0138,
-              0.0152,
-              0.0161,
-              0.0136
-            ],
-            [
-              0.0223,
-              0.0188,
-              0.016,
-              0.0167,
-              0.0138,
-              0.0152,
-              0.0161,
-              0.0153
-            ],
-            [
-              0.0223,
-              0.0188,
-              0.016,
-              0.0136,
-              0.0138,
-              0.0152,
-              0.0161,
-              0.0153
-            ],
-            [
-              0.0212,
-              0.0204,
+              0.0264,
+              0.0218,
+              0.0202,
               0.0172,
-              0.0167,
-              0.0146,
-              0.0162,
-              0.0162,
-              0.0142
+              0.0207,
+              0.0262,
+              0.0246,
+              0.0223
             ],
             [
+              0.0264,
+              0.0218,
+              0.0202,
+              0.0172,
+              0.0207,
+              0.0262,
+              0.0246,
+              0.0223
+            ],
+            [
+              0.0257,
+              0.0267,
               0.0214,
-              0.0199,
-              0.0151,
-              0.0176,
-              0.0146,
-              0.0162,
-              0.0162,
-              0.0142
+              0.0216,
+              0.0181,
+              0.0217,
+              0.0218,
+              0.0191
+            ],
+            [
+              0.029,
+              0.0255,
+              0.0215,
+              0.0216,
+              0.0184,
+              0.0217,
+              0.0218,
+              0.0218
+            ],
+            [
+              0.029,
+              0.0255,
+              0.0215,
+              0.0197,
+              0.0181,
+              0.0217,
+              0.0218,
+              0.0218
+            ],
+            [
+              0.0275,
+              0.0247,
+              0.0214,
+              0.0216,
+              0.019,
+              0.0225,
+              0.0245,
+              0.0183
+            ],
+            [
+              0.0325,
+              0.0272,
+              0.0207,
+              0.0223,
+              0.019,
+              0.0225,
+              0.0245,
+              0.0183
             ]
           ],
           "peak_grid_dbz": [
@@ -947866,7 +947866,7 @@
           "delivery_status": "not_calibrated",
           "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
           "antecedent_condition": "normal (central estimate)",
-          "storm_duration_minutes": 50,
+          "storm_duration_minutes": 65,
           "wet_duration_minutes": 10,
           "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
           "fill_ratio": 0.0,
@@ -947899,12 +947899,12 @@
           "classification_label": "No meaningful pool refill indicated",
           "atlas14_return_period_years": 0.1,
           "atlas14_basis": "watershed-average radar rainfall",
-          "atlas14_duration_minutes": 50,
-          "atlas14_depth_inches": 0.0148,
+          "atlas14_duration_minutes": 65,
+          "atlas14_depth_inches": 0.0199,
           "rainfall_depth_source": "base_reflectivity_zr_screening",
-          "maximum_watershed_cell_storm_inches": 0.017,
-          "accumulation_grid_area_weighted_mean_inches": 0.015,
-          "accumulation_grid_mean_difference_inches": 0.0002,
+          "maximum_watershed_cell_storm_inches": 0.022,
+          "accumulation_grid_area_weighted_mean_inches": 0.0202,
+          "accumulation_grid_mean_difference_inches": 0.0003,
           "accumulation_grid_mean_consistent": true,
           "storm_core_evidence_source": "base_reflectivity",
           "experimental_model_applied": false,
@@ -947915,7 +947915,7 @@
           "flush_target_ft3": 34962,
           "storage_deficit_ft3": 17481,
           "storage_excess_ft3": 0,
-          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=16&interval=5&year=2026&month=11&day=4&hour=20&minute=35"
+          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=19&interval=5&year=2026&month=11&day=4&hour=20&minute=35"
         },
         {
           "start_utc": "2026-10-23T04:40:00Z",
@@ -958775,11 +958775,11 @@
       ],
       "refill_history": [
         {
-          "start_utc": "2026-11-04T20:30:00Z",
+          "start_utc": "2026-11-04T20:15:00Z",
           "end_utc": "2026-11-04T21:15:00Z",
           "classification": "minor",
           "classification_label": "No meaningful pool refill indicated",
-          "basin_rain_inches": 0.0148,
+          "basin_rain_inches": 0.0199,
           "direct_runoff_ft3": 0,
           "event_fill_ratio": 0.0,
           "modeled_loss_since_prior_event_ft3": 1955,
@@ -959464,7 +959464,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-19T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -959498,13 +959498,13 @@
       "cumulative_refill_evidence": {
         "event_count": 40,
         "period_start_utc": "2026-07-16T06:20:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 12993,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 12992,
         "ratio": 0.74,
         "percent": 74,
         "overflow_ft3": 231800,
         "modeled_loss_ft3": 11595,
-        "loss_since_latest_event_ft3": 21,
+        "loss_since_latest_event_ft3": 22,
         "milestones_utc": {
           "25": "2026-08-30T22:35:00Z",
           "50": "2026-08-30T22:35:00Z",
@@ -959533,7 +959533,7 @@
       "model_signature": "2a3cf369373e1a51",
       "area_sq_mi": 1.488,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -976849,7 +976849,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -976883,7 +976883,7 @@
       "cumulative_refill_evidence": {
         "event_count": 53,
         "period_start_utc": "2026-07-16T05:40:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -976915,7 +976915,7 @@
       "model_signature": "09a9d5343e966f2b",
       "area_sq_mi": 0.34,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -990686,7 +990686,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -990720,7 +990720,7 @@
       "cumulative_refill_evidence": {
         "event_count": 49,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -990752,7 +990752,7 @@
       "model_signature": "c04a664aa7ede4bb",
       "area_sq_mi": 1.399,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1006460,7 +1006460,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-12T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1006494,13 +1006494,13 @@
       "cumulative_refill_evidence": {
         "event_count": 52,
         "period_start_utc": "2026-07-17T01:10:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 17454,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 17453,
         "ratio": 0.51,
         "percent": 51,
         "overflow_ft3": 114124,
-        "modeled_loss_ft3": 22929,
-        "loss_since_latest_event_ft3": 3856,
+        "modeled_loss_ft3": 22930,
+        "loss_since_latest_event_ft3": 3857,
         "milestones_utc": {
           "25": "2026-08-24T00:20:00Z",
           "50": "2026-08-24T00:20:00Z",
@@ -1006529,7 +1006529,7 @@
       "model_signature": "6dec4bd06db4841f",
       "area_sq_mi": 0.365,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1019007,7 +1019007,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-12T04:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1019041,12 +1019041,12 @@
       "cumulative_refill_evidence": {
         "event_count": 46,
         "period_start_utc": "2026-07-17T01:20:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 11874,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 11873,
         "ratio": 0.57,
         "percent": 57,
         "overflow_ft3": 27611,
-        "modeled_loss_ft3": 21682,
+        "modeled_loss_ft3": 21683,
         "loss_since_latest_event_ft3": 2101,
         "milestones_utc": {
           "25": "2026-07-20T06:30:00Z",
@@ -1019076,7 +1019076,7 @@
       "model_signature": "b7aa76d478b36eaf",
       "area_sq_mi": 8.887,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1054169,7 +1054169,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:39:59Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-02T16:30:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1054203,13 +1054203,13 @@
       "cumulative_refill_evidence": {
         "event_count": 62,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-11-05T00:39:59Z",
-        "balance_ft3": 7142,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 7140,
         "ratio": 0.13,
         "percent": 13,
         "overflow_ft3": 0,
-        "modeled_loss_ft3": 35504,
-        "loss_since_latest_event_ft3": 2371,
+        "modeled_loss_ft3": 35506,
+        "loss_since_latest_event_ft3": 2372,
         "milestones_utc": {
           "25": "2026-09-02T16:30:00Z",
           "50": "2026-09-02T16:30:00Z",
@@ -1054238,7 +1054238,7 @@
       "model_signature": "5150cc71d5bedcf0",
       "area_sq_mi": 1.526,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1091685,7 +1091685,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-02T18:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1091719,13 +1091719,13 @@
       "cumulative_refill_evidence": {
         "event_count": 82,
         "period_start_utc": "2026-07-16T08:20:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 44294,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 44292,
         "ratio": 0.49,
         "percent": 49,
         "overflow_ft3": 97042,
-        "modeled_loss_ft3": 55751,
-        "loss_since_latest_event_ft3": 9050,
+        "modeled_loss_ft3": 55753,
+        "loss_since_latest_event_ft3": 9053,
         "milestones_utc": {
           "25": "2026-09-02T18:10:00Z",
           "50": "2026-09-02T18:10:00Z",
@@ -1091751,7 +1091751,7 @@
       "model_signature": "34afd8ea1effb390",
       "area_sq_mi": 1.786,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1091768,12 +1091768,12 @@
       },
       "open_event": null,
       "last_rain_event": {
-        "start_utc": "2026-11-04T20:05:00Z",
+        "start_utc": "2026-11-04T20:00:00Z",
         "end_utc": "2026-11-04T21:20:00Z",
         "last_rain_utc": "2026-11-04T21:20:00Z",
-        "frames": 13,
-        "rain_frames": 13,
-        "wet_frames": 10,
+        "frames": 17,
+        "rain_frames": 17,
+        "wet_frames": 11,
         "peak_dbz": 43.0,
         "peak_dbz_distribution": [
           {
@@ -1091892,150 +1091892,150 @@
           "55": 0.0,
           "60": 0.0
         },
-        "basin_rain_inches": 0.0347,
-        "radar_rain_volume_ft3": 143722,
+        "basin_rain_inches": 0.0402,
+        "radar_rain_volume_ft3": 166403,
         "spatial_gate_seen": false,
-        "max_pixel_storm_inches": 0.207,
+        "max_pixel_storm_inches": 0.212,
         "accumulated_rain_grid_inches": [
           [
-            0.0452,
-            0.0569,
-            0.0945,
-            0.0936,
-            0.0336,
-            0.0939,
-            0.1628,
-            0.1249,
-            0.1228,
-            0.0437,
-            0.0493,
-            0.0366
-          ],
-          [
-            0.0441,
-            0.048,
-            0.0379,
-            0.0343,
-            0.0318,
-            0.0488,
-            0.0893,
-            0.093,
-            0.2074,
-            0.1082,
-            0.0858,
-            0.0415
-          ],
-          [
-            0.0303,
-            0.0305,
-            0.0399,
-            0.0396,
-            0.0332,
-            0.0616,
-            0.1492,
-            0.1168,
-            0.0937,
-            0.0353,
-            0.0338,
-            0.0419
-          ],
-          [
-            0.0363,
-            0.0282,
-            0.0288,
-            0.0316,
-            0.0347,
-            0.044,
-            0.0616,
-            0.1529,
-            0.0678,
-            0.0503,
-            0.0533,
-            0.0285
-          ],
-          [
-            0.0201,
-            0.0267,
-            0.0222,
-            0.0276,
-            0.0319,
-            0.0354,
-            0.0561,
             0.0528,
-            0.1325,
-            0.0275,
-            0.0244,
-            0.0255
+            0.0654,
+            0.1037,
+            0.1028,
+            0.0403,
+            0.0982,
+            0.1682,
+            0.1278,
+            0.1292,
+            0.0508,
+            0.0549,
+            0.0423
           ],
           [
-            0.0221,
-            0.0215,
-            0.0252,
-            0.0326,
-            0.0289,
-            0.026,
-            0.0248,
-            0.0282,
-            0.0315,
-            0.0308,
-            0.0313,
-            0.0226
+            0.0549,
+            0.0545,
+            0.0438,
+            0.0402,
+            0.0382,
+            0.0551,
+            0.0946,
+            0.0983,
+            0.2124,
+            0.1124,
+            0.0896,
+            0.0448
           ],
           [
-            0.019,
-            0.022,
-            0.0216,
-            0.0213,
-            0.0336,
-            0.0182,
-            0.0246,
-            0.0266,
-            0.0293,
-            0.0261,
-            0.0284,
-            0.0222
-          ],
-          [
-            0.0199,
-            0.022,
-            0.022,
-            0.0203,
-            0.0275,
-            0.0258,
-            0.0172,
-            0.0249,
-            0.0363,
-            0.0251,
-            0.0259,
-            0.0296
-          ],
-          [
-            0.0187,
-            0.0187,
-            0.0162,
-            0.0194,
-            0.0231,
-            0.0236,
-            0.0192,
-            0.0228,
-            0.0265,
-            0.0369,
-            0.0251,
-            0.0228
-          ],
-          [
-            0.0286,
-            0.0212,
-            0.018,
-            0.0152,
-            0.0234,
-            0.0181,
-            0.0181,
-            0.0306,
-            0.0318,
-            0.0255,
+            0.0368,
+            0.0368,
+            0.0471,
+            0.0475,
+            0.039,
+            0.067,
+            0.1558,
+            0.1217,
+            0.0993,
+            0.0417,
             0.0391,
-            0.0241
+            0.045
+          ],
+          [
+            0.0434,
+            0.0337,
+            0.0359,
+            0.0371,
+            0.0399,
+            0.0509,
+            0.067,
+            0.1595,
+            0.0724,
+            0.0534,
+            0.0579,
+            0.0319
+          ],
+          [
+            0.0268,
+            0.0316,
+            0.0256,
+            0.0348,
+            0.039,
+            0.0391,
+            0.0608,
+            0.0588,
+            0.1359,
+            0.0334,
+            0.0296,
+            0.0276
+          ],
+          [
+            0.0333,
+            0.0265,
+            0.0321,
+            0.0362,
+            0.0322,
+            0.0312,
+            0.03,
+            0.0351,
+            0.0383,
+            0.0366,
+            0.037,
+            0.0245
+          ],
+          [
+            0.0263,
+            0.0289,
+            0.0285,
+            0.0262,
+            0.037,
+            0.0217,
+            0.031,
+            0.0328,
+            0.035,
+            0.0298,
+            0.0309,
+            0.0242
+          ],
+          [
+            0.0264,
+            0.0271,
+            0.0287,
+            0.0256,
+            0.0333,
+            0.0306,
+            0.0206,
+            0.031,
+            0.0413,
+            0.0295,
+            0.0296,
+            0.0321
+          ],
+          [
+            0.0239,
+            0.0245,
+            0.0216,
+            0.026,
+            0.0273,
+            0.0285,
+            0.0244,
+            0.0279,
+            0.0311,
+            0.0415,
+            0.0297,
+            0.0239
+          ],
+          [
+            0.0335,
+            0.0243,
+            0.0222,
+            0.0199,
+            0.029,
+            0.0217,
+            0.0217,
+            0.0341,
+            0.038,
+            0.0277,
+            0.0419,
+            0.0253
           ]
         ],
         "peak_grid_dbz": [
@@ -1092206,8 +1092206,8 @@
         },
         "spatial_direct_runoff_ft3_range": {
           "dry": 0,
-          "normal": 1,
-          "wet": 762
+          "normal": 3,
+          "wet": 857
         },
         "hydrology_available": true,
         "retention_s05_inches": {
@@ -1092227,29 +1092227,29 @@
         },
         "direct_runoff_ft3_range": {
           "dry": 0,
-          "normal": 1,
-          "wet": 762
+          "normal": 3,
+          "wet": 857
         },
-        "direct_runoff_ft3": 1,
+        "direct_runoff_ft3": 3,
         "uncalibrated_routed_peak_cfs_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.2
+          "wet": 0.22
         },
         "uncalibrated_routed_peak_cfs": 0.0,
         "routed_peak_cfs_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.2
+          "wet": 0.22
         },
         "routed_peak_cfs": 0.0,
         "peak_flow_factor": null,
         "peak_flow_status": "uncalibrated_experimental",
-        "generated_runoff_ft3": 1,
+        "generated_runoff_ft3": 3,
         "generated_runoff_ft3_range": {
           "dry": 0,
-          "normal": 1,
-          "wet": 762
+          "normal": 3,
+          "wet": 857
         },
         "runoff_method_version": "spatial_nrcs_all_canyons_v1",
         "runoff_spatialization_applied": true,
@@ -1092258,14 +1092258,14 @@
         "delivery_status": "not_calibrated",
         "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
         "antecedent_condition": "normal (central estimate)",
-        "storm_duration_minutes": 80,
-        "wet_duration_minutes": 50,
+        "storm_duration_minutes": 85,
+        "wet_duration_minutes": 55,
         "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
         "fill_ratio": 0.0,
         "fill_ratio_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.04
+          "wet": 0.05
         },
         "zero_g_field_core_evidence": {
           "available": false,
@@ -1092291,11 +1092291,11 @@
         "classification_label": "No meaningful pool refill indicated",
         "atlas14_return_period_years": 0.1,
         "atlas14_basis": "watershed-average radar rainfall",
-        "atlas14_duration_minutes": 80,
-        "atlas14_depth_inches": 0.0347,
+        "atlas14_duration_minutes": 85,
+        "atlas14_depth_inches": 0.0402,
         "rainfall_depth_source": "base_reflectivity_zr_screening",
-        "maximum_watershed_cell_storm_inches": 0.153,
-        "accumulation_grid_area_weighted_mean_inches": 0.0347,
+        "maximum_watershed_cell_storm_inches": 0.16,
+        "accumulation_grid_area_weighted_mean_inches": 0.0402,
         "accumulation_grid_mean_difference_inches": 0.0,
         "accumulation_grid_mean_consistent": true,
         "storm_core_evidence_source": "base_reflectivity",
@@ -1092305,9 +1092305,9 @@
         "estimated_hidden_storage_ft3": null,
         "storage_uncertainty": "normalized total; visible and hidden components not yet surveyed",
         "flush_target_ft3": 35660,
-        "storage_deficit_ft3": 17829,
+        "storage_deficit_ft3": 17827,
         "storage_excess_ft3": 0,
-        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=19&interval=5&year=2026&month=11&day=4&hour=20&minute=40"
+        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=23&interval=5&year=2026&month=11&day=4&hour=20&minute=40"
       },
       "last_qualifying_event": {
         "start_utc": "2026-09-16T22:05:00Z",
@@ -1092853,12 +1092853,12 @@
       },
       "events": [
         {
-          "start_utc": "2026-11-04T20:05:00Z",
+          "start_utc": "2026-11-04T20:00:00Z",
           "end_utc": "2026-11-04T21:20:00Z",
           "last_rain_utc": "2026-11-04T21:20:00Z",
-          "frames": 13,
-          "rain_frames": 13,
-          "wet_frames": 10,
+          "frames": 17,
+          "rain_frames": 17,
+          "wet_frames": 11,
           "peak_dbz": 43.0,
           "peak_dbz_distribution": [
             {
@@ -1092977,150 +1092977,150 @@
             "55": 0.0,
             "60": 0.0
           },
-          "basin_rain_inches": 0.0347,
-          "radar_rain_volume_ft3": 143722,
+          "basin_rain_inches": 0.0402,
+          "radar_rain_volume_ft3": 166403,
           "spatial_gate_seen": false,
-          "max_pixel_storm_inches": 0.207,
+          "max_pixel_storm_inches": 0.212,
           "accumulated_rain_grid_inches": [
             [
-              0.0452,
-              0.0569,
-              0.0945,
-              0.0936,
-              0.0336,
-              0.0939,
-              0.1628,
-              0.1249,
-              0.1228,
-              0.0437,
-              0.0493,
-              0.0366
-            ],
-            [
-              0.0441,
-              0.048,
-              0.0379,
-              0.0343,
-              0.0318,
-              0.0488,
-              0.0893,
-              0.093,
-              0.2074,
-              0.1082,
-              0.0858,
-              0.0415
-            ],
-            [
-              0.0303,
-              0.0305,
-              0.0399,
-              0.0396,
-              0.0332,
-              0.0616,
-              0.1492,
-              0.1168,
-              0.0937,
-              0.0353,
-              0.0338,
-              0.0419
-            ],
-            [
-              0.0363,
-              0.0282,
-              0.0288,
-              0.0316,
-              0.0347,
-              0.044,
-              0.0616,
-              0.1529,
-              0.0678,
-              0.0503,
-              0.0533,
-              0.0285
-            ],
-            [
-              0.0201,
-              0.0267,
-              0.0222,
-              0.0276,
-              0.0319,
-              0.0354,
-              0.0561,
               0.0528,
-              0.1325,
-              0.0275,
-              0.0244,
-              0.0255
+              0.0654,
+              0.1037,
+              0.1028,
+              0.0403,
+              0.0982,
+              0.1682,
+              0.1278,
+              0.1292,
+              0.0508,
+              0.0549,
+              0.0423
             ],
             [
-              0.0221,
-              0.0215,
-              0.0252,
-              0.0326,
-              0.0289,
-              0.026,
-              0.0248,
-              0.0282,
-              0.0315,
-              0.0308,
-              0.0313,
-              0.0226
+              0.0549,
+              0.0545,
+              0.0438,
+              0.0402,
+              0.0382,
+              0.0551,
+              0.0946,
+              0.0983,
+              0.2124,
+              0.1124,
+              0.0896,
+              0.0448
             ],
             [
-              0.019,
-              0.022,
-              0.0216,
-              0.0213,
-              0.0336,
-              0.0182,
-              0.0246,
-              0.0266,
-              0.0293,
-              0.0261,
-              0.0284,
-              0.0222
-            ],
-            [
-              0.0199,
-              0.022,
-              0.022,
-              0.0203,
-              0.0275,
-              0.0258,
-              0.0172,
-              0.0249,
-              0.0363,
-              0.0251,
-              0.0259,
-              0.0296
-            ],
-            [
-              0.0187,
-              0.0187,
-              0.0162,
-              0.0194,
-              0.0231,
-              0.0236,
-              0.0192,
-              0.0228,
-              0.0265,
-              0.0369,
-              0.0251,
-              0.0228
-            ],
-            [
-              0.0286,
-              0.0212,
-              0.018,
-              0.0152,
-              0.0234,
-              0.0181,
-              0.0181,
-              0.0306,
-              0.0318,
-              0.0255,
+              0.0368,
+              0.0368,
+              0.0471,
+              0.0475,
+              0.039,
+              0.067,
+              0.1558,
+              0.1217,
+              0.0993,
+              0.0417,
               0.0391,
-              0.0241
+              0.045
+            ],
+            [
+              0.0434,
+              0.0337,
+              0.0359,
+              0.0371,
+              0.0399,
+              0.0509,
+              0.067,
+              0.1595,
+              0.0724,
+              0.0534,
+              0.0579,
+              0.0319
+            ],
+            [
+              0.0268,
+              0.0316,
+              0.0256,
+              0.0348,
+              0.039,
+              0.0391,
+              0.0608,
+              0.0588,
+              0.1359,
+              0.0334,
+              0.0296,
+              0.0276
+            ],
+            [
+              0.0333,
+              0.0265,
+              0.0321,
+              0.0362,
+              0.0322,
+              0.0312,
+              0.03,
+              0.0351,
+              0.0383,
+              0.0366,
+              0.037,
+              0.0245
+            ],
+            [
+              0.0263,
+              0.0289,
+              0.0285,
+              0.0262,
+              0.037,
+              0.0217,
+              0.031,
+              0.0328,
+              0.035,
+              0.0298,
+              0.0309,
+              0.0242
+            ],
+            [
+              0.0264,
+              0.0271,
+              0.0287,
+              0.0256,
+              0.0333,
+              0.0306,
+              0.0206,
+              0.031,
+              0.0413,
+              0.0295,
+              0.0296,
+              0.0321
+            ],
+            [
+              0.0239,
+              0.0245,
+              0.0216,
+              0.026,
+              0.0273,
+              0.0285,
+              0.0244,
+              0.0279,
+              0.0311,
+              0.0415,
+              0.0297,
+              0.0239
+            ],
+            [
+              0.0335,
+              0.0243,
+              0.0222,
+              0.0199,
+              0.029,
+              0.0217,
+              0.0217,
+              0.0341,
+              0.038,
+              0.0277,
+              0.0419,
+              0.0253
             ]
           ],
           "peak_grid_dbz": [
@@ -1093291,8 +1093291,8 @@
           },
           "spatial_direct_runoff_ft3_range": {
             "dry": 0,
-            "normal": 1,
-            "wet": 762
+            "normal": 3,
+            "wet": 857
           },
           "hydrology_available": true,
           "retention_s05_inches": {
@@ -1093312,29 +1093312,29 @@
           },
           "direct_runoff_ft3_range": {
             "dry": 0,
-            "normal": 1,
-            "wet": 762
+            "normal": 3,
+            "wet": 857
           },
-          "direct_runoff_ft3": 1,
+          "direct_runoff_ft3": 3,
           "uncalibrated_routed_peak_cfs_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.2
+            "wet": 0.22
           },
           "uncalibrated_routed_peak_cfs": 0.0,
           "routed_peak_cfs_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.2
+            "wet": 0.22
           },
           "routed_peak_cfs": 0.0,
           "peak_flow_factor": null,
           "peak_flow_status": "uncalibrated_experimental",
-          "generated_runoff_ft3": 1,
+          "generated_runoff_ft3": 3,
           "generated_runoff_ft3_range": {
             "dry": 0,
-            "normal": 1,
-            "wet": 762
+            "normal": 3,
+            "wet": 857
           },
           "runoff_method_version": "spatial_nrcs_all_canyons_v1",
           "runoff_spatialization_applied": true,
@@ -1093343,14 +1093343,14 @@
           "delivery_status": "not_calibrated",
           "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
           "antecedent_condition": "normal (central estimate)",
-          "storm_duration_minutes": 80,
-          "wet_duration_minutes": 50,
+          "storm_duration_minutes": 85,
+          "wet_duration_minutes": 55,
           "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
           "fill_ratio": 0.0,
           "fill_ratio_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.04
+            "wet": 0.05
           },
           "zero_g_field_core_evidence": {
             "available": false,
@@ -1093376,11 +1093376,11 @@
           "classification_label": "No meaningful pool refill indicated",
           "atlas14_return_period_years": 0.1,
           "atlas14_basis": "watershed-average radar rainfall",
-          "atlas14_duration_minutes": 80,
-          "atlas14_depth_inches": 0.0347,
+          "atlas14_duration_minutes": 85,
+          "atlas14_depth_inches": 0.0402,
           "rainfall_depth_source": "base_reflectivity_zr_screening",
-          "maximum_watershed_cell_storm_inches": 0.153,
-          "accumulation_grid_area_weighted_mean_inches": 0.0347,
+          "maximum_watershed_cell_storm_inches": 0.16,
+          "accumulation_grid_area_weighted_mean_inches": 0.0402,
           "accumulation_grid_mean_difference_inches": 0.0,
           "accumulation_grid_mean_consistent": true,
           "storm_core_evidence_source": "base_reflectivity",
@@ -1093390,9 +1093390,9 @@
           "estimated_hidden_storage_ft3": null,
           "storage_uncertainty": "normalized total; visible and hidden components not yet surveyed",
           "flush_target_ft3": 35660,
-          "storage_deficit_ft3": 17829,
+          "storage_deficit_ft3": 17827,
           "storage_excess_ft3": 0,
-          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=19&interval=5&year=2026&month=11&day=4&hour=20&minute=40"
+          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=23&interval=5&year=2026&month=11&day=4&hour=20&minute=40"
         },
         {
           "start_utc": "2026-11-04T18:40:00Z",
@@ -1141634,16 +1141634,16 @@
       ],
       "refill_history": [
         {
-          "start_utc": "2026-11-04T20:05:00Z",
+          "start_utc": "2026-11-04T20:00:00Z",
           "end_utc": "2026-11-04T21:20:00Z",
           "classification": "minor",
           "classification_label": "No meaningful pool refill indicated",
-          "basin_rain_inches": 0.0347,
-          "direct_runoff_ft3": 1,
+          "basin_rain_inches": 0.0402,
+          "direct_runoff_ft3": 3,
           "event_fill_ratio": 0.0,
           "modeled_loss_since_prior_event_ft3": 16,
           "balance_before_ft3": 10225,
-          "cumulative_balance_ft3": 10226,
+          "cumulative_balance_ft3": 10228,
           "cumulative_ratio": 0.57,
           "cumulative_percent": 57,
           "overflow_ft3": 0
@@ -1143176,7 +1143176,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-16T22:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1143210,13 +1143210,13 @@
       "cumulative_refill_evidence": {
         "event_count": 123,
         "period_start_utc": "2026-07-16T20:40:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 10204,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 10206,
         "ratio": 0.57,
         "percent": 57,
         "overflow_ft3": 235139,
         "modeled_loss_ft3": 17783,
-        "loss_since_latest_event_ft3": 21,
+        "loss_since_latest_event_ft3": 22,
         "milestones_utc": {
           "25": "2026-07-22T04:30:00Z",
           "50": "2026-07-22T04:30:00Z",
@@ -1143245,7 +1143245,7 @@
       "model_signature": "2554f85b6c6ace3e",
       "area_sq_mi": 0.701,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1143265,9 +1143265,9 @@
         "start_utc": "2026-11-04T19:20:00Z",
         "end_utc": "2026-11-04T21:05:00Z",
         "last_rain_utc": "2026-11-04T21:05:00Z",
-        "frames": 19,
-        "rain_frames": 19,
-        "wet_frames": 13,
+        "frames": 22,
+        "rain_frames": 22,
+        "wet_frames": 16,
         "peak_dbz": 36.5,
         "peak_dbz_distribution": [
           {
@@ -1143386,122 +1143386,122 @@
           "55": 0.0,
           "60": 0.0
         },
-        "basin_rain_inches": 0.045,
-        "radar_rain_volume_ft3": 73456,
+        "basin_rain_inches": 0.0586,
+        "radar_rain_volume_ft3": 95670,
         "spatial_gate_seen": false,
-        "max_pixel_storm_inches": 0.072,
+        "max_pixel_storm_inches": 0.087,
         "accumulated_rain_grid_inches": [
           [
-            0.0505,
-            0.0544,
+            0.0579,
+            0.0673,
+            0.0553,
+            0.0785,
+            0.06,
+            0.0584,
+            0.0635,
             0.0485,
-            0.0636,
-            0.0538,
-            0.0466,
-            0.043,
-            0.0416,
-            0.0474,
-            0.0508,
-            0.0429,
-            0.0414,
-            0.042,
-            0.0464
-          ],
-          [
-            0.0506,
-            0.0491,
-            0.0533,
-            0.0481,
-            0.0497,
-            0.0538,
-            0.0382,
-            0.0357,
-            0.0398,
-            0.0425,
-            0.048,
-            0.0439,
-            0.0406,
-            0.0485
-          ],
-          [
-            0.0418,
-            0.0518,
-            0.0451,
-            0.0533,
-            0.0654,
-            0.0454,
-            0.0382,
-            0.0421,
-            0.0361,
-            0.0422,
-            0.0362,
-            0.0381,
-            0.044,
-            0.0474
-          ],
-          [
-            0.0461,
-            0.0418,
-            0.0674,
-            0.0458,
-            0.0449,
-            0.0454,
-            0.0606,
-            0.0432,
-            0.0483,
-            0.0367,
-            0.0401,
-            0.0362,
-            0.044,
-            0.0474
-          ],
-          [
-            0.0483,
-            0.0589,
-            0.0483,
-            0.0674,
-            0.0458,
-            0.0453,
-            0.0415,
-            0.0367,
-            0.0415,
-            0.048,
-            0.0378,
-            0.0304,
-            0.0369,
-            0.0392
-          ],
-          [
-            0.0708,
+            0.0596,
             0.0643,
-            0.0723,
-            0.0568,
-            0.0472,
-            0.0453,
-            0.0499,
-            0.0422,
-            0.0374,
-            0.0404,
-            0.0453,
-            0.0304,
-            0.0304,
-            0.0345
+            0.0607,
+            0.056,
+            0.0552,
+            0.0553
           ],
           [
-            0.0682,
-            0.0615,
+            0.0633,
+            0.06,
+            0.0631,
+            0.0586,
+            0.0585,
+            0.06,
+            0.0484,
+            0.05,
+            0.0496,
+            0.0556,
             0.0651,
-            0.0561,
-            0.0568,
-            0.0431,
-            0.0512,
-            0.0331,
-            0.0331,
-            0.0368,
-            0.0413,
-            0.0327,
-            0.0325,
-            0.0336
+            0.0612,
+            0.0552,
+            0.0717
+          ],
+          [
+            0.0508,
+            0.0645,
+            0.0576,
+            0.0631,
+            0.0803,
+            0.0553,
+            0.0457,
+            0.0573,
+            0.0504,
+            0.0553,
+            0.052,
+            0.0709,
+            0.0717,
+            0.0678
+          ],
+          [
+            0.0573,
+            0.0508,
+            0.0771,
+            0.0546,
+            0.0556,
+            0.0553,
+            0.0701,
+            0.0545,
+            0.0603,
+            0.0525,
+            0.0669,
+            0.0558,
+            0.0663,
+            0.0865
+          ],
+          [
+            0.0566,
+            0.0663,
+            0.0599,
+            0.0771,
+            0.0603,
+            0.0614,
+            0.0543,
+            0.0503,
+            0.054,
+            0.0627,
+            0.0595,
+            0.0537,
+            0.0535,
+            0.0542
+          ],
+          [
+            0.0762,
+            0.0741,
+            0.0832,
+            0.0693,
+            0.0609,
+            0.0624,
+            0.0716,
+            0.0557,
+            0.0547,
+            0.0741,
+            0.0705,
+            0.0537,
+            0.0537,
+            0.0554
+          ],
+          [
+            0.0818,
+            0.074,
+            0.0741,
+            0.0654,
+            0.0693,
+            0.0542,
+            0.0669,
+            0.087,
+            0.087,
+            0.0593,
+            0.0768,
+            0.0609,
+            0.0583,
+            0.0647
           ]
         ],
         "peak_grid_dbz": [
@@ -1143630,22 +1143630,22 @@
         "lumped_runoff_depth_inches": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.0
+          "wet": 0.0005
         },
         "lumped_direct_runoff_ft3_range": {
           "dry": 0,
           "normal": 0,
-          "wet": 78
+          "wet": 795
         },
         "spatial_runoff_depth_inches": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.0001
+          "wet": 0.0006
         },
         "spatial_direct_runoff_ft3_range": {
           "dry": 0,
           "normal": 0,
-          "wet": 208
+          "wet": 909
         },
         "hydrology_available": true,
         "retention_s05_inches": {
@@ -1143661,24 +1143661,24 @@
         "runoff_depth_inches": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.0001
+          "wet": 0.0006
         },
         "direct_runoff_ft3_range": {
           "dry": 0,
           "normal": 0,
-          "wet": 208
+          "wet": 909
         },
         "direct_runoff_ft3": 0,
         "uncalibrated_routed_peak_cfs_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.05
+          "wet": 0.22
         },
         "uncalibrated_routed_peak_cfs": 0.0,
         "routed_peak_cfs_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.05
+          "wet": 0.22
         },
         "routed_peak_cfs": 0.0,
         "peak_flow_factor": null,
@@ -1143687,7 +1143687,7 @@
         "generated_runoff_ft3_range": {
           "dry": 0,
           "normal": 0,
-          "wet": 208
+          "wet": 909
         },
         "runoff_method_version": "spatial_nrcs_all_canyons_v1",
         "runoff_spatialization_applied": true,
@@ -1143697,13 +1143697,13 @@
         "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
         "antecedent_condition": "normal (central estimate)",
         "storm_duration_minutes": 110,
-        "wet_duration_minutes": 65,
+        "wet_duration_minutes": 80,
         "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
         "fill_ratio": 0.0,
         "fill_ratio_range": {
           "dry": 0.0,
           "normal": 0.0,
-          "wet": 0.04
+          "wet": 0.17
         },
         "zero_g_field_core_evidence": {
           "available": false,
@@ -1143730,11 +1143730,11 @@
         "atlas14_return_period_years": 0.1,
         "atlas14_basis": "watershed-average radar rainfall",
         "atlas14_duration_minutes": 110,
-        "atlas14_depth_inches": 0.045,
+        "atlas14_depth_inches": 0.0586,
         "rainfall_depth_source": "base_reflectivity_zr_screening",
-        "maximum_watershed_cell_storm_inches": 0.067,
-        "accumulation_grid_area_weighted_mean_inches": 0.0453,
-        "accumulation_grid_mean_difference_inches": 0.0003,
+        "maximum_watershed_cell_storm_inches": 0.08,
+        "accumulation_grid_area_weighted_mean_inches": 0.059,
+        "accumulation_grid_mean_difference_inches": 0.0004,
         "accumulation_grid_mean_consistent": true,
         "storm_core_evidence_source": "base_reflectivity",
         "experimental_model_applied": false,
@@ -1143745,7 +1143745,7 @@
         "flush_target_ft3": 10488,
         "storage_deficit_ft3": 5244,
         "storage_excess_ft3": 0,
-        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=25&interval=5&year=2026&month=11&day=4&hour=20&minute=5"
+        "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=28&interval=5&year=2026&month=11&day=4&hour=20&minute=5"
       },
       "last_qualifying_event": {
         "start_utc": "2026-09-12T10:50:00Z",
@@ -1144238,9 +1144238,9 @@
           "start_utc": "2026-11-04T19:20:00Z",
           "end_utc": "2026-11-04T21:05:00Z",
           "last_rain_utc": "2026-11-04T21:05:00Z",
-          "frames": 19,
-          "rain_frames": 19,
-          "wet_frames": 13,
+          "frames": 22,
+          "rain_frames": 22,
+          "wet_frames": 16,
           "peak_dbz": 36.5,
           "peak_dbz_distribution": [
             {
@@ -1144359,122 +1144359,122 @@
             "55": 0.0,
             "60": 0.0
           },
-          "basin_rain_inches": 0.045,
-          "radar_rain_volume_ft3": 73456,
+          "basin_rain_inches": 0.0586,
+          "radar_rain_volume_ft3": 95670,
           "spatial_gate_seen": false,
-          "max_pixel_storm_inches": 0.072,
+          "max_pixel_storm_inches": 0.087,
           "accumulated_rain_grid_inches": [
             [
-              0.0505,
-              0.0544,
+              0.0579,
+              0.0673,
+              0.0553,
+              0.0785,
+              0.06,
+              0.0584,
+              0.0635,
               0.0485,
-              0.0636,
-              0.0538,
-              0.0466,
-              0.043,
-              0.0416,
-              0.0474,
-              0.0508,
-              0.0429,
-              0.0414,
-              0.042,
-              0.0464
-            ],
-            [
-              0.0506,
-              0.0491,
-              0.0533,
-              0.0481,
-              0.0497,
-              0.0538,
-              0.0382,
-              0.0357,
-              0.0398,
-              0.0425,
-              0.048,
-              0.0439,
-              0.0406,
-              0.0485
-            ],
-            [
-              0.0418,
-              0.0518,
-              0.0451,
-              0.0533,
-              0.0654,
-              0.0454,
-              0.0382,
-              0.0421,
-              0.0361,
-              0.0422,
-              0.0362,
-              0.0381,
-              0.044,
-              0.0474
-            ],
-            [
-              0.0461,
-              0.0418,
-              0.0674,
-              0.0458,
-              0.0449,
-              0.0454,
-              0.0606,
-              0.0432,
-              0.0483,
-              0.0367,
-              0.0401,
-              0.0362,
-              0.044,
-              0.0474
-            ],
-            [
-              0.0483,
-              0.0589,
-              0.0483,
-              0.0674,
-              0.0458,
-              0.0453,
-              0.0415,
-              0.0367,
-              0.0415,
-              0.048,
-              0.0378,
-              0.0304,
-              0.0369,
-              0.0392
-            ],
-            [
-              0.0708,
+              0.0596,
               0.0643,
-              0.0723,
-              0.0568,
-              0.0472,
-              0.0453,
-              0.0499,
-              0.0422,
-              0.0374,
-              0.0404,
-              0.0453,
-              0.0304,
-              0.0304,
-              0.0345
+              0.0607,
+              0.056,
+              0.0552,
+              0.0553
             ],
             [
-              0.0682,
-              0.0615,
+              0.0633,
+              0.06,
+              0.0631,
+              0.0586,
+              0.0585,
+              0.06,
+              0.0484,
+              0.05,
+              0.0496,
+              0.0556,
               0.0651,
-              0.0561,
-              0.0568,
-              0.0431,
-              0.0512,
-              0.0331,
-              0.0331,
-              0.0368,
-              0.0413,
-              0.0327,
-              0.0325,
-              0.0336
+              0.0612,
+              0.0552,
+              0.0717
+            ],
+            [
+              0.0508,
+              0.0645,
+              0.0576,
+              0.0631,
+              0.0803,
+              0.0553,
+              0.0457,
+              0.0573,
+              0.0504,
+              0.0553,
+              0.052,
+              0.0709,
+              0.0717,
+              0.0678
+            ],
+            [
+              0.0573,
+              0.0508,
+              0.0771,
+              0.0546,
+              0.0556,
+              0.0553,
+              0.0701,
+              0.0545,
+              0.0603,
+              0.0525,
+              0.0669,
+              0.0558,
+              0.0663,
+              0.0865
+            ],
+            [
+              0.0566,
+              0.0663,
+              0.0599,
+              0.0771,
+              0.0603,
+              0.0614,
+              0.0543,
+              0.0503,
+              0.054,
+              0.0627,
+              0.0595,
+              0.0537,
+              0.0535,
+              0.0542
+            ],
+            [
+              0.0762,
+              0.0741,
+              0.0832,
+              0.0693,
+              0.0609,
+              0.0624,
+              0.0716,
+              0.0557,
+              0.0547,
+              0.0741,
+              0.0705,
+              0.0537,
+              0.0537,
+              0.0554
+            ],
+            [
+              0.0818,
+              0.074,
+              0.0741,
+              0.0654,
+              0.0693,
+              0.0542,
+              0.0669,
+              0.087,
+              0.087,
+              0.0593,
+              0.0768,
+              0.0609,
+              0.0583,
+              0.0647
             ]
           ],
           "peak_grid_dbz": [
@@ -1144603,22 +1144603,22 @@
           "lumped_runoff_depth_inches": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.0
+            "wet": 0.0005
           },
           "lumped_direct_runoff_ft3_range": {
             "dry": 0,
             "normal": 0,
-            "wet": 78
+            "wet": 795
           },
           "spatial_runoff_depth_inches": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.0001
+            "wet": 0.0006
           },
           "spatial_direct_runoff_ft3_range": {
             "dry": 0,
             "normal": 0,
-            "wet": 208
+            "wet": 909
           },
           "hydrology_available": true,
           "retention_s05_inches": {
@@ -1144634,24 +1144634,24 @@
           "runoff_depth_inches": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.0001
+            "wet": 0.0006
           },
           "direct_runoff_ft3_range": {
             "dry": 0,
             "normal": 0,
-            "wet": 208
+            "wet": 909
           },
           "direct_runoff_ft3": 0,
           "uncalibrated_routed_peak_cfs_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.05
+            "wet": 0.22
           },
           "uncalibrated_routed_peak_cfs": 0.0,
           "routed_peak_cfs_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.05
+            "wet": 0.22
           },
           "routed_peak_cfs": 0.0,
           "peak_flow_factor": null,
@@ -1144660,7 +1144660,7 @@
           "generated_runoff_ft3_range": {
             "dry": 0,
             "normal": 0,
-            "wet": 208
+            "wet": 909
           },
           "runoff_method_version": "spatial_nrcs_all_canyons_v1",
           "runoff_spatialization_applied": true,
@@ -1144670,13 +1144670,13 @@
           "delivery_explanation": "Generated watershed runoff is reported separately because channel infiltration, seepage, upstream storage, routing, and attenuation have not been calibrated for this canyon.",
           "antecedent_condition": "normal (central estimate)",
           "storm_duration_minutes": 110,
-          "wet_duration_minutes": 65,
+          "wet_duration_minutes": 80,
           "hydrograph_method": "NRCS curve-number direct runoff + volume-conserving triangular routing",
           "fill_ratio": 0.0,
           "fill_ratio_range": {
             "dry": 0.0,
             "normal": 0.0,
-            "wet": 0.04
+            "wet": 0.17
           },
           "zero_g_field_core_evidence": {
             "available": false,
@@ -1144703,11 +1144703,11 @@
           "atlas14_return_period_years": 0.1,
           "atlas14_basis": "watershed-average radar rainfall",
           "atlas14_duration_minutes": 110,
-          "atlas14_depth_inches": 0.045,
+          "atlas14_depth_inches": 0.0586,
           "rainfall_depth_source": "base_reflectivity_zr_screening",
-          "maximum_watershed_cell_storm_inches": 0.067,
-          "accumulation_grid_area_weighted_mean_inches": 0.0453,
-          "accumulation_grid_mean_difference_inches": 0.0003,
+          "maximum_watershed_cell_storm_inches": 0.08,
+          "accumulation_grid_area_weighted_mean_inches": 0.059,
+          "accumulation_grid_mean_difference_inches": 0.0004,
           "accumulation_grid_mean_consistent": true,
           "storm_core_evidence_source": "base_reflectivity",
           "experimental_model_applied": false,
@@ -1144718,7 +1144718,7 @@
           "flush_target_ft3": 10488,
           "storage_deficit_ft3": 5244,
           "storage_excess_ft3": 0,
-          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=25&interval=5&year=2026&month=11&day=4&hour=20&minute=5"
+          "iem_archive_url": "https://mesonet.agron.iastate.edu/current/mcview.phtml?prod=usrad&java=script&mode=archive&frames=28&interval=5&year=2026&month=11&day=4&hour=20&minute=5"
         },
         {
           "start_utc": "2026-11-04T17:05:00Z",
@@ -1181425,7 +1181425,7 @@
           "end_utc": "2026-11-04T21:05:00Z",
           "classification": "minor",
           "classification_label": "No meaningful pool refill indicated",
-          "basin_rain_inches": 0.045,
+          "basin_rain_inches": 0.0586,
           "direct_runoff_ft3": 0,
           "event_fill_ratio": 0.0,
           "modeled_loss_since_prior_event_ft3": 6,
@@ -1182708,7 +1182708,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-12T11:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1182742,7 +1182742,7 @@
       "cumulative_refill_evidence": {
         "event_count": 98,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "balance_ft3": 4180,
         "ratio": 0.8,
         "percent": 80,
@@ -1182777,7 +1182777,7 @@
       "model_signature": "827264741cdd7f64",
       "area_sq_mi": 7.028,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1237082,7 +1237082,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-22T15:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1237116,13 +1237116,13 @@
       "cumulative_refill_evidence": {
         "event_count": 98,
         "period_start_utc": "2026-07-16T05:55:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 93531,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 93527,
         "ratio": 0.61,
         "percent": 61,
         "overflow_ft3": 7795243,
-        "modeled_loss_ft3": 160451,
-        "loss_since_latest_event_ft3": 6791,
+        "modeled_loss_ft3": 160455,
+        "loss_since_latest_event_ft3": 6795,
         "milestones_utc": {
           "25": "2026-07-17T01:25:00Z",
           "50": "2026-07-17T01:25:00Z",
@@ -1237151,7 +1237151,7 @@
       "model_signature": "cc1087494960237e",
       "area_sq_mi": 3.89,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1283991,7 +1283991,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-16T01:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1284025,13 +1284025,13 @@
       "cumulative_refill_evidence": {
         "event_count": 95,
         "period_start_utc": "2026-07-16T06:00:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 144116,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 144109,
         "ratio": 0.55,
         "percent": 55,
         "overflow_ft3": 2303177,
-        "modeled_loss_ft3": 275067,
-        "loss_since_latest_event_ft3": 11649,
+        "modeled_loss_ft3": 275074,
+        "loss_since_latest_event_ft3": 11656,
         "milestones_utc": {
           "25": "2026-07-17T01:20:00Z",
           "50": "2026-07-22T05:55:00Z",
@@ -1284060,7 +1284060,7 @@
       "model_signature": "31ead494ddc1c3ba",
       "area_sq_mi": 77.36,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1466619,7 +1466619,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-08-31T01:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1466653,13 +1466653,13 @@
       "cumulative_refill_evidence": {
         "event_count": 105,
         "period_start_utc": "2026-07-16T11:25:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 115199,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 115192,
         "ratio": 0.43,
         "percent": 43,
         "overflow_ft3": 7484822,
-        "modeled_loss_ft3": 270622,
-        "loss_since_latest_event_ft3": 602,
+        "modeled_loss_ft3": 270629,
+        "loss_since_latest_event_ft3": 609,
         "milestones_utc": {
           "25": "2026-07-20T02:05:00Z",
           "50": "2026-07-20T02:05:00Z",
@@ -1466688,7 +1466688,7 @@
       "model_signature": "3dfd56e239f93766",
       "area_sq_mi": 3.254,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1490458,7 +1490458,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-08-30T21:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1490492,13 +1490492,13 @@
       "cumulative_refill_evidence": {
         "event_count": 60,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 30764,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 30763,
         "ratio": 0.59,
         "percent": 59,
         "overflow_ft3": 738247,
-        "modeled_loss_ft3": 52728,
-        "loss_since_latest_event_ft3": 122,
+        "modeled_loss_ft3": 52730,
+        "loss_since_latest_event_ft3": 123,
         "milestones_utc": {
           "25": "2026-07-21T09:45:00Z",
           "50": "2026-07-21T09:45:00Z",
@@ -1490527,7 +1490527,7 @@
       "model_signature": "f7d44ec246ce90d4",
       "area_sq_mi": 3.581,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1515852,7 +1515852,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-08-31T01:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1515886,13 +1515886,13 @@
       "cumulative_refill_evidence": {
         "event_count": 60,
         "period_start_utc": "2026-07-17T03:00:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 50777,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 50775,
         "ratio": 0.61,
         "percent": 61,
         "overflow_ft3": 2688572,
-        "modeled_loss_ft3": 84362,
-        "loss_since_latest_event_ft3": 185,
+        "modeled_loss_ft3": 84364,
+        "loss_since_latest_event_ft3": 187,
         "milestones_utc": {
           "25": "2026-07-21T09:15:00Z",
           "50": "2026-07-21T09:15:00Z",
@@ -1515921,7 +1515921,7 @@
       "model_signature": "f05270fe56ed2c43",
       "area_sq_mi": 0.581,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1546512,7 +1546512,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-22T18:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1546546,8 +1546546,8 @@
       "cumulative_refill_evidence": {
         "event_count": 97,
         "period_start_utc": "2026-07-16T10:55:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 13040,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 13039,
         "ratio": 0.67,
         "percent": 67,
         "overflow_ft3": 1320717,
@@ -1546581,7 +1546581,7 @@
       "model_signature": "236e1696ea8f87fa",
       "area_sq_mi": 0.188,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1561201,7 +1561201,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-19T06:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1561235,7 +1561235,7 @@
       "cumulative_refill_evidence": {
         "event_count": 43,
         "period_start_utc": "2026-07-16T05:35:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "balance_ft3": 2223,
         "ratio": 0.58,
         "percent": 58,
@@ -1561270,7 +1561270,7 @@
       "model_signature": "a9291232a94d24e3",
       "area_sq_mi": 6.265,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1631226,7 +1631226,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-10-22T10:15:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1631260,13 +1631260,13 @@
       "cumulative_refill_evidence": {
         "event_count": 100,
         "period_start_utc": "2026-07-16T09:20:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 99152,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 99149,
         "ratio": 0.89,
         "percent": 89,
         "overflow_ft3": 249780,
-        "modeled_loss_ft3": 67583,
-        "loss_since_latest_event_ft3": 3053,
+        "modeled_loss_ft3": 67586,
+        "loss_since_latest_event_ft3": 3056,
         "milestones_utc": {
           "25": "2026-08-31T00:00:00Z",
           "50": "2026-08-31T00:00:00Z",
@@ -1631295,7 +1631295,7 @@
       "model_signature": "7e9fef3ebfb69343",
       "area_sq_mi": 0.822,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1652150,7 +1652150,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-09-15T23:15:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1652184,13 +1652184,13 @@
       "cumulative_refill_evidence": {
         "event_count": 67,
         "period_start_utc": "2026-07-16T05:50:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 61125,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 61122,
         "ratio": 0.55,
         "percent": 55,
         "overflow_ft3": 497733,
-        "modeled_loss_ft3": 75731,
-        "loss_since_latest_event_ft3": 11111,
+        "modeled_loss_ft3": 75734,
+        "loss_since_latest_event_ft3": 11113,
         "milestones_utc": {
           "25": "2026-08-29T20:55:00Z",
           "50": "2026-08-29T20:55:00Z",
@@ -1652219,7 +1652219,7 @@
       "model_signature": "cd534ffbb9ac6c88",
       "area_sq_mi": 4.446,
       "latest_analysis": {
-        "frame_utc": "2026-11-05T00:35:00Z",
+        "frame_utc": "2026-11-05T00:40:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1729082,8 +1729082,8 @@
       "recent_refill_evidence": {
         "window_days": 7,
         "percent": 100,
-        "ratio": 4.776,
-        "through_utc": "2026-11-05T00:40:00Z",
+        "ratio": 4.769,
+        "through_utc": "2026-11-05T00:44:19Z",
         "last_meaningful_event_utc": "2026-10-30T23:55:00Z",
         "trend": "fading",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1729117,13 +1729117,13 @@
       "cumulative_refill_evidence": {
         "event_count": 122,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-11-05T00:40:00Z",
-        "balance_ft3": 27247,
+        "through_utc": "2026-11-05T00:44:19Z",
+        "balance_ft3": 27246,
         "ratio": 0.97,
         "percent": 97,
         "overflow_ft3": 20217646,
-        "modeled_loss_ft3": 29312,
-        "loss_since_latest_event_ft3": 657,
+        "modeled_loss_ft3": 29313,
+        "loss_since_latest_event_ft3": 658,
         "milestones_utc": {
           "25": "2026-07-17T03:45:00Z",
           "50": "2026-07-17T03:45:00Z",
@@ -1729148,36 +1729148,28 @@
     }
   },
   "health": {
-    "ok": false,
-    "message": "All expected five-minute radar frames are archive-confirmed through 2026-11-04T20:10:00Z. 3 archive frames are missing. 15 newer live frames are awaiting archive confirmation.",
-    "latest_iem_frame_utc": "2026-11-05T00:35:00Z",
+    "ok": true,
+    "message": "All expected five-minute radar frames are archive-confirmed through 2026-11-05T00:30:00Z. 0 archive frames are missing. 15 newer live frames are awaiting archive confirmation.",
+    "latest_iem_frame_utc": "2026-11-05T00:40:00Z",
     "archive_confirmation_delay_minutes": 10,
-    "missing_archive_frame_count": 3,
-    "stale_missing_archive_frame_count": 3,
+    "missing_archive_frame_count": 0,
+    "stale_missing_archive_frame_count": 0,
     "provisional_frame_count": 15,
-    "earliest_missing_archive_frame_utc": "2026-11-04T20:15:00Z",
-    "manual_replay_from_utc": "2026-11-04T20:15:00Z",
-    "frame_ledger_count": 894,
-    "frames_attempted": 144,
-    "frames_processed": 144,
-    "frames_replaced": 144,
+    "earliest_missing_archive_frame_utc": null,
+    "manual_replay_from_utc": null,
+    "frame_ledger_count": 898,
+    "frames_attempted": 52,
+    "frames_processed": 52,
+    "frames_replaced": 52,
     "current_run_failures": []
   },
   "last_scheduled_run_utc": "2026-10-24T19:25:26Z",
   "last_run_trigger": "workflow_dispatch",
-  "latest_provisional_frame_utc": "2026-11-05T00:35:00Z",
-  "latest_archive_confirmed_frame_utc": "2026-11-04T20:10:00Z",
+  "latest_provisional_frame_utc": "2026-11-05T00:40:00Z",
+  "latest_archive_confirmed_frame_utc": "2026-11-05T00:30:00Z",
   "ledger_started_utc": "2026-11-01T21:25:00Z",
-  "missing_archive_frames_utc": [
-    "2026-11-04T20:15:00Z",
-    "2026-11-04T20:20:00Z",
-    "2026-11-04T20:25:00Z"
-  ],
-  "stale_missing_archive_frames_utc": [
-    "2026-11-04T20:15:00Z",
-    "2026-11-04T20:20:00Z",
-    "2026-11-04T20:25:00Z"
-  ],
+  "missing_archive_frames_utc": [],
+  "stale_missing_archive_frames_utc": [],
   "frame_ledger": {
     "2026-11-01T21:25:00Z": {
       "frame_utc": "2026-11-01T21:25:00Z",
@@ -1962466,7 +1962458,7 @@
       "frame_utc": "2026-11-04T20:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:41Z",
+      "processed_utc": "2026-11-05T00:44:02Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1963198,7 +1963190,7 @@
       "frame_utc": "2026-11-04T20:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:41Z",
+      "processed_utc": "2026-11-05T00:44:03Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1963930,7 +1963922,7 @@
       "frame_utc": "2026-11-04T20:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:41Z",
+      "processed_utc": "2026-11-05T00:44:03Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1964662,7 +1964654,7 @@
       "frame_utc": "2026-11-04T20:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:42Z",
+      "processed_utc": "2026-11-05T00:44:03Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1965714,7 +1965706,7 @@
       "frame_utc": "2026-11-04T21:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:42Z",
+      "processed_utc": "2026-11-05T00:44:04Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1966606,7 +1966598,7 @@
       "frame_utc": "2026-11-04T21:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:42Z",
+      "processed_utc": "2026-11-05T00:44:04Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1967658,7 +1967650,7 @@
       "frame_utc": "2026-11-04T21:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:43Z",
+      "processed_utc": "2026-11-05T00:44:04Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1968390,7 +1968382,7 @@
       "frame_utc": "2026-11-04T21:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:43Z",
+      "processed_utc": "2026-11-05T00:44:04Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1969122,7 +1969114,7 @@
       "frame_utc": "2026-11-04T21:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:44Z",
+      "processed_utc": "2026-11-05T00:44:05Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1969534,7 +1969526,7 @@
       "frame_utc": "2026-11-04T21:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:44Z",
+      "processed_utc": "2026-11-05T00:44:05Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1969785,7 +1969777,7 @@
       "frame_utc": "2026-11-04T21:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:44Z",
+      "processed_utc": "2026-11-05T00:44:05Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1970036,7 +1970028,7 @@
       "frame_utc": "2026-11-04T21:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:45Z",
+      "processed_utc": "2026-11-05T00:44:06Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1970287,7 +1970279,7 @@
       "frame_utc": "2026-11-04T21:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:45Z",
+      "processed_utc": "2026-11-05T00:44:06Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1970699,7 +1970691,7 @@
       "frame_utc": "2026-11-04T21:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:45Z",
+      "processed_utc": "2026-11-05T00:44:06Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1970950,7 +1970942,7 @@
       "frame_utc": "2026-11-04T21:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:46Z",
+      "processed_utc": "2026-11-05T00:44:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1971362,7 +1971354,7 @@
       "frame_utc": "2026-11-04T21:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:46Z",
+      "processed_utc": "2026-11-05T00:44:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1971613,7 +1971605,7 @@
       "frame_utc": "2026-11-04T22:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:47Z",
+      "processed_utc": "2026-11-05T00:44:07Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1971864,7 +1971856,7 @@
       "frame_utc": "2026-11-04T22:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:47Z",
+      "processed_utc": "2026-11-05T00:44:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1972115,7 +1972107,7 @@
       "frame_utc": "2026-11-04T22:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:47Z",
+      "processed_utc": "2026-11-05T00:44:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1972366,7 +1972358,7 @@
       "frame_utc": "2026-11-04T22:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:48Z",
+      "processed_utc": "2026-11-05T00:44:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1972617,7 +1972609,7 @@
       "frame_utc": "2026-11-04T22:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:48Z",
+      "processed_utc": "2026-11-05T00:44:08Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1972868,7 +1972860,7 @@
       "frame_utc": "2026-11-04T22:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:48Z",
+      "processed_utc": "2026-11-05T00:44:09Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1973119,7 +1973111,7 @@
       "frame_utc": "2026-11-04T22:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:49Z",
+      "processed_utc": "2026-11-05T00:44:09Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1973370,7 +1973362,7 @@
       "frame_utc": "2026-11-04T22:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:49Z",
+      "processed_utc": "2026-11-05T00:44:09Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1973621,7 +1973613,7 @@
       "frame_utc": "2026-11-04T22:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:50Z",
+      "processed_utc": "2026-11-05T00:44:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1973872,7 +1973864,7 @@
       "frame_utc": "2026-11-04T22:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:50Z",
+      "processed_utc": "2026-11-05T00:44:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1974123,7 +1974115,7 @@
       "frame_utc": "2026-11-04T22:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:50Z",
+      "processed_utc": "2026-11-05T00:44:10Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1974374,7 +1974366,7 @@
       "frame_utc": "2026-11-04T22:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:51Z",
+      "processed_utc": "2026-11-05T00:44:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1974625,7 +1974617,7 @@
       "frame_utc": "2026-11-04T23:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:51Z",
+      "processed_utc": "2026-11-05T00:44:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1974876,7 +1974868,7 @@
       "frame_utc": "2026-11-04T23:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:51Z",
+      "processed_utc": "2026-11-05T00:44:11Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1975127,7 +1975119,7 @@
       "frame_utc": "2026-11-04T23:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:52Z",
+      "processed_utc": "2026-11-05T00:44:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1975378,7 +1975370,7 @@
       "frame_utc": "2026-11-04T23:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:52Z",
+      "processed_utc": "2026-11-05T00:44:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1975629,7 +1975621,7 @@
       "frame_utc": "2026-11-04T23:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:52Z",
+      "processed_utc": "2026-11-05T00:44:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1975880,7 +1975872,7 @@
       "frame_utc": "2026-11-04T23:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:53Z",
+      "processed_utc": "2026-11-05T00:44:12Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1976131,7 +1976123,7 @@
       "frame_utc": "2026-11-04T23:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:53Z",
+      "processed_utc": "2026-11-05T00:44:13Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1976382,7 +1976374,7 @@
       "frame_utc": "2026-11-04T23:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:53Z",
+      "processed_utc": "2026-11-05T00:44:13Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1976633,7 +1976625,7 @@
       "frame_utc": "2026-11-04T23:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:54Z",
+      "processed_utc": "2026-11-05T00:44:13Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1976884,7 +1976876,7 @@
       "frame_utc": "2026-11-04T23:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:54Z",
+      "processed_utc": "2026-11-05T00:44:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1977135,7 +1977127,7 @@
       "frame_utc": "2026-11-04T23:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:54Z",
+      "processed_utc": "2026-11-05T00:44:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1977386,7 +1977378,7 @@
       "frame_utc": "2026-11-04T23:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:55Z",
+      "processed_utc": "2026-11-05T00:44:14Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1977637,7 +1977629,7 @@
       "frame_utc": "2026-11-05T00:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:55Z",
+      "processed_utc": "2026-11-05T00:44:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1977888,7 +1977880,7 @@
       "frame_utc": "2026-11-05T00:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:55Z",
+      "processed_utc": "2026-11-05T00:44:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1978139,7 +1978131,7 @@
       "frame_utc": "2026-11-05T00:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:56Z",
+      "processed_utc": "2026-11-05T00:44:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1978390,7 +1978382,7 @@
       "frame_utc": "2026-11-05T00:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:56Z",
+      "processed_utc": "2026-11-05T00:44:15Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1978641,7 +1978633,7 @@
       "frame_utc": "2026-11-05T00:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:57Z",
+      "processed_utc": "2026-11-05T00:44:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1978892,7 +1978884,7 @@
       "frame_utc": "2026-11-05T00:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-05T00:39:57Z",
+      "processed_utc": "2026-11-05T00:44:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1979141,9 +1979133,9 @@
     },
     "2026-11-05T00:30:00Z": {
       "frame_utc": "2026-11-05T00:30:00Z",
-      "source": "provisional",
-      "confirmed": false,
-      "processed_utc": "2026-11-05T00:39:57Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-11-05T00:44:16Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -2028907,7 +2028899,2454 @@
       "frame_utc": "2026-11-05T00:35:00Z",
       "source": "provisional",
       "confirmed": false,
-      "processed_utc": "2026-11-05T00:39:57Z",
+      "processed_utc": "2026-11-05T00:44:17Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-11-04T20:15:00Z": {
+      "frame_utc": "2026-11-04T20:15:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-11-05T00:44:01Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": 24.5,
+          "frame_basin_rain_inches": 0.0025,
+          "frame_rain_volume_ft3": 2814,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": 24.0,
+          "frame_basin_rain_inches": 0.0009,
+          "frame_rain_volume_ft3": 3721,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": 33.5,
+          "frame_basin_rain_inches": 0.0058,
+          "frame_rain_volume_ft3": 9442,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": true,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {
+        "woody": {
+          "analysis": {
+            "maximum_dbz": 24.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 100.0,
+                "area_sq_mi": 0.477
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.238,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.119,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.048,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0025,
+            "frame_rain_volume_ft3": 2814,
+            "wet": false,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -110.5675,
+              37.8375,
+              -110.5275,
+              37.872499999999995
+            ],
+            "frame_utc": "2026-11-04T20:15:00Z"
+          },
+          "grid_dbz_zlib": "eNqVjlEOwCAIQy9EDKBu2VmM97/GVhs3PvjZD6nltTKGe1HxWrq4YlhQKnbyqVP+kPUlDyiH+jwE7QqdazSsEhJeQjZCGblc24ex08IXzLCzM/+cs1cJOW+5kTpe",
+          "rain_grid_zlib": "eNqLjjbQMzAwMtQBU+ZgytAMQlmi8CwgFIQ0jdWhUKMpskYTCMdYB1MKZpgxmo0QytiQoE4j/DotidFpiuIUC2Q7oTxjFMONzGE6jVHMNUFWhEtnLAAwNU6d"
+        },
+        "entrajo": {
+          "analysis": {
+            "maximum_dbz": 24.0,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.1,
+                "area_sq_mi": 0.002
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 7.2,
+                "area_sq_mi": 0.128
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 33.7,
+                "area_sq_mi": 0.601
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 43.2,
+                "area_sq_mi": 0.771
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 15.9,
+                "area_sq_mi": 0.284
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.893,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.447,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.179,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0009,
+            "frame_rain_volume_ft3": 3721,
+            "wet": false,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.4125,
+              38.442499999999995,
+              -109.35249999999999,
+              38.4925
+            ],
+            "frame_utc": "2026-11-04T20:15:00Z"
+          },
+          "grid_dbz_zlib": "eNplUUEOwyAM+xCqICwU3lL1B9Nu+/+SmASqHWoViGM7ua7Sj5yIDk70cihD7gB2bPp3KhQFwh3f6ZJyYVcATyhRPoLTJkcfOA2QtRr62TsIZYLc8a5qTtyOsFE0VeWdoxlB2lsYWInCaWTXyggnli36I7CqDnA5dfk+3/c7Mucw2/eZqA/j8m67buwaehSh+3NEbCPKRlkA6TXkGZxmcIcKaf5nr7UiAj37xBS1jRZsmbGHEFlrt3UaNI/cfOjGvX/jW4E3",
+          "rain_grid_zlib": "eNptklEOwzAIQy8UTQGabD1LlftfY2owKt74qKwG8WIcrqu/ehdpt6htMckilqVPl4/L6YLagdpqm6pe1eHyziIECLgR3EVQCij6YY7YcpDMyuPkMUBFS3h0aqerVCo4qINEf7zSWIJUzipPq6h6C2eK68OMcP7ZfRzy+CMjB/mS9h8zv0iQt6/4ADNupw0wHGqWGPIoYLx6sU5WoPnFHmccXmwbGeAtlbxzStHlv7W+Ur6eHA=="
+        },
+        "pool-arch": {
+          "analysis": {
+            "maximum_dbz": 33.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 14.0,
+                "area_sq_mi": 0.098
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 58.6,
+                "area_sq_mi": 0.411
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 27.4,
+                "area_sq_mi": 0.192
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.35,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.175,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.07,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0058,
+            "frame_rain_volume_ft3": 9442,
+            "wet": true,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.5875,
+              38.5175,
+              -109.5175,
+              38.552499999999995
+            ],
+            "frame_utc": "2026-11-04T20:15:00Z"
+          },
+          "grid_dbz_zlib": "eNpVkdsRxSAIRBvKOL6IphbH/tu4rAvq/VmBwHElY+Qa4qMilJIQRdREhWmGdEhDbaXfrr1B5jP0sBkU2MnUYMpe0eeyUl4AGLDgNCIiEKRb0yZy8MDQXAr6xJrJ+XOBT5RVK9eT/DXVPRLWQ1ROevd+GhHurCPqnLHUnYkhPIWfvF2069qzC7lgnM7birsF5xhoVyS2M7ioyYXT+MNlLa5aOucPtfhi4w==",
+          "rain_grid_zlib": "eNptkmsKBDEIgy80LLW1r7MMvf81dkcjG2F+BWLNp9L7Lp9S6r4eacKy3ZTuprJZm8nwlzofETEpU1JNz2UM5RhVagwzSIhZHjNYYGIKJ/24gfBOT+vCJHRkINIyyUrSzJNd0Q1Cl5cYDAxBrU6+AvpmOrBzgaorGGXxI3S2tFQfHL6UTWyzeI+/CUYVHrknVL44whMqrlN4gUANASOPrG8oHlxnI4lQ+xIy7YUML/Vzvskqhn8="
+        }
+      }
+    },
+    "2026-11-04T20:20:00Z": {
+      "frame_utc": "2026-11-04T20:20:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-11-05T00:44:02Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": 21.5,
+          "frame_basin_rain_inches": 0.0013,
+          "frame_rain_volume_ft3": 1414,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": 26.5,
+          "frame_basin_rain_inches": 0.0029,
+          "frame_rain_volume_ft3": 12061,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": true,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": 36.5,
+          "frame_basin_rain_inches": 0.0052,
+          "frame_rain_volume_ft3": 8477,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": true,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {
+        "woody": {
+          "analysis": {
+            "maximum_dbz": 21.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 73.0,
+                "area_sq_mi": 0.348
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 27.0,
+                "area_sq_mi": 0.129
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.238,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.119,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.048,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0013,
+            "frame_rain_volume_ft3": 1414,
+            "wet": false,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -110.5675,
+              37.8375,
+              -110.5275,
+              37.872499999999995
+            ],
+            "frame_utc": "2026-11-04T20:20:00Z"
+          },
+          "grid_dbz_zlib": "eNqVjlEKwDAIQy8kojLddpbS+19j1dDuZ4PtJwTzEmxNT3YqMWUhPdLZcLYvCZZOP8jKK9JAZ7jKFW0UkzR4x9x30iTdM6lr7t5MqY5teXOQMTfx7BvZL/Z6Orc=",
+          "rain_grid_zlib": "eNqlj9EJwCAMRBeSksSgdhZx/zUK3gkRCi349Ui4lyO9yyWiniIaYBOmE143jHQotpgRihnTjWmDKU1DiGDXgVl+mGttL50LuJP5UKXpHjv57oc5HnfETrw="
+        },
+        "entrajo": {
+          "analysis": {
+            "maximum_dbz": 26.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 14.3,
+                "area_sq_mi": 0.256
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 40.1,
+                "area_sq_mi": 0.716
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 45.6,
+                "area_sq_mi": 0.814
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.893,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.447,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.179,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0029,
+            "frame_rain_volume_ft3": 12061,
+            "wet": true,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.4125,
+              38.442499999999995,
+              -109.35249999999999,
+              38.4925
+            ],
+            "frame_utc": "2026-11-04T20:20:00Z"
+          },
+          "grid_dbz_zlib": "eNplkWsOxCAIhC9kGqAd3T1L0/tfY8UBq9k/EwXn4+F9mx0odh3igpDTr8KYFPWYVj99PGue0EOectOou5wbQr8pPYu4do67x3Mj8xUJgV8nInuUEmYjSFaLzdIrAWyc8qVbchzOhJ1z0f03kTa6r7kgsD9EK5juSsF0YyyyuxXRRzBfxIjVRSTab29t/kaOUvTMzxnDLwjMP02Eu5sHdFlquiVf0mMbohcdbp9R644wIkK4/Ta3C9bG8/wAvcl5Pw==",
+          "rain_grid_zlib": "eNptkmEOhTAIgy9kXmBszp3FeP9rvGRQQw2/mgn7Vir3LT+RZseWtcU0SxtbdOQWOV0urzWv+QW9nuNOvXoV0mYBVyNZdGpBBcAq0Sw2C3iYwhygwrsWHMBHBT9zApAOr6OoWq/eWLlWh/SJddCNnv3jCe/0Q+/EnPEfAyozY+JF/qjEgeQUZJFR4Wy8VUbenIiW0eE+9u9lI1PaJsutWMczi9FPZPY7vjKA4HEzajDuY/SZR0Rez/MHftmkJQ=="
+        },
+        "pool-arch": {
+          "analysis": {
+            "maximum_dbz": 36.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 10.0,
+                "area_sq_mi": 0.07
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 27.5,
+                "area_sq_mi": 0.193
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 49.0,
+                "area_sq_mi": 0.343
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 8.7,
+                "area_sq_mi": 0.061
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 4.9,
+                "area_sq_mi": 0.034
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.35,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.175,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.07,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0052,
+            "frame_rain_volume_ft3": 8477,
+            "wet": true,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.5875,
+              38.5175,
+              -109.5175,
+              38.552499999999995
+            ],
+            "frame_utc": "2026-11-04T20:20:00Z"
+          },
+          "grid_dbz_zlib": "eNpVkNkNBCEMQxtCCAjhqAXRfxubY/DCjxUm8YszaxWKHAqrFJWKp8mMKciISFMZ3rAqeZVn5B2WG5sKOSyFi03gFIcd9jhCyTk2VLGHEKrqM/taRihWo7itOy9Oe5OrR6N+HEbVYATs4djufK494/8zT9VcxFiu46TqMQnHd3ec1EEk3Nr8/0gK/XZx5ofVPMYZMOYXi1tdtEF0EPI0dtr7B5foYsg=",
+          "rain_grid_zlib": "eNptktENBCEIRBsyl0VBtBZj/21cTsYLZPkiIMybhV3r+TxP1fILzUJtlpEvIvRuLXICWw2Nlkn3GfEuy6mxlQGsVBK8hBDmgJcQxmVgpAU/VxyoabZGQgRDzxuJB/4R/P58iBB7wFWefk9Hq9buMC8AfF6D7OY1bAtXQsaukSjcCudhBQFGWcO8ZjvzdONRGxmiowgEnOI+UKOZcZN/zDqoBoQQint/AXtChXY="
+        }
+      }
+    },
+    "2026-11-04T20:25:00Z": {
+      "frame_utc": "2026-11-04T20:25:00Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-11-05T00:44:02Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": 21.5,
+          "frame_basin_rain_inches": 0.0013,
+          "frame_rain_volume_ft3": 1466,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": 23.5,
+          "frame_basin_rain_inches": 0.0016,
+          "frame_rain_volume_ft3": 6683,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": 28.0,
+          "frame_basin_rain_inches": 0.0026,
+          "frame_rain_volume_ft3": 4295,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": true,
+          "rain_detected": true,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {
+        "woody": {
+          "analysis": {
+            "maximum_dbz": 21.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 73.0,
+                "area_sq_mi": 0.348
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 27.0,
+                "area_sq_mi": 0.129
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.238,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.119,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.048,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0013,
+            "frame_rain_volume_ft3": 1466,
+            "wet": false,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -110.5675,
+              37.8375,
+              -110.5275,
+              37.872499999999995
+            ],
+            "frame_utc": "2026-11-04T20:25:00Z"
+          },
+          "grid_dbz_zlib": "eNqVjsENwDAIAxdCKKBC01mi7L9GA1bpp3n0Y1n4bDGGXGyUosKNpIfT5fQscW6TfpCZZySOznKZC9ooBqnwhjmQvaA9qS3c96bU3LsZkh094mYg/dnEszty3vncOr0=",
+          "rain_grid_zlib": "eNqlj1sKwDAIBC8Uii+a9Cwh979GIW5BIZCWfg0rjou900HEViKaQyaEJ6wmjPJTbHGHIKqny1OCMEzxJQBdnNMX83zR+Yxl1anxjuKhCtMsduLdjTlucyFOtg=="
+        },
+        "entrajo": {
+          "analysis": {
+            "maximum_dbz": 23.5,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 43.8,
+                "area_sq_mi": 0.782
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 56.2,
+                "area_sq_mi": 1.004
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.893,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.447,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.179,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0016,
+            "frame_rain_volume_ft3": 6683,
+            "wet": false,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.4125,
+              38.442499999999995,
+              -109.35249999999999,
+              38.4925
+            ],
+            "frame_utc": "2026-11-04T20:25:00Z"
+          },
+          "grid_dbz_zlib": "eNpdkdENxDAIQxeqKiBN0pul6v5rXMDByd2PRUWeAfd5rJ71sAKRKZeLuKg3ououN7o15D0mLUP0TgFz0azyUzZbcVpnzQWGWFrohxaNS8VjA31xNwW4+n8WUdVl4bQlgxYttPvznqssi1hlXBh0/2XunA1QGKfxhoJRQTfkkqsKQPSZZGZlqLCU04V9WgAMaZtFrp8WSE3WKfOPyQbKxiwLLZl5PoqYYnZj8AqfnN0Qkhx+9vsFk1147A==",
+          "rain_grid_zlib": "eNptklEOwzAIQy8UTRiSLjlLlftfY1oDE574qRU1PIzJfctLxN7tK+oySNYjOCfQqZ+CcT1icNktU3H+QklWhnursMEdXaZTMVsSZedGJi3DO7G9+mcVxZAKuluyfcQ/uFO9JDi9gqdvdLBiGQinAxWFnCLHHltEsVqYQ48z62Tj3BGaN7ZHcSk1DKMRDSo2iczqgXB2V1AXp0Ilg3CoOASXwVTkbXgoQs/NhR3zFdG9P0YFo/k="
+        },
+        "pool-arch": {
+          "analysis": {
+            "maximum_dbz": 28.0,
+            "dbz_distribution": [
+              {
+                "label": "No echo / <5 dBZ",
+                "minimum_dbz": null,
+                "maximum_dbz_exclusive": 5.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "5\u2013<10 dBZ",
+                "minimum_dbz": 5.0,
+                "maximum_dbz_exclusive": 10.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "10\u2013<15 dBZ",
+                "minimum_dbz": 10.0,
+                "maximum_dbz_exclusive": 15.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "15\u2013<20 dBZ",
+                "minimum_dbz": 15.0,
+                "maximum_dbz_exclusive": 20.0,
+                "percent": 13.8,
+                "area_sq_mi": 0.097
+              },
+              {
+                "label": "20\u2013<25 dBZ",
+                "minimum_dbz": 20.0,
+                "maximum_dbz_exclusive": 25.0,
+                "percent": 74.9,
+                "area_sq_mi": 0.525
+              },
+              {
+                "label": "25\u2013<30 dBZ",
+                "minimum_dbz": 25.0,
+                "maximum_dbz_exclusive": 30.0,
+                "percent": 11.3,
+                "area_sq_mi": 0.079
+              },
+              {
+                "label": "30\u2013<35 dBZ",
+                "minimum_dbz": 30.0,
+                "maximum_dbz_exclusive": 35.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "35\u2013<40 dBZ",
+                "minimum_dbz": 35.0,
+                "maximum_dbz_exclusive": 40.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "40\u2013<45 dBZ",
+                "minimum_dbz": 40.0,
+                "maximum_dbz_exclusive": 45.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "45\u2013<50 dBZ",
+                "minimum_dbz": 45.0,
+                "maximum_dbz_exclusive": 50.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "50\u2013<55 dBZ",
+                "minimum_dbz": 50.0,
+                "maximum_dbz_exclusive": 55.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "55\u2013<60 dBZ",
+                "minimum_dbz": 55.0,
+                "maximum_dbz_exclusive": 60.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "60\u2013<65 dBZ",
+                "minimum_dbz": 60.0,
+                "maximum_dbz_exclusive": 65.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "65\u2013<70 dBZ",
+                "minimum_dbz": 65.0,
+                "maximum_dbz_exclusive": 70.0,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              },
+              {
+                "label": "70+ dBZ",
+                "minimum_dbz": 70.0,
+                "maximum_dbz_exclusive": null,
+                "percent": 0.0,
+                "area_sq_mi": 0.0
+              }
+            ],
+            "coverage_percent": {
+              "50": 0.0,
+              "55": 0.0,
+              "60": 0.0
+            },
+            "spatial_rules": [
+              {
+                "dbz": 50.0,
+                "minimum_area_sq_mi": 0.35,
+                "minimum_coverage_percent": 50.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 55.0,
+                "minimum_area_sq_mi": 0.175,
+                "minimum_coverage_percent": 25.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              },
+              {
+                "dbz": 60.0,
+                "minimum_area_sq_mi": 0.07,
+                "minimum_coverage_percent": 10.0,
+                "coverage_percent": 0.0,
+                "covered_area_sq_mi": 0.0,
+                "qualified": false
+              }
+            ],
+            "spatial_gate": false,
+            "frame_basin_rain_inches": 0.0026,
+            "frame_rain_volume_ft3": 4295,
+            "wet": true,
+            "rain_detected": true,
+            "unknown_watershed_percent": 0.0,
+            "radar_data_quality": "valid",
+            "radar_data_sufficient": true,
+            "grid_bbox": [
+              -109.5875,
+              38.5175,
+              -109.5175,
+              38.552499999999995
+            ],
+            "frame_utc": "2026-11-04T20:25:00Z"
+          },
+          "grid_dbz_zlib": "eNpVkdsNwCAIRRcyBrBYO4tx/zUK8mj9uaEChwudk7BCoVG54CMinxLdGt2a6CqU0jTRoo5Y5aq8yhQE7NjzHJHBesBwnLA9Hn8c9xOzv2GUwkmkrOvJkTflkD2A9dhyIz7NqEfOwXFy0DjdFoF/j0oDK4+sl4hAYsO87RUuziNtTvNzSs8T/8NKrsT6fa68GqSfZgdhb/x6dJswGm5lylovU0tibg==",
+          "rain_grid_zlib": "eNptktENwzAIRBeKKhMIDrNE3n+NKuaoQOXHJ0dwD855nvEZg+7jFaUtJC7msk+ZLvs8qcjMgi72G9M6NuFS3HMt185EwAQdB7MGJwD4DI40I52chZuFChtN4Y8SYGCCpAANZyo4ywSifwTdQAiGuTobl+n4WhkCOy3ciCBisjx4+xxgGAL2StX8h8STW5bfU3CJiko46MQCYVd8pGyay1nW+gJKGYR1"
+        }
+      }
+    },
+    "2026-11-05T00:40:00Z": {
+      "frame_utc": "2026-11-05T00:40:00Z",
+      "source": "provisional",
+      "confirmed": false,
+      "processed_utc": "2026-11-05T00:44:17Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -2029161,8 +2031600,8 @@
     "missing_count": 14,
     "recipient": "canyoncountryadventure@gmail.com"
   },
-  "earliest_missing_archive_frame_utc": "2026-11-04T20:15:00Z",
-  "manual_replay_from_utc": "2026-11-04T20:15:00Z",
+  "earliest_missing_archive_frame_utc": null,
+  "manual_replay_from_utc": null,
   "state_restoration": {
     "validated": true,
     "source": "/home/runner/work/cca-radar-tracker/cca-radar-tracker/cca-radar-tracker/docs/data/status.json"
