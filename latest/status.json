@@ -1,8 +1,8 @@
 {
   "schema_version": 5,
   "monitoring_started_utc": "2026-07-22T22:15:00Z",
-  "last_checked_utc": "2026-11-12T23:58:07Z",
-  "latest_frame_utc": "2026-11-12T23:50:00Z",
+  "last_checked_utc": "2026-11-13T00:02:59Z",
+  "latest_frame_utc": "2026-11-12T23:55:00Z",
   "canyons": {
     "zerog": {
       "id": "zerog",
@@ -10,7 +10,7 @@
       "model_signature": "c5774006d8524ec9",
       "area_sq_mi": 1.359,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -14431,7 +14431,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-08-30T21:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -14465,13 +14465,13 @@
       "cumulative_refill_evidence": {
         "event_count": 48,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 28407,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 28405,
         "ratio": 0.54,
         "percent": 54,
         "overflow_ft3": 842118,
-        "modeled_loss_ft3": 56311,
-        "loss_since_latest_event_ft3": 9508,
+        "modeled_loss_ft3": 56313,
+        "loss_since_latest_event_ft3": 9510,
         "milestones_utc": {
           "25": "2026-07-21T09:30:00Z",
           "50": "2026-07-21T09:30:00Z",
@@ -14500,7 +14500,7 @@
       "model_signature": "08299c603300e4b8",
       "area_sq_mi": 262.582,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -926488,7 +926488,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-18T13:00:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -926522,13 +926522,13 @@
       "cumulative_refill_evidence": {
         "event_count": 145,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 180846,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 180838,
         "ratio": 0.69,
         "percent": 69,
         "overflow_ft3": 5873376,
-        "modeled_loss_ft3": 279384,
-        "loss_since_latest_event_ft3": 29440,
+        "modeled_loss_ft3": 279391,
+        "loss_since_latest_event_ft3": 29448,
         "milestones_utc": {
           "25": "2026-07-22T05:15:00Z",
           "50": "2026-07-22T05:15:00Z",
@@ -926557,7 +926557,7 @@
       "model_signature": "0fa08cdfd258847d",
       "area_sq_mi": 1.117,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -941112,7 +941112,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-19T07:05:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -941146,12 +941146,12 @@
       "cumulative_refill_evidence": {
         "event_count": 51,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 3564,
         "ratio": 0.51,
         "percent": 51,
         "overflow_ft3": 22591,
-        "modeled_loss_ft3": 7587,
+        "modeled_loss_ft3": 7588,
         "loss_since_latest_event_ft3": 1179,
         "milestones_utc": {
           "25": "2026-07-23T02:15:00Z",
@@ -941181,7 +941181,7 @@
       "model_signature": "706e99825657d6f8",
       "area_sq_mi": 0.477,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -953080,7 +953080,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-19T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -953114,13 +953114,13 @@
       "cumulative_refill_evidence": {
         "event_count": 40,
         "period_start_utc": "2026-07-16T06:20:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 11796,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 11795,
         "ratio": 0.67,
         "percent": 67,
         "overflow_ft3": 231800,
         "modeled_loss_ft3": 12792,
-        "loss_since_latest_event_ft3": 1218,
+        "loss_since_latest_event_ft3": 1219,
         "milestones_utc": {
           "25": "2026-08-30T22:35:00Z",
           "50": "2026-08-30T22:35:00Z",
@@ -953149,7 +953149,7 @@
       "model_signature": "2a3cf369373e1a51",
       "area_sq_mi": 1.488,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -969401,7 +969401,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -969435,7 +969435,7 @@
       "cumulative_refill_evidence": {
         "event_count": 53,
         "period_start_utc": "2026-07-16T05:40:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -969467,7 +969467,7 @@
       "model_signature": "09a9d5343e966f2b",
       "area_sq_mi": 0.34,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -982440,7 +982440,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": null,
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -982474,7 +982474,7 @@
       "cumulative_refill_evidence": {
         "event_count": 49,
         "period_start_utc": "2026-07-16T05:30:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 0,
         "ratio": 0.0,
         "percent": 0,
@@ -982506,7 +982506,7 @@
       "model_signature": "c04a664aa7ede4bb",
       "area_sq_mi": 1.399,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -997416,7 +997416,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-12T06:40:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -997450,13 +997450,13 @@
       "cumulative_refill_evidence": {
         "event_count": 52,
         "period_start_utc": "2026-07-17T01:10:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 15120,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 15119,
         "ratio": 0.44,
         "percent": 44,
         "overflow_ft3": 114124,
-        "modeled_loss_ft3": 25263,
-        "loss_since_latest_event_ft3": 6190,
+        "modeled_loss_ft3": 25264,
+        "loss_since_latest_event_ft3": 6191,
         "milestones_utc": {
           "25": "2026-08-24T00:20:00Z",
           "50": "2026-08-24T00:20:00Z",
@@ -997485,7 +997485,7 @@
       "model_signature": "6dec4bd06db4841f",
       "area_sq_mi": 0.365,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1009165,7 +1009165,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-12T04:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1009199,13 +1009199,13 @@
       "cumulative_refill_evidence": {
         "event_count": 46,
         "period_start_utc": "2026-07-17T01:20:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 10438,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 10437,
         "ratio": 0.5,
         "percent": 50,
         "overflow_ft3": 27611,
-        "modeled_loss_ft3": 23118,
-        "loss_since_latest_event_ft3": 3537,
+        "modeled_loss_ft3": 23119,
+        "loss_since_latest_event_ft3": 3538,
         "milestones_utc": {
           "25": "2026-07-20T06:30:00Z",
           "50": "2026-07-20T06:30:00Z",
@@ -1009234,7 +1009234,7 @@
       "model_signature": "b7aa76d478b36eaf",
       "area_sq_mi": 8.887,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1042731,7 +1042731,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-02T16:30:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1042765,13 +1042765,13 @@
       "cumulative_refill_evidence": {
         "event_count": 62,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 3408,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 3406,
         "ratio": 0.06,
         "percent": 6,
         "overflow_ft3": 0,
-        "modeled_loss_ft3": 39238,
-        "loss_since_latest_event_ft3": 6105,
+        "modeled_loss_ft3": 39240,
+        "loss_since_latest_event_ft3": 6107,
         "milestones_utc": {
           "25": "2026-09-02T16:30:00Z",
           "50": "2026-09-02T16:30:00Z",
@@ -1042800,7 +1042800,7 @@
       "model_signature": "5150cc71d5bedcf0",
       "area_sq_mi": 1.526,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1079183,7 +1079183,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-02T18:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1079217,13 +1079217,13 @@
       "cumulative_refill_evidence": {
         "event_count": 82,
         "period_start_utc": "2026-07-16T08:20:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 38071,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 38068,
         "ratio": 0.42,
         "percent": 42,
         "overflow_ft3": 97042,
-        "modeled_loss_ft3": 61974,
-        "loss_since_latest_event_ft3": 15274,
+        "modeled_loss_ft3": 61977,
+        "loss_since_latest_event_ft3": 15277,
         "milestones_utc": {
           "25": "2026-09-02T18:10:00Z",
           "50": "2026-09-02T18:10:00Z",
@@ -1079249,7 +1079249,7 @@
       "model_signature": "34afd8ea1effb390",
       "area_sq_mi": 1.786,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1129344,7 +1129344,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-16T22:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1129378,13 +1129378,13 @@
       "cumulative_refill_evidence": {
         "event_count": 123,
         "period_start_utc": "2026-07-16T20:40:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 8986,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 8985,
         "ratio": 0.5,
         "percent": 50,
         "overflow_ft3": 235139,
-        "modeled_loss_ft3": 19003,
-        "loss_since_latest_event_ft3": 1242,
+        "modeled_loss_ft3": 19004,
+        "loss_since_latest_event_ft3": 1243,
         "milestones_utc": {
           "25": "2026-07-22T04:30:00Z",
           "50": "2026-07-22T04:30:00Z",
@@ -1129413,7 +1129413,7 @@
       "model_signature": "2554f85b6c6ace3e",
       "area_sq_mi": 0.701,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1167812,7 +1167812,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-12T11:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1167846,7 +1167846,7 @@
       "cumulative_refill_evidence": {
         "event_count": 98,
         "period_start_utc": "2026-07-17T00:10:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 3821,
         "ratio": 0.73,
         "percent": 73,
@@ -1167881,7 +1167881,7 @@
       "model_signature": "827264741cdd7f64",
       "area_sq_mi": 7.028,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1219526,7 +1219526,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-22T15:35:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1219560,13 +1219560,13 @@
       "cumulative_refill_evidence": {
         "event_count": 98,
         "period_start_utc": "2026-07-16T05:55:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 83058,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 83054,
         "ratio": 0.54,
         "percent": 54,
         "overflow_ft3": 7795243,
-        "modeled_loss_ft3": 170923,
-        "loss_since_latest_event_ft3": 17263,
+        "modeled_loss_ft3": 170928,
+        "loss_since_latest_event_ft3": 17268,
         "milestones_utc": {
           "25": "2026-07-17T01:25:00Z",
           "50": "2026-07-17T01:25:00Z",
@@ -1219595,7 +1219595,7 @@
       "model_signature": "cc1087494960237e",
       "area_sq_mi": 3.89,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1264307,7 +1264307,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-09-16T01:10:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1264341,13 +1264341,13 @@
       "cumulative_refill_evidence": {
         "event_count": 95,
         "period_start_utc": "2026-07-16T06:00:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 126163,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 126155,
         "ratio": 0.48,
         "percent": 48,
         "overflow_ft3": 2303177,
-        "modeled_loss_ft3": 293020,
-        "loss_since_latest_event_ft3": 29602,
+        "modeled_loss_ft3": 293028,
+        "loss_since_latest_event_ft3": 29610,
         "milestones_utc": {
           "25": "2026-07-17T01:20:00Z",
           "50": "2026-07-22T05:55:00Z",
@@ -1264376,7 +1264376,7 @@
       "model_signature": "31ead494ddc1c3ba",
       "area_sq_mi": 77.36,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1444009,7 +1444009,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:01Z",
         "last_meaningful_event_utc": "2026-08-31T01:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1444043,13 +1444043,13 @@
       "cumulative_refill_evidence": {
         "event_count": 105,
         "period_start_utc": "2026-07-16T11:25:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 97006,
+        "through_utc": "2026-11-13T00:03:01Z",
+        "balance_ft3": 96998,
         "ratio": 0.37,
         "percent": 37,
         "overflow_ft3": 7484822,
-        "modeled_loss_ft3": 288815,
-        "loss_since_latest_event_ft3": 18795,
+        "modeled_loss_ft3": 288822,
+        "loss_since_latest_event_ft3": 18802,
         "milestones_utc": {
           "25": "2026-07-20T02:05:00Z",
           "50": "2026-07-20T02:05:00Z",
@@ -1444078,7 +1444078,7 @@
       "model_signature": "3dfd56e239f93766",
       "area_sq_mi": 3.254,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1466784,7 +1466784,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-08-30T21:45:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1466818,13 +1466818,13 @@
       "cumulative_refill_evidence": {
         "event_count": 60,
         "period_start_utc": "2026-07-17T02:55:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 27173,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 27172,
         "ratio": 0.52,
         "percent": 52,
         "overflow_ft3": 738247,
-        "modeled_loss_ft3": 56319,
-        "loss_since_latest_event_ft3": 3713,
+        "modeled_loss_ft3": 56320,
+        "loss_since_latest_event_ft3": 3714,
         "milestones_utc": {
           "25": "2026-07-21T09:45:00Z",
           "50": "2026-07-21T09:45:00Z",
@@ -1466853,7 +1466853,7 @@
       "model_signature": "f7d44ec246ce90d4",
       "area_sq_mi": 3.581,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1490582,7 +1490582,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-08-31T01:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1490616,13 +1490616,13 @@
       "cumulative_refill_evidence": {
         "event_count": 60,
         "period_start_utc": "2026-07-17T03:00:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 45032,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 45030,
         "ratio": 0.54,
         "percent": 54,
         "overflow_ft3": 2688572,
-        "modeled_loss_ft3": 90107,
-        "loss_since_latest_event_ft3": 5930,
+        "modeled_loss_ft3": 90109,
+        "loss_since_latest_event_ft3": 5933,
         "milestones_utc": {
           "25": "2026-07-21T09:15:00Z",
           "50": "2026-07-21T09:15:00Z",
@@ -1490651,7 +1490651,7 @@
       "model_signature": "f05270fe56ed2c43",
       "area_sq_mi": 0.581,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1519114,7 +1519114,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-22T18:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1519148,13 +1519148,13 @@
       "cumulative_refill_evidence": {
         "event_count": 97,
         "period_start_utc": "2026-07-16T10:55:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 11711,
         "ratio": 0.6,
         "percent": 60,
         "overflow_ft3": 1320717,
-        "modeled_loss_ft3": 19971,
-        "loss_since_latest_event_ft3": 2192,
+        "modeled_loss_ft3": 19972,
+        "loss_since_latest_event_ft3": 2193,
         "milestones_utc": {
           "25": "2026-07-25T19:40:00Z",
           "50": "2026-07-25T19:40:00Z",
@@ -1519183,7 +1519183,7 @@
       "model_signature": "236e1696ea8f87fa",
       "area_sq_mi": 0.188,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1533537,7 +1533537,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-19T06:50:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1533571,7 +1533571,7 @@
       "cumulative_refill_evidence": {
         "event_count": 43,
         "period_start_utc": "2026-07-16T05:35:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "balance_ft3": 1960,
         "ratio": 0.51,
         "percent": 51,
@@ -1533606,7 +1533606,7 @@
       "model_signature": "a9291232a94d24e3",
       "area_sq_mi": 6.265,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1601168,7 +1601168,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-10-22T10:15:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1601202,13 +1601202,13 @@
       "cumulative_refill_evidence": {
         "event_count": 100,
         "period_start_utc": "2026-07-16T09:20:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 91492,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 91488,
         "ratio": 0.82,
         "percent": 82,
         "overflow_ft3": 249780,
-        "modeled_loss_ft3": 75243,
-        "loss_since_latest_event_ft3": 10713,
+        "modeled_loss_ft3": 75247,
+        "loss_since_latest_event_ft3": 10716,
         "milestones_utc": {
           "25": "2026-08-31T00:00:00Z",
           "50": "2026-08-31T00:00:00Z",
@@ -1601237,7 +1601237,7 @@
       "model_signature": "7e9fef3ebfb69343",
       "area_sq_mi": 0.822,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1619964,7 +1619964,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-09-15T23:15:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1619998,13 +1619998,13 @@
       "cumulative_refill_evidence": {
         "event_count": 67,
         "period_start_utc": "2026-07-16T05:50:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 53513,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 53510,
         "ratio": 0.48,
         "percent": 48,
         "overflow_ft3": 497733,
-        "modeled_loss_ft3": 83343,
-        "loss_since_latest_event_ft3": 18723,
+        "modeled_loss_ft3": 83347,
+        "loss_since_latest_event_ft3": 18726,
         "milestones_utc": {
           "25": "2026-08-29T20:55:00Z",
           "50": "2026-08-29T20:55:00Z",
@@ -1620033,7 +1620033,7 @@
       "model_signature": "cd534ffbb9ac6c88",
       "area_sq_mi": 4.446,
       "latest_analysis": {
-        "frame_utc": "2026-11-12T23:50:00Z",
+        "frame_utc": "2026-11-12T23:55:00Z",
         "maximum_dbz": null,
         "coverage_percent": {},
         "spatial_rules": [],
@@ -1694504,7 +1694504,7 @@
         "window_days": 7,
         "percent": 0,
         "ratio": 0.0,
-        "through_utc": "2026-11-12T23:58:08Z",
+        "through_utc": "2026-11-13T00:03:02Z",
         "last_meaningful_event_utc": "2026-10-30T23:55:00Z",
         "trend": "no recent evidence",
         "description": "Age-weighted modeled refill evidence; not observed pool level."
@@ -1694538,13 +1694538,13 @@
       "cumulative_refill_evidence": {
         "event_count": 122,
         "period_start_utc": "2026-07-16T00:00:00Z",
-        "through_utc": "2026-11-12T23:58:08Z",
-        "balance_ft3": 25332,
+        "through_utc": "2026-11-13T00:03:02Z",
+        "balance_ft3": 25331,
         "ratio": 0.91,
         "percent": 91,
         "overflow_ft3": 20217646,
-        "modeled_loss_ft3": 31227,
-        "loss_since_latest_event_ft3": 2572,
+        "modeled_loss_ft3": 31228,
+        "loss_since_latest_event_ft3": 2573,
         "milestones_utc": {
           "25": "2026-07-17T03:45:00Z",
           "50": "2026-07-17T03:45:00Z",
@@ -1694570,8 +1694570,8 @@
   },
   "health": {
     "ok": true,
-    "message": "All expected five-minute radar frames are archive-confirmed through 2026-11-12T23:40:00Z. 0 archive frames are missing. 12 newer live frames are awaiting archive confirmation.",
-    "latest_iem_frame_utc": "2026-11-12T23:50:00Z",
+    "message": "All expected five-minute radar frames are archive-confirmed through 2026-11-12T23:45:00Z. 0 archive frames are missing. 12 newer live frames are awaiting archive confirmation.",
+    "latest_iem_frame_utc": "2026-11-12T23:55:00Z",
     "archive_confirmation_delay_minutes": 10,
     "missing_archive_frame_count": 0,
     "stale_missing_archive_frame_count": 0,
@@ -1694579,270 +1694579,19 @@
     "earliest_missing_archive_frame_utc": null,
     "manual_replay_from_utc": null,
     "frame_ledger_count": 861,
-    "frames_attempted": 63,
-    "frames_processed": 63,
-    "frames_replaced": 63,
+    "frames_attempted": 49,
+    "frames_processed": 49,
+    "frames_replaced": 49,
     "current_run_failures": []
   },
   "last_scheduled_run_utc": "2026-11-12T23:53:11Z",
   "last_run_trigger": "workflow_dispatch",
-  "latest_provisional_frame_utc": "2026-11-12T23:50:00Z",
-  "latest_archive_confirmed_frame_utc": "2026-11-12T23:40:00Z",
-  "ledger_started_utc": "2026-11-09T23:50:00Z",
+  "latest_provisional_frame_utc": "2026-11-12T23:55:00Z",
+  "latest_archive_confirmed_frame_utc": "2026-11-12T23:45:00Z",
+  "ledger_started_utc": "2026-11-09T23:55:00Z",
   "missing_archive_frames_utc": [],
   "stale_missing_archive_frames_utc": [],
   "frame_ledger": {
-    "2026-11-09T23:50:00Z": {
-      "frame_utc": "2026-11-09T23:50:00Z",
-      "source": "historical",
-      "confirmed": true,
-      "processed_utc": "2026-11-10T03:45:18Z",
-      "summary": {
-        "zerog": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "black-hole-white-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "leprechaun": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "woody": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "hog-canyons": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "no-kidding": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "angel-cove": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "constrychnine": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "alcatraz": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "poe": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "entrajo": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "pool-arch": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "the-squeeze": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "cable-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "eardley": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "north-fork-iron-wash": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "upper-greasewood": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "wonderland-canyon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "hogwarts": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "neon": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "quandary": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        },
-        "yankee-doodle": {
-          "maximum_dbz": null,
-          "frame_basin_rain_inches": 0.0,
-          "frame_rain_volume_ft3": 0,
-          "spatial_gate": false,
-          "unknown_watershed_percent": 0.0,
-          "wet": false,
-          "rain_detected": false,
-          "radar_data_quality": "valid",
-          "radar_data_sufficient": true
-        }
-      },
-      "wet_canyons": {}
-    },
     "2026-11-09T23:55:00Z": {
       "frame_utc": "2026-11-09T23:55:00Z",
       "source": "historical",
@@ -1903032,7 +1902781,7 @@
       "frame_utc": "2026-11-12T19:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:48Z",
+      "processed_utc": "2026-11-13T00:02:43Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1903283,7 +1903032,7 @@
       "frame_utc": "2026-11-12T20:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:48Z",
+      "processed_utc": "2026-11-13T00:02:43Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1903534,7 +1903283,7 @@
       "frame_utc": "2026-11-12T20:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:49Z",
+      "processed_utc": "2026-11-13T00:02:44Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1903785,7 +1903534,7 @@
       "frame_utc": "2026-11-12T20:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:49Z",
+      "processed_utc": "2026-11-13T00:02:44Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1904036,7 +1903785,7 @@
       "frame_utc": "2026-11-12T20:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:49Z",
+      "processed_utc": "2026-11-13T00:02:45Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1904287,7 +1904036,7 @@
       "frame_utc": "2026-11-12T20:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:50Z",
+      "processed_utc": "2026-11-13T00:02:45Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1904538,7 +1904287,7 @@
       "frame_utc": "2026-11-12T20:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:50Z",
+      "processed_utc": "2026-11-13T00:02:45Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1904789,7 +1904538,7 @@
       "frame_utc": "2026-11-12T20:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:51Z",
+      "processed_utc": "2026-11-13T00:02:46Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1905040,7 +1904789,7 @@
       "frame_utc": "2026-11-12T20:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:51Z",
+      "processed_utc": "2026-11-13T00:02:46Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1905291,7 +1905040,7 @@
       "frame_utc": "2026-11-12T20:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:51Z",
+      "processed_utc": "2026-11-13T00:02:46Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1905542,7 +1905291,7 @@
       "frame_utc": "2026-11-12T20:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:52Z",
+      "processed_utc": "2026-11-13T00:02:47Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1905793,7 +1905542,7 @@
       "frame_utc": "2026-11-12T20:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:52Z",
+      "processed_utc": "2026-11-13T00:02:47Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1906044,7 +1905793,7 @@
       "frame_utc": "2026-11-12T20:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:53Z",
+      "processed_utc": "2026-11-13T00:02:47Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1906295,7 +1906044,7 @@
       "frame_utc": "2026-11-12T21:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:53Z",
+      "processed_utc": "2026-11-13T00:02:48Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1906546,7 +1906295,7 @@
       "frame_utc": "2026-11-12T21:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:54Z",
+      "processed_utc": "2026-11-13T00:02:48Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1906797,7 +1906546,7 @@
       "frame_utc": "2026-11-12T21:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:54Z",
+      "processed_utc": "2026-11-13T00:02:48Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1907048,7 +1906797,7 @@
       "frame_utc": "2026-11-12T21:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:54Z",
+      "processed_utc": "2026-11-13T00:02:48Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1907299,7 +1907048,7 @@
       "frame_utc": "2026-11-12T21:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:55Z",
+      "processed_utc": "2026-11-13T00:02:49Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1907550,7 +1907299,7 @@
       "frame_utc": "2026-11-12T21:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:55Z",
+      "processed_utc": "2026-11-13T00:02:49Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1907801,7 +1907550,7 @@
       "frame_utc": "2026-11-12T21:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:56Z",
+      "processed_utc": "2026-11-13T00:02:49Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1908052,7 +1907801,7 @@
       "frame_utc": "2026-11-12T21:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:56Z",
+      "processed_utc": "2026-11-13T00:02:50Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1908303,7 +1908052,7 @@
       "frame_utc": "2026-11-12T21:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:56Z",
+      "processed_utc": "2026-11-13T00:02:50Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1908554,7 +1908303,7 @@
       "frame_utc": "2026-11-12T21:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:57Z",
+      "processed_utc": "2026-11-13T00:02:50Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1908805,7 +1908554,7 @@
       "frame_utc": "2026-11-12T21:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:57Z",
+      "processed_utc": "2026-11-13T00:02:51Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1909056,7 +1908805,7 @@
       "frame_utc": "2026-11-12T21:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:57Z",
+      "processed_utc": "2026-11-13T00:02:51Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1909307,7 +1909056,7 @@
       "frame_utc": "2026-11-12T22:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:58Z",
+      "processed_utc": "2026-11-13T00:02:51Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1909558,7 +1909307,7 @@
       "frame_utc": "2026-11-12T22:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:58Z",
+      "processed_utc": "2026-11-13T00:02:52Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1909809,7 +1909558,7 @@
       "frame_utc": "2026-11-12T22:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:59Z",
+      "processed_utc": "2026-11-13T00:02:52Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1910060,7 +1909809,7 @@
       "frame_utc": "2026-11-12T22:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:59Z",
+      "processed_utc": "2026-11-13T00:02:52Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1910311,7 +1910060,7 @@
       "frame_utc": "2026-11-12T22:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:57:59Z",
+      "processed_utc": "2026-11-13T00:02:53Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1910562,7 +1910311,7 @@
       "frame_utc": "2026-11-12T22:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:00Z",
+      "processed_utc": "2026-11-13T00:02:53Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1910813,7 +1910562,7 @@
       "frame_utc": "2026-11-12T22:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:00Z",
+      "processed_utc": "2026-11-13T00:02:54Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1911064,7 +1910813,7 @@
       "frame_utc": "2026-11-12T22:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:01Z",
+      "processed_utc": "2026-11-13T00:02:54Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1911315,7 +1911064,7 @@
       "frame_utc": "2026-11-12T22:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:01Z",
+      "processed_utc": "2026-11-13T00:02:54Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1911566,7 +1911315,7 @@
       "frame_utc": "2026-11-12T22:45:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:01Z",
+      "processed_utc": "2026-11-13T00:02:54Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1911817,7 +1911566,7 @@
       "frame_utc": "2026-11-12T22:50:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:02Z",
+      "processed_utc": "2026-11-13T00:02:55Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1912068,7 +1911817,7 @@
       "frame_utc": "2026-11-12T22:55:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:02Z",
+      "processed_utc": "2026-11-13T00:02:55Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1912319,7 +1912068,7 @@
       "frame_utc": "2026-11-12T23:00:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:03Z",
+      "processed_utc": "2026-11-13T00:02:55Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1912570,7 +1912319,7 @@
       "frame_utc": "2026-11-12T23:05:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:03Z",
+      "processed_utc": "2026-11-13T00:02:56Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1912821,7 +1912570,7 @@
       "frame_utc": "2026-11-12T23:10:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:03Z",
+      "processed_utc": "2026-11-13T00:02:56Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1913072,7 +1912821,7 @@
       "frame_utc": "2026-11-12T23:15:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:04Z",
+      "processed_utc": "2026-11-13T00:02:56Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1913323,7 +1913072,7 @@
       "frame_utc": "2026-11-12T23:20:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:04Z",
+      "processed_utc": "2026-11-13T00:02:57Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1913574,7 +1913323,7 @@
       "frame_utc": "2026-11-12T23:25:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:05Z",
+      "processed_utc": "2026-11-13T00:02:57Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1913825,7 +1913574,7 @@
       "frame_utc": "2026-11-12T23:30:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:05Z",
+      "processed_utc": "2026-11-13T00:02:57Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1914076,7 +1913825,7 @@
       "frame_utc": "2026-11-12T23:35:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:05Z",
+      "processed_utc": "2026-11-13T00:02:58Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1914327,7 +1914076,7 @@
       "frame_utc": "2026-11-12T23:40:00Z",
       "source": "historical",
       "confirmed": true,
-      "processed_utc": "2026-11-12T23:58:06Z",
+      "processed_utc": "2026-11-13T00:02:58Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1914576,9 +1914325,9 @@
     },
     "2026-11-12T23:45:00Z": {
       "frame_utc": "2026-11-12T23:45:00Z",
-      "source": "provisional",
-      "confirmed": false,
-      "processed_utc": "2026-11-12T23:58:06Z",
+      "source": "historical",
+      "confirmed": true,
+      "processed_utc": "2026-11-13T00:02:58Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
@@ -1918343,7 +1918092,258 @@
       "frame_utc": "2026-11-12T23:50:00Z",
       "source": "provisional",
       "confirmed": false,
-      "processed_utc": "2026-11-12T23:58:06Z",
+      "processed_utc": "2026-11-13T00:02:59Z",
+      "summary": {
+        "zerog": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "black-hole-white-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "leprechaun": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "woody": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hog-canyons": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "no-kidding": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "angel-cove": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "constrychnine": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "alcatraz": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "poe": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "entrajo": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "pool-arch": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "the-squeeze": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "cable-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "eardley": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "north-fork-iron-wash": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "upper-greasewood": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "wonderland-canyon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "hogwarts": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "neon": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "quandary": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        },
+        "yankee-doodle": {
+          "maximum_dbz": null,
+          "frame_basin_rain_inches": 0.0,
+          "frame_rain_volume_ft3": 0,
+          "spatial_gate": false,
+          "unknown_watershed_percent": 0.0,
+          "wet": false,
+          "rain_detected": false,
+          "radar_data_quality": "valid",
+          "radar_data_sufficient": true
+        }
+      },
+      "wet_canyons": {}
+    },
+    "2026-11-12T23:55:00Z": {
+      "frame_utc": "2026-11-12T23:55:00Z",
+      "source": "provisional",
+      "confirmed": false,
+      "processed_utc": "2026-11-13T00:02:59Z",
       "summary": {
         "zerog": {
           "maximum_dbz": null,
