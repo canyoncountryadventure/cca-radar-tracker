@@ -16,6 +16,8 @@ on:
       - "cca-radar-tracker/docs/index.html"
       - "cca-radar-tracker/docs/styles.css"
       - "cca-radar-tracker/tools/select_status.py"
+      - "cca-radar-tracker/tools/notification_ledger.py"
+      - "cca-radar-tracker/tests/test_notification_ledger.py"
   schedule:
     # High-frequency GitHub schedules are often throttled. This watchdog only
     # restarts the self-dispatch chain when no recent continuation exists.
@@ -51,7 +53,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   cadence-gate:
@@ -560,6 +562,21 @@ jobs:
             git push
           fi
 
+      - name: Restore durable canyon notification ledger
+        working-directory: cca-radar-tracker
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ledger="$RUNNER_TEMP/cca-notification-ledger.json"
+          metadata="$RUNNER_TEMP/cca-notification-ledger-meta.json"
+          # Fail closed if the ledger is unavailable: otherwise a stale Pages
+          # snapshot can generate the same email every five minutes.
+          gh api "repos/$GITHUB_REPOSITORY/contents/latest/notification-ledger.json?ref=operational-data" > "$metadata"
+          jq -r '.content' "$metadata" | base64 --decode > "$ledger"
+          cp "$ledger" "$RUNNER_TEMP/cca-notification-ledger-before.json"
+          python tools/notification_ledger.py restore --status docs/data/status.json --ledger "$ledger"
+
       - name: Send canyon refill and missing-frame alerts
         working-directory: cca-radar-tracker
         env:
@@ -573,6 +590,27 @@ jobs:
           else
             python send_alert.py
           fi
+
+      - name: Persist durable canyon notification ledger
+        working-directory: cca-radar-tracker
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ledger="$RUNNER_TEMP/cca-notification-ledger.json"
+          before="$RUNNER_TEMP/cca-notification-ledger-before.json"
+          metadata="$RUNNER_TEMP/cca-notification-ledger-meta.json"
+          python tools/notification_ledger.py persist --status docs/data/status.json --ledger "$ledger"
+          if cmp -s "$ledger" "$before"; then
+            echo "Durable notification ledger unchanged."
+            exit 0
+          fi
+          old_sha="$(jq -r '.sha' "$metadata")"
+          new_content="$(base64 --wrap=0 "$ledger")"
+          jq -n --arg sha "$old_sha" --arg content "$new_content" \
+            '{branch: "operational-data", message: "Persist latest canyon email notification markers", sha: $sha, content: $content}' \
+            | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/latest/notification-ledger.json" --input - > /dev/null
+          echo "Persisted canyon email notification markers independently of cached Pages data."
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
