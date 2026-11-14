@@ -23,6 +23,11 @@ class WorkflowCadenceTests(unittest.TestCase):
         self.assertIn("next_epoch=\"$((CHAIN_STARTED_EPOCH + 300))\"", text)
         self.assertIn("gh workflow run update-radar.yml", text)
         self.assertIn("age_seconds < 900", text)
+        self.assertIn("cancel-in-progress: false", text)
+        self.assertIn("Restore durable canyon notification ledger", text)
+        self.assertIn("Persist durable canyon notification ledger", text)
+        self.assertIn("notification_ledger.py restore", text)
+        self.assertIn("notification_ledger.py persist", text)
 
 
 if __name__ == "__main__":
