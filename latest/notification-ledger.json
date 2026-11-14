@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "canyons": {
+    "yankee-doodle": {
+      "last_emailed_event_start_utc": "2026-11-14T06:40:00Z",
+      "last_email_sent_utc": "2026-11-14T15:10:55Z",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_alert_label": "Major refill likely",
+      "recipient": "canyoncountryadventure@gmail.com"
+    }
+  },
+  "health_notification": {}
+}
