@@ -1,13 +1,144 @@
 {
-  "schema_version": 1,
   "canyons": {
-    "yankee-doodle": {
-      "last_emailed_event_start_utc": "2026-11-14T06:40:00Z",
-      "last_email_sent_utc": "2026-11-14T15:10:55Z",
-      "last_emailed_alert_tier": 2,
+    "alcatraz": {
+      "last_email_sent_utc": "2026-09-02T17:56:13Z",
+      "last_emailed_alert_label": "Substantial partial refill",
+      "last_emailed_alert_tier": 1,
+      "last_emailed_event_start_utc": "2026-09-02T15:20:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "angel-cove": {
+      "last_email_sent_utc": "2026-08-23T21:25:36Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-08-23T20:10:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "black-hole-white-canyon": {
+      "last_email_sent_utc": "2026-09-18T22:56:29Z",
       "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-18T11:45:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "cable-canyon": {
+      "last_email_sent_utc": "2026-08-29T19:46:36Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-08-29T18:55:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "constrychnine": {
+      "last_email_sent_utc": "2026-09-12T05:16:31Z",
+      "last_emailed_alert_label": "Substantial partial refill",
+      "last_emailed_alert_tier": 1,
+      "last_emailed_event_start_utc": "2026-09-12T04:05:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "eardley": {
+      "last_email_sent_utc": "2026-09-16T02:35:45Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-09-15T21:25:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "entrajo": {
+      "last_email_sent_utc": "2026-09-16T23:28:27Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-09-16T22:05:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "hogwarts": {
+      "last_email_sent_utc": "2026-09-19T07:27:45Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-19T04:35:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "leprechaun": {
+      "last_email_sent_utc": "2026-09-19T07:42:45Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-09-19T04:15:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "neon": {
+      "last_email_sent_utc": "2026-09-16T14:47:39Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-16T13:40:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "north-fork-iron-wash": {
+      "last_email_sent_utc": "2026-09-17T01:05:47Z",
+      "last_emailed_alert_label": "Substantial partial refill",
+      "last_emailed_alert_tier": 1,
+      "last_emailed_event_start_utc": "2026-09-16T22:45:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "pool-arch": {
+      "last_email_sent_utc": "2026-09-12T12:23:17Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-09-12T10:50:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "quandary": {
+      "last_email_sent_utc": "2026-09-15T23:50:44Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-15T22:10:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "the-squeeze": {
+      "last_email_sent_utc": "2026-09-22T16:12:44Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-22T14:10:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "upper-greasewood": {
+      "last_email_sent_utc": "2026-08-30T21:28:37Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-08-30T20:05:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "wonderland-canyon": {
+      "last_email_sent_utc": "2026-09-22T19:24:32Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-09-22T18:30:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "woody": {
+      "last_email_sent_utc": "2026-08-30T21:28:37Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-08-30T20:55:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "yankee-doodle": {
+      "last_email_sent_utc": "2026-11-14T15:10:55Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-11-14T06:40:00Z",
+      "recipient": "canyoncountryadventure@gmail.com"
+    },
+    "zerog": {
+      "last_email_sent_utc": "2026-09-22T16:59:33Z",
+      "last_emailed_alert_label": "Major refill likely",
+      "last_emailed_alert_tier": 2,
+      "last_emailed_event_start_utc": "2026-09-22T14:55:00Z",
       "recipient": "canyoncountryadventure@gmail.com"
     }
   },
-  "health_notification": {}
+  "health_notification": {
+    "last_email_sent_utc": "2026-10-30T13:16:42Z",
+    "last_missing_signature": "2026-10-30T08:00:00Z|2026-10-30T08:05:00Z|2026-10-30T08:10:00Z|2026-10-30T08:15:00Z|2026-10-30T08:20:00Z|2026-10-30T08:25:00Z|2026-10-30T08:30:00Z|2026-10-30T08:35:00Z|2026-10-30T08:40:00Z|2026-10-30T08:45:00Z|2026-10-30T08:50:00Z|2026-10-30T08:55:00Z|2026-10-30T09:00:00Z|2026-10-30T09:05:00Z",
+    "missing_count": 14,
+    "recipient": "canyoncountryadventure@gmail.com"
+  },
+  "schema_version": 1
 }
