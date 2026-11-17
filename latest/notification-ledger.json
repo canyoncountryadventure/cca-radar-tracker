@@ -120,10 +120,10 @@
       "recipient": "canyoncountryadventure@gmail.com"
     },
     "yankee-doodle": {
-      "last_email_sent_utc": "2026-11-14T15:10:55Z",
-      "last_emailed_alert_label": "Major refill likely",
-      "last_emailed_alert_tier": 2,
-      "last_emailed_event_start_utc": "2026-11-14T06:40:00Z",
+      "last_email_sent_utc": "2026-11-17T18:37:10Z",
+      "last_emailed_alert_label": "Strong flush likely",
+      "last_emailed_alert_tier": 3,
+      "last_emailed_event_start_utc": "2026-11-17T12:25:00Z",
       "recipient": "canyoncountryadventure@gmail.com"
     },
     "zerog": {
